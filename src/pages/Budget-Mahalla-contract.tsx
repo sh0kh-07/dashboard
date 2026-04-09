@@ -42,7 +42,8 @@ const allContracts: Record<string, { name: string; type: string; amount: number;
   "6": { name: "Startap loyihalarni moliyalashtirish", type: "Kredit", amount: 221.30, status: "Bajarilmoqda", checkPassed: true, failedStages: [] },
   // External (Tashqi moliya)
   "7": { name: "Quyosh panellarini o‘rnatish", type: "Yetkazib berish", amount: 0.30, status: "Bajarilmoqda", checkPassed: false, failedStages: [3, 7] },
-  "8": { name: "Elektr tarmog‘iga ulash", type: "Montaj", amount: 0.12, status: "Bajarildi", checkPassed: true, failedStages: [] },
+  "8": { name: "Onlayn do‘kon ochish", type: "Savdo", amount: 0.12, status: "Bajarildi", checkPassed: true, failedStages: [] },
+  "9": { name: "Qurilish materiallari savdosi", type: "Savdo", amount: 0.12, status: "Bajarilmoqda", checkPassed: false, failedStages: [1] },
 };
 
 const ContractDetail = () => {

@@ -36,6 +36,25 @@ import ExternalDetail from './pages/ExternalDetail';
 import ExternalVil from './pages/ExternalVil';
 import ExternalMahalla from './pages/ExternalMahalla';
 import ExternalBatosh from './pages/ExternalBatosh';
+import PoorLevel from './pages/PoorLevel';
+import PoorLevelVil from './pages/PoorLevelVil';
+import PoorLevelVilDetail from './pages/PoorLevelVilDetail';
+import PoorLevelBatosh from './pages/PoorLevelBatosh';
+import PoorFamilies from './pages/Famaly';
+import FamalyVil from './pages/FamalyVil';
+import FamaliyVilDetail from './pages/FamaliyVilDetail';
+import FamaliyBatosh from './pages/FamaliyBatosh';
+import Dwork from './pages/Dwork';
+import DWorkVil from './pages/DWorkVil';
+import DWorkVilDetail from './pages/DWorkVilDetail';
+import DWorkBatosh from './pages/DWorkBatosh';
+import Work from './pages/Work';
+import WorkVil from './pages/WorkVil';
+import WorkVilDetail from './pages/WorkVilDetail';
+import WorkBatosh from './pages/WorkBatosh';
+import Regions from './pages/Regions';
+import Mahalla from './pages/Mahalla';
+import Reports from './pages/Resports';
 
 export default function App() {
   return (
@@ -73,6 +92,33 @@ export default function App() {
             <Route path="/external-detail/kashkadarya" element={<ExternalVil />} />
             <Route path="/external-detail/kashkadarya/mahallalar" element={<ExternalMahalla />} />
             <Route path="/external-detail/kashkadarya/mahallalar/batosh" element={<ExternalBatosh />} />
+
+            <Route path="/poor-level" element={<PoorLevel />} />
+            <Route path="/poor-level/vil" element={<PoorLevelVil />} />
+            <Route path="/poor-level/vil/qarshi" element={<PoorLevelVilDetail />} />
+            <Route path="/poor-level/vil/qarshi/batosh" element={<PoorLevelBatosh />} />
+
+            <Route path="/family" element={<PoorFamilies />} />
+            <Route path="/family/vil" element={<FamalyVil />} />
+            <Route path="/family/vil/qarshi" element={<FamaliyVilDetail />} />
+            <Route path="/family/vil/qarshi/batosh" element={<FamaliyBatosh />} />
+
+            <Route path="/work" element={<Dwork />} />
+            <Route path="/work/vil" element={<DWorkVil />} />
+            <Route path="/work/vil/qarshi" element={<DWorkVilDetail />} />
+            <Route path="/work/vil/qarshi/batosh" element={<DWorkBatosh />} />
+
+            <Route path="/swork" element={<Work />} />
+            <Route path="/swork/vil" element={<WorkVil />} />
+            <Route path="/swork/vil/qarshi" element={<WorkVilDetail />} />
+            <Route path="/swork/vil/qarshi/batosh" element={<WorkBatosh />} />
+
+            <Route path="/regions" element={<Regions />} />
+            <Route path="/mahalla" element={<Mahalla />} />
+            <Route path="/reports" element={<Reports />} />
+`
+
+
           </Routes>
         </MainLayout>
       </Router>
