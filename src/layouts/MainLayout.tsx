@@ -1,16 +1,18 @@
 import React, { useState } from 'react';
 import {
   Box, Flex, HStack, Text, IconButton, Avatar, VStack,
-  Button
+  Button, Menu, MenuButton, MenuList, MenuItem, MenuDivider
 } from '@chakra-ui/react';
 import {
-  LayoutDashboard, Wallet, Landmark, Bell, Menu,
+  LayoutDashboard, Wallet, Landmark, Bell, Menu as MenuIcon,
   BanknoteArrowDown, HandCoins, ArrowLeft, BadgeDollarSign,
   ChevronRight, ChevronDown,
   Users,
   BriefcaseBusiness,
   MapPin,
-  ChartColumnBig
+  ChartColumnBig,
+  LogOut,
+  User
 } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -20,7 +22,6 @@ interface MainLayoutProps {
   children: React.ReactNode;
 }
 
-// Типы для пунктов меню
 type MenuItemType = 'item' | 'accordion';
 
 interface BaseMenuItem {
@@ -41,7 +42,6 @@ interface AccordionMenuItem extends BaseMenuItem {
 
 type MenuItem = SimpleMenuItem | AccordionMenuItem;
 
-// Конфигурация меню (объектная версия)
 const menuConfig: MenuItem[] = [
   {
     type: 'item',
@@ -101,7 +101,6 @@ const menuConfig: MenuItem[] = [
   },
 ];
 
-// Компонент аккордеона (с анимацией через framer-motion)
 interface AccordionItemProps {
   icon: React.ElementType;
   label: string;
@@ -166,7 +165,6 @@ const AccordionItem: React.FC<AccordionItemProps> = ({
   );
 };
 
-// Маппинг путей для хлебных крошек (остаётся без изменений)
 const routeConfig: Record<string, { title: string; breadcrumbs: string[] }> = {
   '/': { title: 'Dashboard', breadcrumbs: ['Asosiy'] },
   '/budget': { title: 'Davlat byudjeti', breadcrumbs: ['Budjet'] },
@@ -179,18 +177,15 @@ const routeConfig: Record<string, { title: string; breadcrumbs: string[] }> = {
   '/contract/budget-1': { title: 'Kontrakt detali', breadcrumbs: ['Budjet', 'Qashqadaryo', 'Qarshi', 'Batosh', 'Kontrakt'] },
 };
 
-// Функция для получения даты в узбекской латинице (день, месяц, год)
 const getUzbekDate = (): string => {
   const today = new Date();
   const day = today.getDate();
   const year = today.getFullYear();
-  
   const months: Record<number, string> = {
     0: 'Yanvar', 1: 'Fevral', 2: 'Mart', 3: 'Aprel', 4: 'May', 5: 'Iyun',
     6: 'Iyul', 7: 'Avgust', 8: 'Sentabr', 9: 'Oktabr', 10: 'Noyabr', 11: 'Dekabr'
   };
   const monthName = months[today.getMonth()];
-  
   return `${day} ${monthName} ${year}`;
 };
 
@@ -199,8 +194,6 @@ const MainLayout = ({ children }: MainLayoutProps) => {
   const [openAccordions, setOpenAccordions] = useState<Record<string, boolean>>({});
   const location = useLocation();
   const navigate = useNavigate();
-
-  const currentRoute = routeConfig[location.pathname] || { title: 'Nomaʼlum', breadcrumbs: ['Sahifa'] };
 
   const handleBack = () => navigate(-1);
   const showBackButton = location.pathname !== '/';
@@ -214,13 +207,15 @@ const MainLayout = ({ children }: MainLayoutProps) => {
     setOpenAccordions(prev => ({ ...prev, [label]: !prev[label] }));
   };
 
-  // Получаем текущую дату на узбекской латинице
   const uzbekDate = getUzbekDate();
-
-  // Имя администратора
   const adminName = "Shoxrux T.";
 
-  // Рендер пункта меню на основе конфигурации
+  const handleLogout = () => {
+    localStorage.removeItem('isAuthenticated');
+    localStorage.removeItem('user');
+    navigate('/login');
+  };
+
   const renderMenuItem = (item: MenuItem, index: number) => {
     if (item.type === 'item') {
       return (
@@ -233,7 +228,6 @@ const MainLayout = ({ children }: MainLayoutProps) => {
         />
       );
     } else {
-      // accordion
       const isOpen = openAccordions[item.label] || false;
       return (
         <AccordionItem
@@ -269,28 +263,36 @@ const MainLayout = ({ children }: MainLayoutProps) => {
         overflow="hidden"
         display={{ base: 'none', lg: 'block' }}
       >
-        <VStack h="full" py={8} px={4} align="start" spacing={8}>
-          <HStack px={4} spacing={3}>
-            <Box bg="brand.500" p={2} borderRadius="lg">
-              <Wallet color="white" size={24} />
-            </Box>
-            <Text fontWeight="bold" fontSize="lg" lineHeight="1.2">
-              Ijtimoiy Himoya<br />
-              <Text as="span" color="brand.500" fontSize="sm">Nazorat Paneli</Text>
-            </Text>
-          </HStack>
+        {/* Контейнер с вертикальным flex, который занимает всю высоту */}
+        <Flex direction="column" h="full">
+          {/* Логотип */}
+          <Box px={4} py={6}>
+            <HStack spacing={3}>
+              <Box bg="brand.500" p={2} borderRadius="lg">
+                <Wallet color="white" size={24} />
+              </Box>
+              <Text fontWeight="bold" fontSize="lg" lineHeight="1.2">
+                Ijtimoiy Himoya<br />
+                <Text as="span" color="brand.500" fontSize="sm">Nazorat Paneli</Text>
+              </Text>
+            </HStack>
+          </Box>
 
-          <VStack w="full" spacing={2} align="start">
-            {menuConfig.map((item, idx) => renderMenuItem(item, idx))}
-          </VStack>
+          {/* Скроллируемое меню */}
+          <Box flex="1" overflowY="auto" px={4}>
+            <VStack w="full" spacing={2} align="stretch">
+              {menuConfig.map((item, idx) => renderMenuItem(item, idx))}
+            </VStack>
+          </Box>
 
-          <Box mt="auto" w="full" px={4}>
+          {/* Блок помощи (внизу, не скроллится) */}
+          <Box px={4} py={6} mt="auto">
             <Box bg="whiteAlpha.100" p={4} borderRadius="xl" borderWidth="1px" borderColor="dark.border">
               <Text fontSize="xs" color="gray.400" mb={2}>Yordam kerakmi?</Text>
               <Text fontSize="sm" fontWeight="bold">Texnik qo'llab-quvvatlash</Text>
             </Box>
           </Box>
-        </VStack>
+        </Flex>
       </Box>
 
       {/* Main Content Area */}
@@ -308,7 +310,7 @@ const MainLayout = ({ children }: MainLayoutProps) => {
           <HStack spacing={4}>
             <IconButton
               aria-label="Toggle Sidebar"
-              icon={<Menu size={20} />}
+              icon={<MenuIcon size={20} />}
               variant="ghost"
               onClick={() => setSidebarOpen(!isSidebarOpen)}
               display={{ base: 'flex', lg: 'none' }}
@@ -329,7 +331,6 @@ const MainLayout = ({ children }: MainLayoutProps) => {
           </HStack>
 
           <HStack spacing={4}>
-            {/* Текущая дата на узбекской латинице */}
             <Text fontSize="sm" color="gray.400" fontWeight="medium">
               {uzbekDate}
             </Text>
@@ -340,13 +341,36 @@ const MainLayout = ({ children }: MainLayoutProps) => {
               color="gray.400"
               _hover={{ color: 'brand.500', bg: 'gray.700' }}
             />
-            <HStack spacing={2} cursor="pointer">
-              <VStack align="end" spacing={0} display={{ base: 'none', sm: 'flex' }}>
-                <Text fontSize="sm" fontWeight="bold" color="white">{adminName}</Text>
-                <Text fontSize="xs" color="gray.500">Administrator</Text>
-              </VStack>
-              <Avatar size="sm" name={adminName} />
-            </HStack>
+            <Menu>
+              <MenuButton>
+                <HStack spacing={2} cursor="pointer">
+                  <VStack align="end" spacing={0} display={{ base: 'none', sm: 'flex' }}>
+                    <Text fontSize="sm" fontWeight="bold" color="white">{adminName}</Text>
+                    <Text fontSize="xs" color="gray.500">Administrator</Text>
+                  </VStack>
+                  <Avatar size="sm" name={adminName} />
+                </HStack>
+              </MenuButton>
+              <MenuList bg="dark.card" borderColor="dark.border" boxShadow="xl">
+                <MenuItem 
+                  bg="transparent" 
+                  _hover={{ bg: 'whiteAlpha.100' }} 
+                  icon={<User size={16} />}
+                >
+                  Profil
+                </MenuItem>
+                <MenuDivider borderColor="dark.border" />
+                <MenuItem 
+                  bg="transparent" 
+                  _hover={{ bg: 'red.500', color: 'white' }} 
+                  icon={<LogOut size={16} />}
+                  onClick={handleLogout}
+                  color="red.400"
+                >
+                  Tizimdan chiqish
+                </MenuItem>
+              </MenuList>
+            </Menu>
           </HStack>
         </Flex>
 
