@@ -17,7 +17,7 @@ import {
 import { useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import SidebarItem from '../components/SidebarItem';
-import Logo from '../Logo/logo.jpg';
+import Logo from '../Logo/Logo.jpg';
 
 interface MainLayoutProps {
   children: React.ReactNode;
