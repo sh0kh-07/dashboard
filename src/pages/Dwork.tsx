@@ -222,17 +222,17 @@ const UnemploymentRate = () => {
     };
 
     const renderTable = () => (
-        <Box overflowX="auto" mt={8} bg="dark.card" borderRadius="xl" p={4}>
-            <Heading size="md" mb={4}>Viloyatlar kesimida ishsizlik darajasi (foiz)</Heading>
-            <Table variant="simple" colorScheme="whiteAlpha">
-                <Thead>
+        <Box overflowX="auto" mt={8} bg="white" borderRadius="xl" p={4} border="1px solid" borderColor="gray.200">
+            <Heading size="md" mb={4} color="gray.800">Viloyatlar kesimida ishsizlik darajasi (foiz)</Heading>
+            <Table variant="simple">
+                <Thead color="gray.700">
                     <Tr>
-                        <Th>Viloyat</Th>
-                        <Th isNumeric>Yil boshi (%)</Th>
-                        <Th isNumeric>Maqsad (yil oxiri)</Th>
-                        <Th isNumeric>Hozirgi real (%)</Th>
-                        <Th>Holat</Th>
-                        <Th>Bashorat</Th>
+                        <Th color="gray.700">Viloyat</Th>
+                        <Th isNumeric color="gray.700">Yil boshi (%)</Th>
+                        <Th isNumeric color="gray.700">Maqsad (yil oxiri)</Th>
+                        <Th isNumeric color="gray.700">Hozirgi real (%)</Th>
+                        <Th color="gray.700">Holat</Th>
+                        <Th color="gray.700">Bashorat</Th>
                     </Tr>
                 </Thead>
                 <Tbody>
@@ -251,14 +251,14 @@ const UnemploymentRate = () => {
                         }
                         return (
                             <Tr key={row.name}>
-                                <Td fontWeight="medium">{row.name}</Td>
-                                <Td isNumeric>{row.startYear.toFixed(1)}%</Td>
-                                <Td isNumeric>{row.targetEndYear.toFixed(1)}%</Td>
-                                <Td isNumeric fontWeight="bold" color={row.status === "bad" ? "red.300" : row.status === "good" ? "green.300" : "yellow.300"}>
+                                <Td fontWeight="medium" color="gray.800">{row.name}</Td>
+                                <Td isNumeric color="gray.700">{row.startYear.toFixed(1)}%</Td>
+                                <Td isNumeric color="gray.700">{row.targetEndYear.toFixed(1)}%</Td>
+                                <Td isNumeric fontWeight="bold" color={row.status === "bad" ? "red.500" : row.status === "good" ? "green.500" : "yellow.500"}>
                                     {row.actualCurrent.toFixed(1)}%
                                 </Td>
-                                <Td><Flex align="center" gap={2}>{statusIcon}<Badge colorScheme={row.status === "bad" ? "red" : row.status === "good" ? "green" : "yellow"}>{statusText}</Badge></Flex></Td>
-                                <Td>{row.willMeetTarget ? <Flex align="center" gap={1} color="green.300"><TrendingUp size={14} /><Text fontSize="sm">Bajaradi</Text></Flex> : <Flex align="center" gap={1} color="red.300"><TrendingDown size={14} /><Text fontSize="sm">Bajara olmaydi</Text></Flex>}</Td>
+                                <Td color="gray.800"><Flex align="center" gap={2}>{statusIcon}<Badge colorScheme={row.status === "bad" ? "red" : row.status === "good" ? "green" : "yellow"}>{statusText}</Badge></Flex></Td>
+                                <Td color="gray.800">{row.willMeetTarget ? <Flex align="center" gap={1} color="green.500"><TrendingUp size={14} /><Text fontSize="sm">Bajaradi</Text></Flex> : <Flex align="center" gap={1} color="red.500"><TrendingDown size={14} /><Text fontSize="sm">Bajara olmaydi</Text></Flex>}</Td>
                             </Tr>
                         );
                     })}
@@ -285,15 +285,29 @@ const UnemploymentRate = () => {
                             onMouseMove={(e) => setTooltip((prev) => ({ ...prev, x: e.clientX, y: e.clientY }))}
                             onMouseLeave={() => setTooltip({ visible: false, x: 0, y: 0, data: null })}
                             onClick={() => { if (regionKey === "Qashqadaryo") handleRegionClick(loc.id, regionKey); }}
-                            style={{ fill: fillColor, stroke: "#1a202c", strokeWidth: 1.2, cursor: "pointer", transition: "all 0.2s ease", opacity: 0.85 }}
-                            onMouseOver={(e) => { e.currentTarget.style.opacity = "1"; e.currentTarget.style.strokeWidth = "2.5"; e.currentTarget.style.stroke = "#ffffff"; }}
-                            onMouseOut={(e) => { e.currentTarget.style.opacity = "0.85"; e.currentTarget.style.strokeWidth = "1.2"; e.currentTarget.style.stroke = "#1a202c"; }}
+                            style={{ fill: fillColor, stroke: "#cbd5e0", strokeWidth: 1.2, cursor: "pointer", transition: "all 0.2s ease", opacity: 0.85 }}
+                            onMouseOver={(e) => { e.currentTarget.style.opacity = "1"; e.currentTarget.style.strokeWidth = "2.5"; e.currentTarget.style.stroke = "#4a5568"; }}
+                            onMouseOut={(e) => { e.currentTarget.style.opacity = "0.85"; e.currentTarget.style.strokeWidth = "1.2"; e.currentTarget.style.stroke = "#cbd5e0"; }}
                         />
                     );
                 })}
             </svg>
             {tooltip.visible && tooltip.data && (
-                <Box position="fixed" top={tooltip.y + 12} left={tooltip.x + 12} bg="gray.800" color="white" px={4} py={2} borderRadius="md" boxShadow="lg" zIndex={1000} pointerEvents="none" backdropFilter="blur(4px)" bgColor="rgba(0,0,0,0.85)">
+                <Box 
+                    position="fixed" 
+                    top={tooltip.y + 12} 
+                    left={tooltip.x + 12} 
+                    bg="white" 
+                    color="gray.800" 
+                    px={4} 
+                    py={2} 
+                    borderRadius="md" 
+                    boxShadow="lg" 
+                    zIndex={1000} 
+                    pointerEvents="none" 
+                    border="1px solid" 
+                    borderColor="gray.200"
+                >
                     <Text fontWeight="bold" mb={1}>{tooltip.data.name}</Text>
                     {tooltip.data.regionKey ? (() => {
                         const reg = getRegionData(tooltip.data.regionKey!);
@@ -304,7 +318,7 @@ const UnemploymentRate = () => {
                                 <Text fontSize="xs">Yil boshi: {reg.startYear.toFixed(1)}%</Text>
                                 <Text fontSize="xs">Hozirgi: {reg.actualCurrent.toFixed(1)}%</Text>
                                 <Text fontSize="xs">Maqsad: {reg.targetEndYear.toFixed(1)}%</Text>
-                                <Text fontSize="xs" fontWeight="bold" color={reg.willMeetTarget ? "green.300" : "red.300"}>{reg.willMeetTarget ? "Maqsad bajariladi ✅" : "Bajarilmaydi ❌"}</Text>
+                                <Text fontSize="xs" fontWeight="bold" color={reg.willMeetTarget ? "green.500" : "red.500"}>{reg.willMeetTarget ? "Maqsad bajariladi ✅" : "Bajarilmaydi ❌"}</Text>
                             </>
                         );
                     })() : <Text fontSize="sm">Maʼlumot topilmadi</Text>}
@@ -323,25 +337,37 @@ const UnemploymentRate = () => {
     return (
         <Box>
             <Flex direction="column" gap={4}>
-                <Heading as="h1" size="xl" fontWeight="bold">Ishsizlik darajasi monitoringi</Heading>
-                <Text color="gray.300">Xaritadagi ranglar: <strong style={{ color: green400 }}>Yashil</strong> — yaxshi (kam ishsizlik), <strong style={{ color: yellow400 }}>Sariq</strong> — o‘rtacha, <strong style={{ color: red400 }}>Qizil</strong> — xavf ostida (yuqori ishsizlik).</Text>
+                <Heading as="h1" size="xl" fontWeight="bold" color="gray.800">Ishsizlik darajasi monitoringi</Heading>
+                <Text color="gray.600">Xaritadagi ranglar: <strong style={{ color: green400 }}>Yashil</strong> — yaxshi (kam ishsizlik), <strong style={{ color: yellow400 }}>Sariq</strong> — o‘rtacha, <strong style={{ color: red400 }}>Qizil</strong> — xavf ostida (yuqori ishsizlik).</Text>
                 <SimpleGrid columns={{ base: 1, md: 3 }} spacing={4} my={2}>
-                    <Stat bg="dark.card" p={4} borderRadius="lg"><StatLabel>Yaxshi holat</StatLabel><StatNumber color="green.400">{stats.goodCount}</StatNumber><StatHelpText>Maqsadga ishonchli</StatHelpText></Stat>
-                    <Stat bg="dark.card" p={4} borderRadius="lg"><StatLabel>O‘rtacha holat</StatLabel><StatNumber color="yellow.400">{stats.moderateCount}</StatNumber><StatHelpText>Harakat kerak</StatHelpText></Stat>
-                    <Stat bg="dark.card" p={4} borderRadius="lg"><StatLabel>Xavf ostida</StatLabel><StatNumber color="red.400">{stats.badCount}</StatNumber><StatHelpText>Rejani bajarmaslik xavfi</StatHelpText></Stat>
+                    <Stat bg="white" p={4} borderRadius="lg" border="1px solid" borderColor="gray.200" boxShadow="sm">
+                        <StatLabel color="gray.700">Yaxshi holat</StatLabel>
+                        <StatNumber color="green.500">{stats.goodCount}</StatNumber>
+                        <StatHelpText color="gray.600">Maqsadga ishonchli</StatHelpText>
+                    </Stat>
+                    <Stat bg="white" p={4} borderRadius="lg" border="1px solid" borderColor="gray.200" boxShadow="sm">
+                        <StatLabel color="gray.700">O‘rtacha holat</StatLabel>
+                        <StatNumber color="yellow.500">{stats.moderateCount}</StatNumber>
+                        <StatHelpText color="gray.600">Harakat kerak</StatHelpText>
+                    </Stat>
+                    <Stat bg="white" p={4} borderRadius="lg" border="1px solid" borderColor="gray.200" boxShadow="sm">
+                        <StatLabel color="gray.700">Xavf ostida</StatLabel>
+                        <StatNumber color="red.500">{stats.badCount}</StatNumber>
+                        <StatHelpText color="gray.600">Rejani bajarmaslik xavfi</StatHelpText>
+                    </Stat>
                 </SimpleGrid>
                 {renderMap()}
-                <Box bg="dark.card" borderRadius="xl" p={5} mt={4}>
-                    <Heading size="md" mb={2}>Ishsizlik dinamikasi (foiz)</Heading>
-                    <Text fontSize="sm" color="gray.400" mb={4}>Yil boshi, hozirgi (4 oy) va yil oxiri maqsadi</Text>
+                <Box bg="white" borderRadius="xl" p={5} mt={4} border="1px solid" borderColor="gray.200" boxShadow="sm">
+                    <Heading size="md" mb={2} color="gray.800">Ishsizlik dinamikasi (foiz)</Heading>
+                    <Text fontSize="sm" color="gray.600" mb={4}>Yil boshi, hozirgi (4 oy) va yil oxiri maqsadi</Text>
                     <ResponsiveContainer width="100%" height={450}>
                         <BarChart data={chartComparison} margin={{ top: 20, right: 30, left: 0, bottom: 5 }}>
-                            <CartesianGrid strokeDasharray="3 3" stroke="#2d3748" />
-                            <XAxis dataKey="name" tick={{ fill: "#cbd5e0", fontSize: 11 }} angle={-35} textAnchor="end" height={70} />
-                            <YAxis tick={{ fill: "#cbd5e0" }} label={{ value: "Ishsizlik %", angle: -90, position: "insideLeft", fill: "#cbd5e0" }} />
-                            <RechartsTooltip contentStyle={{ backgroundColor: "#1e2533", border: "none", borderRadius: "8px" }} />
-                            <Legend wrapperStyle={{ color: "white" }} />
-                            <Bar dataKey="Yil boshi (%)" fill="#4A5568" />
+                            <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                            <XAxis dataKey="name" tick={{ fill: "#4a5568", fontSize: 11 }} angle={-35} textAnchor="end" height={70} />
+                            <YAxis tick={{ fill: "#4a5568" }} label={{ value: "Ishsizlik %", angle: -90, position: "insideLeft", fill: "#4a5568" }} />
+                            <RechartsTooltip contentStyle={{ backgroundColor: "white", border: "1px solid #e2e8f0", borderRadius: "8px", color: "#1a202c" }} />
+                            <Legend wrapperStyle={{ color: "#4a5568" }} />
+                            <Bar dataKey="Yil boshi (%)" fill="#718096" />
                             <Bar dataKey="Hozirgi (4 oy)" fill={brand600} />
                             <Bar dataKey="Yil oxiri maqsadi (%)" fill="#38A169" />
                         </BarChart>

@@ -188,20 +188,20 @@ const MainQarshi = () => {
       <Box mx="auto">
         <Flex align="center" gap={3} mb={6}>
           <Icon as={TrendingUp} boxSize={7} color={brand600} />
-          <Heading size="xl" color="white">Qarshi shahri – mahallalar kesimida taqsimot</Heading>
+          <Heading size="xl" color="gray.800">Qarshi shahri – mahallalar kesimida taqsimot</Heading>
         </Flex>
 
         <SimpleGrid columns={{ base: 1, md: 2, lg: 4 }} spacing={6} mb={8}>
           {summaryCards.map((card, idx) => (
-            <Stat key={idx} bg="gray.900" p={5} borderRadius="xl" boxShadow="lg">
+            <Stat key={idx} bg="white" p={5} borderRadius="xl" boxShadow="lg">
               <Flex align="center" gap={2} mb={2}>
                 <Icon as={card.icon} boxSize={5} color={card.color} />
-                <StatLabel fontSize="lg" color="gray.400">{card.title}</StatLabel>
+                <StatLabel fontSize="lg" color="gray.600">{card.title}</StatLabel>
               </Flex>
               <StatNumber fontSize="2xl" fontWeight="bold" color={card.color}>
                 {card.amount.toFixed(2)} {card.unit}
               </StatNumber>
-              <StatHelpText color="gray.500">Qarshi shahri uchun jami</StatHelpText>
+              <StatHelpText color="gray.600">Qarshi shahri uchun jami</StatHelpText>
             </Stat>
           ))}
         </SimpleGrid>
@@ -209,12 +209,12 @@ const MainQarshi = () => {
         {/* Фильтры */}
         <Flex direction={{ base: "column", md: "row" }} gap={4} mb={6}>
           <InputGroup maxW={{ base: "100%", md: "300px" }}>
-            <InputLeftElement pointerEvents="none"><Icon as={Search} color="gray.400" /></InputLeftElement>
+            <InputLeftElement pointerEvents="none"><Icon as={Search} color="gray.600" /></InputLeftElement>
             <Input
               placeholder="Mahalla nomi bo‘yicha qidirish..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              bg="gray.900" borderColor="gray.700" color="white"
+              bg="white" borderColor="gray.200" color="gray.800"
               _focus={{ borderColor: brand600 }}
             />
           </InputGroup>
@@ -222,7 +222,7 @@ const MainQarshi = () => {
             width={{ base: "100%", md: "200px" }}
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value as any)}
-            bg="gray.900" borderColor="gray.700" color="white"
+            bg="white" borderColor="gray.200" color="gray.800"
           >
             <option value="all">Barcha mahallalar</option>
             <option value="receives">Mablag‘ oluvchilar</option>
@@ -231,17 +231,17 @@ const MainQarshi = () => {
         </Flex>
 
         <Tabs variant="soft-rounded" colorScheme="blue" index={tabIndex} onChange={setTabIndex} mb={8}>
-          <TabList bg="gray.900" borderRadius="xl" p={2}>
-            <Tab _selected={{ bg: brand600, color: "white" }} color="gray.300">
+          <TabList bg="white" borderRadius="xl" p={2}>
+            <Tab _selected={{ bg: "brand.50", color: "brand.600" }} color="gray.600">
               <HStack><Icon as={Landmark} boxSize={4} /><Text>Davlat byudjeti</Text></HStack>
             </Tab>
-            <Tab _selected={{ bg: brand600, color: "white" }} color="gray.300">
+            <Tab _selected={{ bg: "brand.50", color: "brand.600" }} color="gray.600">
               <HStack><Icon as={Wallet} boxSize={4} /><Text>Jamgʻarma</Text></HStack>
             </Tab>
-            <Tab _selected={{ bg: brand600, color: "white" }} color="gray.300">
+            <Tab _selected={{ bg: "brand.50", color: "brand.600" }} color="gray.600">
               <HStack><Icon as={CreditCard} boxSize={4} /><Text>Kreditlar</Text></HStack>
             </Tab>
-            <Tab _selected={{ bg: brand600, color: "white" }} color="gray.300">
+            <Tab _selected={{ bg: "brand.50", color: "brand.600" }} color="gray.600">
               <HStack><Icon as={Globe} boxSize={4} /><Text>Tashqi moliya</Text></HStack>
             </Tab>
           </TabList>
@@ -250,7 +250,7 @@ const MainQarshi = () => {
             {[0, 1, 2, 3].map(idx => (
               <TabPanel key={idx} p={0}>
                 <TableContainer
-                  bg="gray.900"
+                  bg="white"
                   borderRadius="xl"
                   overflowX="auto"
                   mb={8}
@@ -258,11 +258,11 @@ const MainQarshi = () => {
                   sx={{ "&::-webkit-scrollbar": { height: "6px" }, "&::-webkit-scrollbar-track": { bg: "gray.700" }, "&::-webkit-scrollbar-thumb": { bg: brand600, borderRadius: "full" } }}
                 >
                   <Table variant="unstyled" minWidth="600px">
-                    <Thead bg="gray.800" position="sticky" top={0} zIndex={1}>
+                    <Thead bg="gray.50" position="sticky" top={0} zIndex={1} color="gray.700">
                       <Tr>
-                        <Th color="gray.400" width="200px">Mahalla nomi</Th>
-                        <Th color="gray.400" textAlign="right" width="150px">{getLabel()} ({getUnit()})</Th>
-                        <Th color="gray.400" textAlign="center" width="120px">Holat</Th>
+                        <Th color="gray.600" width="200px">Mahalla nomi</Th>
+                        <Th color="gray.600" textAlign="right" width="150px">{getLabel()} ({getUnit()})</Th>
+                        <Th color="gray.600" textAlign="center" width="120px">Holat</Th>
                       </Tr>
                     </Thead>
                     <Tbody>
@@ -272,13 +272,13 @@ const MainQarshi = () => {
                         return (
                           <Tr
                             key={idx}
-                            _hover={{ bg: "gray.800", cursor: isBatosh ? "pointer" : "default" }}
+                            _hover={{ bg: "gray.50", cursor: isBatosh ? "pointer" : "default" }}
                             opacity={item.receives ? 1 : 0.6}
                             onClick={() => handleRowClick(item.name)}
                           >
-                            <Td color="white" fontWeight={item.receives || isBatosh ? "bold" : "normal"}>{item.name}</Td>
+                            <Td color="gray.800" fontWeight={item.receives || isBatosh ? "bold" : "normal"}>{item.name}</Td>
                             <Td textAlign="right" fontWeight="bold" color={brand600}>{value.toFixed(2)}</Td>
-                            <Td textAlign="center">
+                            <Td textAlign="center" color="gray.800">
                               {item.receives ? (
                                 <Badge colorScheme="green" borderRadius="full" px={2}>Mablag‘ ajratilgan</Badge>
                               ) : (
@@ -288,23 +288,23 @@ const MainQarshi = () => {
                           </Tr>
                         );
                       })}
-                      {filteredData.length === 0 && <Tr><Td colSpan={3} textAlign="center" py={8} color="gray.400">Hech qanday mahalla topilmadi</Td></Tr>}
+                      {filteredData.length === 0 && <Tr><Td colSpan={3} textAlign="center" py={8} color="gray.600">Hech qanday mahalla topilmadi</Td></Tr>}
                     </Tbody>
                   </Table>
                 </TableContainer>
 
-                <Box bg="gray.900" p={4} borderRadius="xl" boxShadow="lg">
-                  <Heading as="h2" size="lg" mb={2} color="white">{getLabel()} – mahallalar kesimida</Heading>
-                  <Text mb={6} color="gray.400">{getUnit()} – barcha mahallalar (nol qiymatli mahallalar ham ko‘rsatilgan)</Text>
+                <Box bg="white" p={4} borderRadius="xl" boxShadow="lg">
+                  <Heading as="h2" size="lg" mb={2} color="gray.800">{getLabel()} – mahallalar kesimida</Heading>
+                  <Text mb={6} color="gray.600">{getUnit()} – barcha mahallalar (nol qiymatli mahallalar ham ko‘rsatilgan)</Text>
                   <ResponsiveContainer width="100%" height={Math.max(400, chartData.length * 30)}>
                     <BarChart layout="vertical" data={chartData} margin={{ top: 20, right: 30, left: 140, bottom: 20 }}>
-                      <CartesianGrid stroke="#2d3748" />
-                      <XAxis type="number" tick={{ fill: "#cbd5e0" }} label={{ value: getUnit(), position: "insideBottom", offset: -5, fill: "#cbd5e0" }} />
-                      <YAxis type="category" dataKey="name" width={130} tick={{ fontSize: 11, fill: "#cbd5e0" }} />
+                      <CartesianGrid stroke="#e2e8f0" />
+                      <XAxis type="number" tick={{ fill: "#4a5568" }} label={{ value: getUnit(), position: "insideBottom", offset: -5, fill: "#4a5568" }} />
+                      <YAxis type="category" dataKey="name" width={130} tick={{ fontSize: 11, fill: "#4a5568" }} />
                       <Tooltip
                         formatter={(value: number) => `${value} ${getUnit()}`}
                         labelFormatter={(label) => chartData.find(d => d.name === label)?.fullName || label}
-                        contentStyle={{ backgroundColor: "#1a202c", border: "none", color: "white" }}
+                        contentStyle={{ backgroundColor: "#ffffff", border: "1px solid #e2e8f0", color: "#1a202c" }}
                       />
                       <Bar dataKey="value" radius={[0, 8, 8, 0]}>
                         {chartData.map((_, index) => <Cell key={index} fill={barColors[index % barColors.length]} />)}
@@ -317,7 +317,7 @@ const MainQarshi = () => {
           </TabPanels>
         </Tabs>
 
-        <Text fontSize="xs" textAlign="center" color="gray.500" mt={6}>
+        <Text fontSize="xs" textAlign="center" color="gray.600" mt={6}>
           * Batosh mahallasiga ustunlik berilgan (2.5 baravar ko‘p), Ishonch mahallasi ham qo‘shimcha mablag‘ olgan. Qolgan mahallalar standart ulushga ega.
         </Text>
       </Box>

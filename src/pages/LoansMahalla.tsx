@@ -132,7 +132,7 @@ const LoansMahalla = () => {
                 {/* Заголовок и общая сумма */}
                 <Flex alignItems="baseline" justifyContent="space-between" mb={4}>
                     <Box>
-                        <Heading as="h1" size="xl" fontWeight="bold" color="white">
+                        <Heading as="h1" size="xl" fontWeight="bold" color="gray.800">
                             Qarshi shahri mahallalari (Kreditlar)
                         </Heading>
                         <Text fontSize="md" color="brand.300" mt={1}>
@@ -140,7 +140,7 @@ const LoansMahalla = () => {
                         </Text>
                     </Box>
                     <Box textAlign="right">
-                        <Text fontSize="lg" fontWeight="medium" color="gray.400">
+                        <Text fontSize="lg" fontWeight="medium" color="gray.600">
                             Jami ajratilgan mablag‘ (kreditlar)
                         </Text>
                         <Text fontSize="2xl" fontWeight="extrabold" color={brand600}>
@@ -149,7 +149,7 @@ const LoansMahalla = () => {
                     </Box>
                 </Flex>
 
-                <Text fontSize="md" color="gray.300" mb={8}>
+                <Text fontSize="md" color="gray.600" mb={8}>
                     Tijorat banklari tomonidan berilgan jami kreditlarning mahallalar kesimida taqsimlanishi.
                 </Text>
 
@@ -157,18 +157,18 @@ const LoansMahalla = () => {
                 <Flex direction={{ base: "column", md: "row" }} gap={4} mb={6}>
                     <InputGroup maxW="400px">
                         <InputLeftElement pointerEvents="none">
-                            <Search size={18} color="gray.400" />
+                            <Search size={18} color="gray.600" />
                         </InputLeftElement>
                         <Input
                             placeholder="Mahalla nomi bo‘yicha qidirish..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            bg="gray.900"
+                            bg="white"
                             border="1px solid"
-                            borderColor="gray.700"
+                            borderColor="gray.200"
                             _hover={{ borderColor: "gray.600" }}
                             _focus={{ borderColor: brand600, boxShadow: `0 0 0 1px ${brand600}` }}
-                            color="white"
+                            color="gray.800"
                         />
                         {searchTerm && (
                             <InputRightElement>
@@ -177,9 +177,9 @@ const LoansMahalla = () => {
                                     icon={<X size={16} />}
                                     size="xs"
                                     variant="ghost"
-                                    color="gray.400"
+                                    color="gray.600"
                                     onClick={clearSearch}
-                                    _hover={{ color: "white" }}
+                                    _hover={{ color: "#1a202c" }}
                                 />
                             </InputRightElement>
                         )}
@@ -188,9 +188,9 @@ const LoansMahalla = () => {
                         width="200px"
                         value={statusFilter}
                         onChange={(e) => setStatusFilter(e.target.value as any)}
-                        bg="gray.900"
-                        borderColor="gray.700"
-                        color="white"
+                        bg="white"
+                        borderColor="gray.200"
+                        color="gray.800"
                         _focus={{ borderColor: brand600 }}
                     >
                         <option value="all">Barcha mahallalar</option>
@@ -201,26 +201,26 @@ const LoansMahalla = () => {
 
                 {/* Таблица махаллей */}
                 <TableContainer
-                    bg="gray.900"
+                    bg="white"
                     borderRadius="xl"
                     overflow="hidden"
                     mb={12}
                     boxShadow="lg"
                 >
                     <Table variant="unstyled">
-                        <Thead bg="gray.800">
+                        <Thead bg="gray.50" color="gray.700">
                             <Tr>
-                                <Th color="gray.400" fontSize="sm" fontWeight="medium" borderBottom="1px solid" borderColor="gray.700">№</Th>
-                                <Th color="gray.400" fontSize="sm" fontWeight="medium" borderBottom="1px solid" borderColor="gray.700">Mahalla nomi</Th>
-                                <Th color="gray.400" fontSize="sm" fontWeight="medium" borderBottom="1px solid" borderColor="gray.700" textAlign="right">Ajratilgan mablag‘ (mlrd so‘m)</Th>
-                                <Th color="gray.400" fontSize="sm" fontWeight="medium" borderBottom="1px solid" borderColor="gray.700" textAlign="center">Holat</Th>
-                                <Th color="gray.400" fontSize="sm" fontWeight="medium" borderBottom="1px solid" borderColor="gray.700" textAlign="center">Harakat</Th>
+                                <Th color="gray.600" fontSize="sm" fontWeight="medium" borderBottom="1px solid" borderColor="gray.200">№</Th>
+                                <Th color="gray.600" fontSize="sm" fontWeight="medium" borderBottom="1px solid" borderColor="gray.200">Mahalla nomi</Th>
+                                <Th color="gray.600" fontSize="sm" fontWeight="medium" borderBottom="1px solid" borderColor="gray.200" textAlign="right">Ajratilgan mablag‘ (mlrd so‘m)</Th>
+                                <Th color="gray.600" fontSize="sm" fontWeight="medium" borderBottom="1px solid" borderColor="gray.200" textAlign="center">Holat</Th>
+                                <Th color="gray.600" fontSize="sm" fontWeight="medium" borderBottom="1px solid" borderColor="gray.200" textAlign="center">Harakat</Th>
                             </Tr>
                         </Thead>
                         <Tbody>
                             {filteredMahallas.length === 0 ? (
                                 <Tr>
-                                    <Td colSpan={5} textAlign="center" py={8} color="gray.400">
+                                    <Td colSpan={5} textAlign="center" py={8} color="gray.600">
                                         Hech qanday mahalla topilmadi
                                     </Td>
                                 </Tr>
@@ -231,31 +231,31 @@ const LoansMahalla = () => {
                                     return (
                                         <Tr
                                             key={idx}
-                                            _hover={{ bg: isActive ? "gray.750" : "gray.850" }}
+                                            _hover={{ bg: isActive ? "brand.50" : "gray.50" }}
                                             transition="background 0.15s"
                                             cursor={isActive ? "pointer" : "default"}
                                             onClick={() => isActive && handleDetailClick(mahalla.name)}
                                         >
-                                            <Td color="gray.500" fontSize="sm" borderBottom="1px solid" borderColor="gray.700">
+                                            <Td color="gray.600" fontSize="sm" borderBottom="1px solid" borderColor="gray.200">
                                                 {originalIndex + 1}
                                             </Td>
-                                            <Td fontWeight="medium" color="white" borderBottom="1px solid" borderColor="gray.700">
+                                            <Td fontWeight="medium" color="gray.800" borderBottom="1px solid" borderColor="gray.200">
                                                 <Flex align="center" gap={2}>
                                                     <Icon as={MapPin} boxSize={3} color={brand600} />
                                                     {mahalla.name}
                                                 </Flex>
                                             </Td>
-                                            <Td textAlign="right" fontWeight="semibold" color={brand600} borderBottom="1px solid" borderColor="gray.700">
+                                            <Td textAlign="right" fontWeight="semibold" color={brand600} borderBottom="1px solid" borderColor="gray.200">
                                                 {mahalla.budget.toFixed(2)}
                                             </Td>
-                                            <Td textAlign="center" borderBottom="1px solid" borderColor="gray.700">
+                                            <Td textAlign="center" borderBottom="1px solid" borderColor="gray.200" color="gray.800">
                                                 {mahalla.receives ? (
                                                     <Badge colorScheme="green" borderRadius="full" px={2}>Mablag‘ ajratilgan</Badge>
                                                 ) : (
                                                     <Badge colorScheme="gray" borderRadius="full" px={2}>Mablag‘ ajratilmagan</Badge>
                                                 )}
                                             </Td>
-                                            <Td textAlign="center" borderBottom="1px solid" borderColor="gray.700">
+                                            <Td textAlign="center" borderBottom="1px solid" borderColor="gray.200" color="gray.800">
                                                 {isActive ? (
                                                     <IconButton
                                                         aria-label="Batafsil"
@@ -275,7 +275,7 @@ const LoansMahalla = () => {
                                                         icon={<Lock size={14} />}
                                                         size="xs"
                                                         variant="ghost"
-                                                        color="gray.500"
+                                                        color="gray.600"
                                                         isDisabled
                                                         _hover={{}}
                                                     />
@@ -291,34 +291,34 @@ const LoansMahalla = () => {
 
                 {/* Горизонтальная гистограмма */}
                 <Box mt={10}>
-                    <Heading as="h2" size="lg" mb={4} color="white">
+                    <Heading as="h2" size="lg" mb={4} color="gray.800">
                         Mablag‘ taqsimoti (mlrd so‘m)
                     </Heading>
-                    <Text mb={6} color="gray.400">
+                    <Text mb={6} color="gray.600">
                         Eng ko‘p mablag‘ ajratilgan mahallalar (gorizontal diagramma)
                     </Text>
-                    <Box bg="gray.900" p={4} borderRadius="xl" boxShadow="lg">
+                    <Box bg="white" p={4} borderRadius="xl" boxShadow="lg">
                         <ResponsiveContainer width="100%" height={Math.max(500, chartData.length * 32)}>
                             <BarChart
                                 layout="vertical"
                                 data={chartData}
                                 margin={{ top: 20, right: 30, left: 140, bottom: 20 }}
                             >
-                                <CartesianGrid strokeDasharray="3 3" stroke="#2d3748" />
+                                <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
                                 <XAxis
                                     type="number"
                                     label={{
                                         value: "mlrd so‘m",
                                         position: "insideBottom",
                                         offset: -5,
-                                        fill: "#cbd5e0",
+                                        fill: "#4a5568",
                                     }}
-                                    tick={{ fill: "#cbd5e0" }}
+                                    tick={{ fill: "#4a5568" }}
                                 />
                                 <YAxis
                                     type="category"
                                     dataKey="name"
-                                    tick={{ fontSize: 11, fill: "#cbd5e0" }}
+                                    tick={{ fontSize: 11, fill: "#4a5568" }}
                                     width={130}
                                 />
                                 <Tooltip
@@ -328,18 +328,18 @@ const LoansMahalla = () => {
                                         return item ? item.fullName : label;
                                     }}
                                     contentStyle={{
-                                        backgroundColor: "#1a202c",
+                                        backgroundColor: "#ffffff",
                                         borderRadius: "8px",
-                                        border: "none",
-                                        color: "white",
+                                        border: "1px solid #e2e8f0",
+                                        color: "#1a202c",
                                     }}
-                                    itemStyle={{ color: "white" }}
+                                    itemStyle={{ color: "#1a202c" }}
                                 />
                                 <Bar dataKey="budget" fill={brand600} radius={[0, 8, 8, 0]} />
                             </BarChart>
                         </ResponsiveContainer>
                     </Box>
-                    <Text fontSize="xs" mt={4} color="gray.500">
+                    <Text fontSize="xs" mt={4} color="gray.600">
                         * Maʼlumotlar real kredit taqsimotiga asoslangan holda hisoblangan.
                     </Text>
                 </Box>

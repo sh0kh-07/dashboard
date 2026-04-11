@@ -199,31 +199,31 @@ const PoorLevelVil = () => {
   return (
     <Box minH="100vh" >
       <Flex justify="space-between" mb={6} flexWrap="wrap" gap={4}>
-        <Heading>Qashqadaryo viloyati tumanlarida kambag‘allik monitoringi</Heading>
+        <Heading color="gray.800">Qashqadaryo viloyati tumanlarida kambag‘allik monitoringi</Heading>
         <Flex alignItems="center" gap={'10px'} textAlign="right">
-          <Text color="gray.400">Viloyat maqsadi (yil oxiri)</Text>
+          <Text color="gray.600">Viloyat maqsadi (yil oxiri)</Text>
           <Text color={brand600} fontWeight="bold" fontSize="2xl">3.3%</Text>
         </Flex>
       </Flex>
 
-      <Text color="gray.300" mb={4}>
+      <Text color="gray.600" mb={4}>
         Xaritada tumanlar holati: <strong style={{ color: green400 }}>Yashil</strong> — yaxshi,{" "}
         <strong style={{ color: yellow400 }}>Sariq</strong> — o‘rtacha,{" "}
         <strong style={{ color: red400 }}>Qizil</strong> — xavf ostida.
       </Text>
 
       <SimpleGrid columns={{ base: 1, md: 3 }} spacing={4} mb={6}>
-        <Stat bg="dark.card" p={3} borderRadius="lg">
+        <Stat bg="white" border="1px solid" borderColor="gray.200" boxShadow="sm" p={3} borderRadius="lg">
           <StatLabel>Yaxshi holat</StatLabel>
           <StatNumber color="green.400">{stats.good}</StatNumber>
           <StatHelpText>Maqsadga ishonchli</StatHelpText>
         </Stat>
-        <Stat bg="dark.card" p={3} borderRadius="lg">
+        <Stat bg="white" border="1px solid" borderColor="gray.200" boxShadow="sm" p={3} borderRadius="lg">
           <StatLabel>O‘rtacha holat</StatLabel>
           <StatNumber color="yellow.400">{stats.moderate}</StatNumber>
           <StatHelpText>Harakat kerak</StatHelpText>
         </Stat>
-        <Stat bg="dark.card" p={3} borderRadius="lg">
+        <Stat bg="white" border="1px solid" borderColor="gray.200" boxShadow="sm" p={3} borderRadius="lg">
           <StatLabel>Xavf ostida</StatLabel>
           <StatNumber color="red.400">{stats.bad}</StatNumber>
           <StatHelpText>Rejani bajarmaslik xavfi</StatHelpText>
@@ -231,9 +231,9 @@ const PoorLevelVil = () => {
       </SimpleGrid>
 
       {/* Tushuntirish bloki */}
-      <Box bg="dark.card" p={4} borderRadius="lg" mb={6}>
-        <Heading size="sm" mb={2}>Tumanlar foizlari qanday hisoblandi?</Heading>
-        <Text fontSize="sm" color="gray.300">
+      <Box bg="white" border="1px solid" borderColor="gray.200" boxShadow="sm" p={4} borderRadius="lg" mb={6}>
+        <Heading size="sm" mb={2} color="gray.800">Tumanlar foizlari qanday hisoblandi?</Heading>
+        <Text fontSize="sm" color="gray.600">
           • <strong>Yil boshi</strong> – viloyat oʻrtacha 4.6% dan kelib chiqib, har bir tumanning ogʻirligiga qarab taqsimlangan.<br/>
           • <strong>Maqsad</strong> – viloyatning yillik rejasi 3.3% asosida tumanlarga mos ravishda belgilangan.<br/>
           • <strong>Hozirgi (4 oy)</strong> – real pasayish tezligi. Yaxshi tumanlar (Qarshi shahri) tezroq pasaygan, xavf ostidagilar (Qamashi, Mirishkor) sekinroq.<br/>
@@ -242,7 +242,7 @@ const PoorLevelVil = () => {
       </Box>
 
       {/* Xarita */}
-      <Box position="relative" bg="dark.card" p={4} borderRadius="xl" mb={10}>
+      <Box position="relative" bg="white" border="1px solid" borderColor="gray.200" boxShadow="sm" p={4} borderRadius="xl" mb={10}>
         <svg viewBox={kashkadaryaMap.viewBox} style={{ width: "80%", height: "auto", margin: "0 auto", display: "block" }}>
           {kashkadaryaMap.layers.map((layer: any) => (
             <path
@@ -256,7 +256,7 @@ const PoorLevelVil = () => {
               onMouseOver={(e) => {
                 e.currentTarget.style.opacity = "1";
                 e.currentTarget.style.strokeWidth = "2";
-                e.currentTarget.style.stroke = "#ffffff";
+                e.currentTarget.style.stroke = "#2b6cb0";
               }}
               onMouseOut={(e) => {
                 e.currentTarget.style.opacity = "0.85";
@@ -272,8 +272,8 @@ const PoorLevelVil = () => {
             position="fixed"
             top={tooltip.y}
             left={tooltip.x}
-            bg="gray.800"
-            color="white"
+            bg="gray.50"
+            color="gray.800"
             px={4}
             py={2}
             borderRadius="lg"
@@ -281,8 +281,8 @@ const PoorLevelVil = () => {
             zIndex={1000}
             pointerEvents="none"
             minW="200px"
-            backdropFilter="blur(4px)"
-            bgColor="rgba(0,0,0,0.85)"
+            
+            
           >
             <Text fontWeight="bold">{tooltip.name}</Text>
             <Text fontSize="sm">
@@ -304,14 +304,14 @@ const PoorLevelVil = () => {
       </Box>
 
       {/* Grafik */}
-      <Heading size="lg" mb={4}>Kambag‘allik darajasi dinamikasi (tumanlar)</Heading>
-      <Box bg="dark.card" p={4} borderRadius="xl">
+      <Heading size="lg" mb={4} color="gray.800">Kambag‘allik darajasi dinamikasi (tumanlar)</Heading>
+      <Box bg="white" border="1px solid" borderColor="gray.200" boxShadow="sm" p={4} borderRadius="xl">
         <ResponsiveContainer width="100%" height={500}>
           <BarChart layout="vertical" data={chartData} margin={{ left: 80 }}>
-            <CartesianGrid stroke="#2d3748" />
-            <XAxis type="number" tick={{ fill: "#cbd5e0" }} domain={[0, 6]} label={{ value: "Kambag‘allik %", position: "insideBottom", offset: -5, fill: "#cbd5e0" }} />
-            <YAxis type="category" dataKey="name" tick={{ fill: "#cbd5e0" }} width={100} />
-            <RechartsTooltip contentStyle={{ backgroundColor: "#1a202c", border: "none", borderRadius: "8px", color: "white" }} />
+            <CartesianGrid stroke="#e2e8f0" />
+            <XAxis type="number" tick={{ fill: "#4a5568" }} domain={[0, 6]} label={{ value: "Kambag‘allik %", position: "insideBottom", offset: -5, fill: "#4a5568" }} />
+            <YAxis type="category" dataKey="name" tick={{ fill: "#4a5568" }} width={100} />
+            <RechartsTooltip contentStyle={{ backgroundColor: "#ffffff", border: "1px solid #e2e8f0", borderRadius: "8px", color: "#1a202c" }} />
             <Bar dataKey="Yil boshi" fill="#4A5568" />
             <Bar dataKey="Hozirgi (4 oy)" fill={brand600} />
             <Bar dataKey="Maqsad" fill="#38A169" />
@@ -319,7 +319,7 @@ const PoorLevelVil = () => {
         </ResponsiveContainer>
       </Box>
 
-      <Box bg="dark.card" p={4} borderRadius="lg" mt={6}>
+      <Box bg="white" border="1px solid" borderColor="gray.200" boxShadow="sm" p={4} borderRadius="lg" mt={6}>
         <Flex gap={3} align="center">
           <AlertTriangle size={20} color={red400} />
           <Text fontWeight="medium">
@@ -331,7 +331,7 @@ const PoorLevelVil = () => {
           <Text>Qarshi shahri, Shahrisabz va Kitob tumanlari yaxshi ko‘rsatkichga ega.</Text>
         </Flex>
         <Flex gap={3} align="center" mt={2}>
-          <Text fontSize="sm" color="gray.400">💡 Eslatma: Qarshi shahri xaritasiga bossangiz, mahallalar darajasidagi batafsil ma’lumotga o‘tasiz.</Text>
+          <Text fontSize="sm" color="gray.600">💡 Eslatma: Qarshi shahri xaritasiga bossangiz, mahallalar darajasidagi batafsil ma’lumotga o‘tasiz.</Text>
         </Flex>
       </Box>
     </Box>

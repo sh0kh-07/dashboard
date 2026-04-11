@@ -58,6 +58,16 @@ import Regions from './pages/Regions';
 import Mahalla from './pages/Mahalla';
 import Reports from './pages/Resports';
 
+import JobPlacement from './pages/JobPlacement';
+import JobPlacementVil from './pages/JobPlacementVil';
+import JobPlacementVilDetail from './pages/JobPlacementVilDetail';
+import JobPlacementBatosh from './pages/JobPlacementBatosh';
+
+import PoorServices from './pages/PoorServices';
+import PoorServicesVil from './pages/PoorServicesVil';
+import PoorServicesVilDetail from './pages/PoorServicesVilDetail';
+import PoorServicesBatosh from './pages/PoorServicesBatosh';
+
 export default function App() {
   return (
     <ChakraProvider theme={theme}>
@@ -82,7 +92,7 @@ export default function App() {
               <Route path="/budget-detail/kashkadarya/mahallalar" element={<KashkadaryaMahalla />} />
               <Route path="/kashkadarya/mahalla/batosh" element={<BudgetMahallaDetail />} />
               <Route path="/kashkadarya/mahalla/batosh/contract/:id" element={<ContractDetail />} />
-              
+
               <Route path="/fund" element={<Found />} />
               <Route path="/fund-detail" element={<FoundDetail />} />
               <Route path="/fund-detail/kashkadarya" element={<FoundDetailKashkadarya />} />
@@ -124,6 +134,16 @@ export default function App() {
               <Route path="/regions" element={<Regions />} />
               <Route path="/mahalla" element={<Mahalla />} />
               <Route path="/reports" element={<Reports />} />
+              
+              <Route path="/job-placement" element={<JobPlacement />} />
+              <Route path="/job-placement/vil" element={<JobPlacementVil />} />
+              <Route path="/job-placement/vil/qarshi" element={<JobPlacementVilDetail />} />
+              <Route path="/job-placement/vil/qarshi/batosh" element={<JobPlacementBatosh />} />
+              
+              <Route path="/poor-services" element={<PoorServices />} />
+              <Route path="/poor-services/vil" element={<PoorServicesVil />} />
+              <Route path="/poor-services/vil/qarshi" element={<PoorServicesVilDetail />} />
+              <Route path="/poor-services/vil/qarshi/batosh" element={<PoorServicesBatosh />} />
             </Route>
           </Route>
         </Routes>

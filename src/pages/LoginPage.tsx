@@ -1,4 +1,3 @@
-// src/pages/LoginPage.tsx
 import React, { useState } from 'react';
 import {
   Box, Flex, VStack, Heading, Text, Input, Button,
@@ -6,8 +5,9 @@ import {
   FormControl, FormLabel, useToast, Image,
   HStack, Divider, IconButton
 } from '@chakra-ui/react';
-import { User, Lock, Eye, EyeOff, Wallet } from 'lucide-react';
+import { User, Lock, Eye, EyeOff } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import Logo from '../Logo/Logo.jpg';
 
 const LoginPage = () => {
   const [username, setUsername] = useState('');
@@ -52,75 +52,82 @@ const LoginPage = () => {
   };
 
   return (
-    <Flex minH="100vh" align="center" justify="center" bg="dark.bg" p={4}>
+    <Flex minH="100vh" align="center" justify="center" bg="gray.50" p={4}>
       <Box
-        maxW="450px"
+        maxW="400px"
         w="full"
-        bg="dark.card"
-        p={8}
-        borderRadius="2xl"
-        boxShadow="2xl"
-        borderWidth="1px"
-        borderColor="dark.border"
+        bg="white"
+        p={10}
+        borderRadius="3xl"
+        boxShadow="xl"
+        border="1px solid"
+        borderColor="gray.200"
       >
         <VStack spacing={8} align="stretch">
-          <VStack spacing={2} align="center">
-            <Box bg="brand.500" p={3} borderRadius="xl" mb={2}>
-              <Wallet color="white" size={32} />
+          <VStack spacing={4} align="center">
+            <Image src={Logo} alt="Logo" h="80px" w="auto" objectFit="contain" />
+            <Box textAlign="center">
+              <Heading size="lg" fontWeight="extrabold" color="gray.800" letterSpacing="tight">
+                Kirish
+              </Heading>
+              <Text color="gray.500" fontSize="sm" mt={1}>
+                Ijtimoiy Himoya Nazorat Paneli
+              </Text>
             </Box>
-            <Heading size="lg" textAlign="center" color="white">
-              Ijtimoiy Himoya
-            </Heading>
-            <Text color="gray.400" fontSize="sm">
-              Nazorat paneliga kirish
-            </Text>
           </VStack>
 
           <form onSubmit={handleLogin}>
-            <VStack spacing={4}>
+            <VStack spacing={5}>
               <FormControl isRequired>
-                <FormLabel color="gray.300" fontSize="sm">Login</FormLabel>
-                <InputGroup>
+                <FormLabel color="gray.700" fontSize="sm" fontWeight="semibold">Foydalanuvchi nomi</FormLabel>
+                <InputGroup size="lg">
                   <InputLeftElement pointerEvents="none">
-                    <User size={18} color="gray.500" />
+                    <User size={20} color="gray.400" />
                   </InputLeftElement>
                   <Input
                     type="text"
+                    placeholder="Loginni kiriting"
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
-                    bg="rgba(255, 255, 255, 0.05)"
-                    border="none"
-                    _focus={{ ring: 2, ringColor: 'brand.500', bg: 'rgba(255, 255, 255, 0.08)' }}
-                    color="white"
+                    bg="gray.50"
+                    border="1px solid"
+                    borderColor="gray.200"
+                    fontSize="md"
+                    _focus={{ borderColor: 'brand.500', boxShadow: '0 0 0 1px #343c75' }}
+                    color="gray.800"
+                    borderRadius="xl"
                   />
                 </InputGroup>
               </FormControl>
 
               <FormControl isRequired>
-                <FormLabel color="gray.300" fontSize="sm">Parol</FormLabel>
-                <InputGroup>
+                <FormLabel color="gray.700" fontSize="sm" fontWeight="semibold">Parol</FormLabel>
+                <InputGroup size="lg">
                   <InputLeftElement pointerEvents="none">
-                    <Lock size={18} color="gray.500" />
+                    <Lock size={20} color="gray.400" />
                   </InputLeftElement>
                   <Input
                     type={showPassword ? 'text' : 'password'}
-                    placeholder="••••••"
+                    placeholder="••••••••"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    bg="rgba(255, 255, 255, 0.05)"
-                    border="none"
-                    _focus={{ ring: 2, ringColor: 'brand.500', bg: 'rgba(255, 255, 255, 0.08)' }}
-                    color="white"
+                    bg="gray.50"
+                    border="1px solid"
+                    borderColor="gray.200"
+                    fontSize="md"
+                    _focus={{ borderColor: 'brand.500', boxShadow: '0 0 0 1px #343c75' }}
+                    color="gray.800"
+                    borderRadius="xl"
                   />
-                  <InputRightElement>
+                  <InputRightElement width="3.5rem">
                     <IconButton
                       aria-label="Toggle Password"
                       variant="ghost"
                       size="sm"
-                      icon={showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                      icon={showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                       onClick={() => setShowPassword(!showPassword)}
-                      color="gray.500"
-                      _hover={{ color: 'white' }}
+                      color="gray.400"
+                      _hover={{ color: 'brand.500', bg: 'transparent' }}
                     />
                   </InputRightElement>
                 </InputGroup>
@@ -133,22 +140,28 @@ const LoginPage = () => {
                 w="full"
                 isLoading={isLoading}
                 loadingText="Kirish..."
-                mt={2}
-                height="50px"
+                mt={4}
+                height="56px"
+                borderRadius="xl"
+                fontSize="md"
+                fontWeight="bold"
+                boxShadow="lg"
+                _hover={{ transform: 'translateY(-1px)', boxShadow: 'xl' }}
+                _active={{ transform: 'translateY(0)' }}
               >
-                Tizimga kirish
+                Kirish
               </Button>
             </VStack>
           </form>
 
           <VStack spacing={4}>
             <HStack w="full">
-              <Divider borderColor="gray.700" />
-              <Text fontSize="xs" color="gray.500" whiteSpace="nowrap">YORDAM</Text>
-              <Divider borderColor="gray.700" />
+              <Divider borderColor="gray.200" />
+              <Text fontSize="xs" color="gray.400" whiteSpace="nowrap" fontWeight="medium" letterSpacing="widest">SUPPORT</Text>
+              <Divider borderColor="gray.200" />
             </HStack>
-            <Text fontSize="xs" color="gray.500" textAlign="center">
-              Parolni unutgan boʻlsangiz, tizim administratoriga murojaat qiling
+            <Text fontSize="xs" color="gray.500" textAlign="center" px={4} lineHeight="tall">
+              Agar tizimga kirishda muammo bo'lsa, ma'muriyat bilan bog'laning.
             </Text>
           </VStack>
         </VStack>

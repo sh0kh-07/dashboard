@@ -128,33 +128,33 @@ const MainBatosh = () => {
       <Box>
         <Flex align="center" gap={3} mb={6}>
           <Icon as={TrendingUp} boxSize={7} color={brand600} />
-          <Heading size="xl" color="white">Batosh mahallasi – kontraktlar</Heading>
+          <Heading size="xl" color="gray.800">Batosh mahallasi – kontraktlar</Heading>
         </Flex>
 
         <SimpleGrid columns={{ base: 1, md: 2, lg: 4 }} spacing={6} mb={8}>
           {summaryCards.map((card, idx) => (
-            <Stat key={idx} bg="gray.900" p={5} borderRadius="xl">
+            <Stat key={idx} bg="white" p={5} borderRadius="xl">
               <Flex align="center" gap={2} mb={2}>
                 <Icon as={card.icon} boxSize={5} color={brand600} />
-                <StatLabel color="gray.400">{card.title}</StatLabel>
+                <StatLabel color="gray.600">{card.title}</StatLabel>
               </Flex>
               <StatNumber fontSize="2xl" color={brand600}>{card.amount.toFixed(2)} {card.unit}</StatNumber>
-              <StatHelpText color="gray.500">Batosh uchun jami</StatHelpText>
+              <StatHelpText color="gray.600">Batosh uchun jami</StatHelpText>
             </Stat>
           ))}
         </SimpleGrid>
 
         <Flex direction={{ base: "column", md: "row" }} gap={4} mb={6} wrap="wrap">
           <InputGroup maxW="300px">
-            <InputLeftElement><Icon as={Search} color="gray.400" /></InputLeftElement>
-            <Input placeholder="Qidirish..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} bg="gray.900" borderColor="gray.700" color="white" _focus={{ borderColor: brand600 }} />
+            <InputLeftElement><Icon as={Search} color="gray.600" /></InputLeftElement>
+            <Input placeholder="Qidirish..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} bg="white" borderColor="gray.200" color="gray.800" _focus={{ borderColor: brand600 }} />
           </InputGroup>
-          <Select width="200px" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value as any)} bg="gray.900" borderColor="gray.700" color="white">
+          <Select width="200px" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value as any)} bg="white" borderColor="gray.200" color="gray.800">
             <option value="all">Barcha holatlar</option>
             <option value="Bajarildi">Bajarildi</option>
             <option value="Bajarilmoqda">Bajarilmoqda</option>
           </Select>
-          <Select width="200px" value={redFlagFilter} onChange={(e) => setRedFlagFilter(e.target.value as any)} bg="gray.900" borderColor="gray.700" color="white">
+          <Select width="200px" value={redFlagFilter} onChange={(e) => setRedFlagFilter(e.target.value as any)} bg="white" borderColor="gray.200" color="gray.800">
             <option value="all">Barcha kontraktlar</option>
             <option value="red">Red flag (rad etilgan)</option>
             <option value="ok">Tekshiruvdan o‘tgan</option>
@@ -162,11 +162,11 @@ const MainBatosh = () => {
         </Flex>
 
         <Tabs variant="soft-rounded" colorScheme="blue" index={tabIndex} onChange={setTabIndex} mb={8}>
-          <TabList bg="gray.900" borderRadius="xl" p={2}>
-            <Tab _selected={{ bg: brand600, color: "white" }}><HStack><Icon as={Landmark} /><Text>Davlat byudjeti</Text></HStack></Tab>
-            <Tab _selected={{ bg: brand600, color: "white" }}><HStack><Icon as={Wallet} /><Text>Jamgʻarma</Text></HStack></Tab>
-            <Tab _selected={{ bg: brand600, color: "white" }}><HStack><Icon as={CreditCard} /><Text>Kreditlar</Text></HStack></Tab>
-            <Tab _selected={{ bg: brand600, color: "white" }}><HStack><Icon as={Globe} /><Text>Tashqi moliya</Text></HStack></Tab>
+          <TabList bg="white" borderRadius="xl" p={2}>
+            <Tab _selected={{ bg: "brand.50", color: "brand.600" }}><HStack><Icon as={Landmark} /><Text>Davlat byudjeti</Text></HStack></Tab>
+            <Tab _selected={{ bg: "brand.50", color: "brand.600" }}><HStack><Icon as={Wallet} /><Text>Jamgʻarma</Text></HStack></Tab>
+            <Tab _selected={{ bg: "brand.50", color: "brand.600" }}><HStack><Icon as={CreditCard} /><Text>Kreditlar</Text></HStack></Tab>
+            <Tab _selected={{ bg: "brand.50", color: "brand.600" }}><HStack><Icon as={Globe} /><Text>Tashqi moliya</Text></HStack></Tab>
           </TabList>
           <TabPanels mt={6}>
             {[0,1,2,3].map(idx => {
@@ -180,27 +180,27 @@ const MainBatosh = () => {
               const chartLocal = filtered.map(c => ({ name: c.name.length>25?c.name.slice(0,22)+"...":c.name, fullName: c.name, value: c.amount }));
               return (
                 <TabPanel key={idx} p={0}>
-                  <TableContainer bg="gray.900" borderRadius="xl" mb={8}>
+                  <TableContainer bg="white" borderRadius="xl" mb={8}>
                     <Table variant="unstyled">
-                      <Thead bg="gray.800">
+                      <Thead bg="gray.50" color="gray.700">
                         <Tr>
-                          <Th>Kontrakt nomi</Th>
-                          <Th>Podryadchi</Th>
-                          <Th textAlign="right">Summa ({currentUnit})</Th>
-                          <Th>Sana</Th>
-                          <Th textAlign="center">Holati</Th>
-                          <Th textAlign="center">10 bosqich</Th>
+                          <Th color="gray.700">Kontrakt nomi</Th>
+                          <Th color="gray.700">Podryadchi</Th>
+                          <Th textAlign="right" color="gray.700">Summa ({currentUnit})</Th>
+                          <Th color="gray.700">Sana</Th>
+                          <Th textAlign="center" color="gray.700">Holati</Th>
+                          <Th textAlign="center" color="gray.700">10 bosqich</Th>
                         </Tr>
                       </Thead>
                       <Tbody>
                         {filtered.map(contract => (
-                          <Tr key={contract.id} _hover={{ bg: "gray.800", cursor: "pointer" }} onClick={() => handleRowClick(contract.id)}>
-                            <Td color="white">{contract.name}</Td>
-                            <Td color="gray.300"><Icon as={Building} size={14} /> {contract.contractor}</Td>
+                          <Tr key={contract.id} _hover={{ bg: "gray.50", cursor: "pointer" }} onClick={() => handleRowClick(contract.id)}>
+                            <Td color="gray.800">{contract.name}</Td>
+                            <Td color="gray.600"><Icon as={Building} size={14} /> {contract.contractor}</Td>
                             <Td textAlign="right" fontWeight="bold" color={brand600}>{contract.amount}</Td>
-                            <Td color="gray.400"><Icon as={Calendar} size={14} /> {contract.date}</Td>
-                            <Td textAlign="center"><StatusBadge status={contract.status} /></Td>
-                            <Td textAlign="center">
+                            <Td color="gray.600"><Icon as={Calendar} size={14} /> {contract.date}</Td>
+                            <Td textAlign="center" color="gray.800"><StatusBadge status={contract.status} /></Td>
+                            <Td textAlign="center" color="gray.800">
                               {contract.hasRedFlag ? (
                                 <HStack justify="center" spacing={1}>
                                   <Icon as={AlertTriangle} color="red.500" boxSize={4} />
@@ -215,18 +215,18 @@ const MainBatosh = () => {
                             </Td>
                           </Tr>
                         ))}
-                        {filtered.length === 0 && <Tr><Td colSpan={6} textAlign="center" py={8} color="gray.400">Kontrakt topilmadi</Td></Tr>}
+                        {filtered.length === 0 && <Tr><Td colSpan={6} textAlign="center" py={8} color="gray.600">Kontrakt topilmadi</Td></Tr>}
                       </Tbody>
                     </Table>
                   </TableContainer>
-                  <Box bg="gray.900" p={4} borderRadius="xl">
-                    <Heading size="md" mb={2} color="white">Kontrakt summalari taqsimoti ({currentUnit})</Heading>
+                  <Box bg="white" p={4} borderRadius="xl">
+                    <Heading size="md" mb={2} color="gray.800">Kontrakt summalari taqsimoti ({currentUnit})</Heading>
                     <ResponsiveContainer width="100%" height={200}>
                       <BarChart layout="vertical" data={chartLocal} margin={{ left: 150 }}>
-                        <CartesianGrid stroke="#2d3748" />
-                        <XAxis type="number" tick={{ fill: "#cbd5e0" }} />
-                        <YAxis type="category" dataKey="name" width={140} tick={{ fill: "#cbd5e0", fontSize: 11 }} />
-                        <Tooltip contentStyle={{ backgroundColor: "#1a202c", border: "none", color: "white" }} />
+                        <CartesianGrid stroke="#e2e8f0" />
+                        <XAxis type="number" tick={{ fill: "#4a5568" }} />
+                        <YAxis type="category" dataKey="name" width={140} tick={{ fill: "#4a5568", fontSize: 11 }} />
+                        <Tooltip contentStyle={{ backgroundColor: "#ffffff", border: "1px solid #e2e8f0", color: "#1a202c" }} />
                         <Bar dataKey="value" fill={brand600} radius={[0,8,8,0]}>
                           {chartLocal.map((_, i) => <Cell key={i} fill={barColors[i % barColors.length]} />)}
                         </Bar>

@@ -148,11 +148,11 @@ const ExternalDetail = () => {
   return (
     <Box>
       <Flex alignItems="start" justifyContent="space-between" mb={8}>
-        <Heading as="h1" size="xl" fontWeight="bold">
+        <Heading as="h1" size="xl" fontWeight="bold" color="gray.800">
           Kichik quyosh elektr stansiyalarini o‘rnatish
         </Heading>
         <Box>
-          <Text fontSize="lg" fontWeight="medium" color="gray.400">
+          <Text fontSize="lg" fontWeight="medium" color="gray.600">
             Jami mablag‘
           </Text>
           <Text fontSize="2xl" fontWeight="extrabold" color={brand600}>
@@ -161,7 +161,7 @@ const ExternalDetail = () => {
         </Box>
       </Flex>
 
-      <Text fontSize="md" color="gray.300" mb={8}>
+      <Text fontSize="md" color="gray.600" mb={8}>
         Tiklanish va taraqqiyot jamg‘armasi hisobidan kichik quyosh elektr stansiyalarini o‘rnatish loyihasi.
         Viloyatlar kesimida ajratilgan mablag‘lar xaritada va diagrammada keltirilgan.
       </Text>
@@ -213,8 +213,8 @@ const ExternalDetail = () => {
             position="fixed"
             top={tooltip.y + 12}
             left={tooltip.x + 12}
-            bg="gray.800"
-            color="white"
+            bg="gray.50"
+            color="gray.800"
             px={4}
             py={2}
             borderRadius="md"
@@ -235,10 +235,10 @@ const ExternalDetail = () => {
 
       {/* График */}
       <Box mt={8}>
-        <Heading as="h2" size="lg" mb={4}>
+        <Heading as="h2" size="lg" mb={4} color="gray.800">
           Viloyatlar kesimida taqsimot (mln AQSH dollari)
         </Heading>
-        <Text fontSize="sm" color="gray.400" mb={6}>
+        <Text fontSize="sm" color="gray.600" mb={6}>
           Quyosh elektr stansiyalari uchun ajratilgan mablag‘lar viloyatlar ehtiyojiga qarab taqsimlanadi.
         </Text>
         <ResponsiveContainer width="100%" height={500}>
@@ -247,16 +247,16 @@ const ExternalDetail = () => {
             layout="vertical"
             margin={{ top: 20, right: 30, left: 80, bottom: 20 }}
           >
-            <CartesianGrid strokeDasharray="3 3" stroke="#2d3748" />
+            <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
             <XAxis
               type="number"
-              label={{ value: "mln AQSH dollari", position: "insideBottom", offset: -5, fill: "#cbd5e0" }}
-              tick={{ fill: "#cbd5e0" }}
+              label={{ value: "mln AQSH dollari", position: "insideBottom", offset: -5, fill: "#4a5568" }}
+              tick={{ fill: "#4a5568" }}
             />
             <YAxis
               type="category"
               dataKey="name"
-              tick={{ fontSize: 12, fill: "#cbd5e0" }}
+              tick={{ fontSize: 12, fill: "#4a5568" }}
               width={100}
             />
             <RechartsTooltip
@@ -266,12 +266,12 @@ const ExternalDetail = () => {
                 return `${label} - ${item?.description || ""}`;
               }}
               contentStyle={{
-                backgroundColor: "#1a202c",
+                backgroundColor: "#ffffff",
                 borderRadius: "8px",
-                border: "none",
-                color: "white",
+                border: "1px solid #e2e8f0",
+                color: "#1a202c",
               }}
-              itemStyle={{ color: "white" }}
+              itemStyle={{ color: "#1a202c" }}
             />
             <Bar dataKey="value" radius={[0, 8, 8, 0]}>
               {chartData.map((entry, index) => (
@@ -280,7 +280,7 @@ const ExternalDetail = () => {
             </Bar>
           </BarChart>
         </ResponsiveContainer>
-        <Text fontSize="xs" color="gray.500" mt={4}>
+        <Text fontSize="xs" color="gray.600" mt={4}>
           *Eslatma: Raqamlar namunaviy, real taqsimot loyiha hujjatlarida belgilanadi.
           Eng ko‘p mablag‘ Toshkent, Samarqand va Farg‘ona viloyatlariga yo‘naltirilgan.
         </Text>

@@ -1,35 +1,37 @@
 import React from 'react';
-import { HStack, Icon, Text } from '@chakra-ui/react';
-import { Link } from 'react-router-dom';
-import { LucideIcon } from 'lucide-react';
+import { Flex, HStack, Text, Link } from '@chakra-ui/react';
+import { Link as RouterLink } from 'react-router-dom';
 
 interface SidebarItemProps {
-  icon: LucideIcon | any;
+  icon: React.ElementType;
   label: string;
   to: string;
   active: boolean;
 }
 
-const SidebarItem = ({ icon, label, to, active }: SidebarItemProps) => {
+const SidebarItem: React.FC<SidebarItemProps> = ({ icon: Icon, label, to, active }) => {
   return (
-    <Link to={to} style={{ width: '100%' }}>
-      <HStack
-        w="full"
+    <Link as={RouterLink} to={to} style={{ textDecoration: 'none' }} _focus={{ boxShadow: 'none' }}>
+      <Flex
+        align="center"
         px={4}
-        py={3}
-        cursor="pointer"
-        bg={active ? 'brand.500' : 'transparent'}
-        color={active ? 'white' : 'gray.400'}
+        py={2.5}
         borderRadius="lg"
-        transition="all 0.2s"
+        bg={active ? 'brand.50' : 'transparent'}
+        color={active ? 'brand.600' : 'gray.700'}
         _hover={{
-          bg: active ? 'brand.600' : 'whiteAlpha.100',
-          color: 'white',
+          bg: active ? 'brand.100' : 'gray.100',
+          color: active ? 'brand.700' : 'gray.900',
         }}
+        transition="all 0.2s"
       >
-        <Icon as={icon} size={20} />
-        <Text fontWeight="medium" fontSize="sm">{label}</Text>
-      </HStack>
+        <HStack spacing={3}>
+          <Icon size={20} />
+          <Text fontSize="sm" fontWeight={active ? 'semibold' : 'medium'}>
+            {label}
+          </Text>
+        </HStack>
+      </Flex>
     </Link>
   );
 };

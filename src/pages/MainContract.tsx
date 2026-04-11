@@ -42,7 +42,7 @@ const MainContract = () => {
   if (!contract) {
     return (
       <Box  minH="100vh">
-        <Text color="white" fontSize="xl">Noma'lum kontrakt</Text>
+        <Text color="gray.800" fontSize="xl">Noma'lum kontrakt</Text>
         <Button mt={4} onClick={() => navigate(-1)}>Orqaga</Button>
       </Box>
     );
@@ -55,28 +55,28 @@ const MainContract = () => {
       <Box mx="auto">
         <Flex justify="space-between" align="center" mb={8}>
           <Box>
-            <Heading size="xl" color="white">{contract.name}</Heading>
+            <Heading size="xl" color="gray.800">{contract.name}</Heading>
             <HStack mt={2} spacing={4}>
-              <HStack><Icon as={Building} size={16} color="gray.400" /><Text color="gray.300">{contract.contractor}</Text></HStack>
-              <HStack><Icon as={Calendar} size={16} color="gray.400" /><Text color="gray.300">{contract.date}</Text></HStack>
+              <HStack><Icon as={Building} size={16} color="gray.600" /><Text color="gray.600">{contract.contractor}</Text></HStack>
+              <HStack><Icon as={Calendar} size={16} color="gray.600" /><Text color="gray.600">{contract.date}</Text></HStack>
             </HStack>
           </Box>
           <Badge colorScheme={contract.status === "Bajarildi" ? "green" : "blue"} fontSize="md" p={2} borderRadius="full">{contract.status}</Badge>
         </Flex>
 
-        <Heading size="lg" mb={6} color="white">10 bosqichli tekshiruv natijalari</Heading>
+        <Heading size="lg" mb={6} color="gray.800">10 bosqichli tekshiruv natijalari</Heading>
 
         <VStack spacing={4} align="stretch">
           {stages.map(stage => {
             const passed = !failedSet.has(stage.id);
             return (
-              <Box key={stage.id} bg="gray.900" p={4} borderRadius="xl" borderLeft="4px solid" borderLeftColor={passed ? "green.500" : "red.500"}>
+              <Box key={stage.id} bg="white" p={4} borderRadius="xl" borderTop="1px solid" borderRight="1px solid" borderBottom="1px solid" borderColor="gray.200" boxShadow="sm" borderLeft="4px solid" borderLeftColor={passed ? "green.500" : "red.500"}>
                 <HStack justify="space-between">
                   <Flex align="center" gap={3}>
                     <Icon as={passed ? CheckCircle : XCircle} color={passed ? "green.500" : "red.500"} boxSize={5} />
                     <Box>
-                      <Text fontWeight="bold" color="white">{stage.name}</Text>
-                      <Text fontSize="sm" color="gray.400">{stage.description}</Text>
+                      <Text fontWeight="bold" color="gray.800">{stage.name}</Text>
+                      <Text fontSize="sm" color="gray.600">{stage.description}</Text>
                     </Box>
                   </Flex>
                   <Badge colorScheme={passed ? "green" : "red"}>{passed ? "O‘tdi" : "Rad etildi"}</Badge>
@@ -86,8 +86,8 @@ const MainContract = () => {
           })}
         </VStack>
 
-        <Box mt={8} p={4} bg="gray.900" borderRadius="xl">
-          <Text fontSize="sm" color="gray.400">
+        <Box mt={8} p={4} bg="white" borderRadius="xl" border="1px solid" borderColor="gray.200" boxShadow="sm">
+          <Text fontSize="sm" color="gray.600">
             * Umumiy xulosa: {failedSet.size === 0
               ? "Kontrakt barcha tekshiruv bosqichlaridan muvaffaqiyatli o‘tdi."
               : `Kontrakt ${failedSet.size} ta bosqichda rad etildi. Rad etilgan bosqichlar: ${Array.from(failedSet).join(", ")}.`}

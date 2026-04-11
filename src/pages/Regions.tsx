@@ -205,49 +205,57 @@ const HeavyDistrictsList = () => {
 
     return (
         <Box>
-            <Heading as="h1" size="xl" mb={2}>
+            <Heading as="h1" size="xl" mb={2} color="gray.800">
                 Ogʻir mahallalari bor tumanlar
             </Heading>
-            <Text fontSize="md" color="gray.400" mb={4}>
-                Jami {districtData.length} ta tuman/shaharda ogʻir mahallalar mavjud
-            </Text>
+   
 
             <InputGroup maxW="400px" mb={6}>
                 <InputLeftElement pointerEvents="none">
-                    <Search size={18} color="gray.400" />
+                    <Search size={18} color="#4a5568" />
                 </InputLeftElement>
                 <Input
                     placeholder="Tuman nomi boʻyicha qidirish..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    bg="gray.900"
-                    borderColor="gray.700"
-                    color="white"
+                    bg="white"
+                    borderColor="gray.200"
+                    color="gray.800"
+                    _placeholder={{ color: "gray.400" }}
+                    _hover={{ borderColor: "gray.300" }}
+                    _focus={{ borderColor: "brand.500", boxShadow: "0 0 0 1px brand.500" }}
                 />
             </InputGroup>
 
-            <TableContainer bg="dark.card" borderRadius="xl" overflowX="auto">
+            <TableContainer
+                bg="white"
+                borderRadius="xl"
+                overflowX="auto"
+                border="1px solid"
+                borderColor="gray.200"
+                boxShadow="sm"
+            >
                 <Table variant="simple">
-                    <Thead bg="gray.800">
+                    <Thead bg="gray.50">
                         <Tr>
-                            <Th>Tuman/shahar nomi</Th>
-                            <Th isNumeric>Aholi soni</Th>
-                            <Th isNumeric>Xonadonlar soni</Th>
-                            <Th isNumeric>Oilalar soni</Th>
+                            <Th color="gray.700">Tuman/shahar nomi</Th>
+                            <Th isNumeric color="gray.700">Aholi soni</Th>
+                            <Th isNumeric color="gray.700">Xonadonlar soni</Th>
+                            <Th isNumeric color="gray.700">Oilalar soni</Th>
                         </Tr>
                     </Thead>
                     <Tbody>
                         {filteredData.map((item, idx) => (
-                            <Tr key={idx} _hover={{ bg: "gray.800" }}>
-                                <Td fontWeight="medium">{item.district}</Td>
-                                <Td isNumeric>{item.population.toLocaleString()}</Td>
-                                <Td isNumeric>{item.households.toLocaleString()}</Td>
-                                <Td isNumeric>{item.families.toLocaleString()}</Td>
+                            <Tr key={idx} _hover={{ bg: "gray.50" }}>
+                                <Td fontWeight="medium" color="gray.800">{item.district}</Td>
+                                <Td isNumeric color="gray.700">{item.population.toLocaleString()}</Td>
+                                <Td isNumeric color="gray.700">{item.households.toLocaleString()}</Td>
+                                <Td isNumeric color="gray.700">{item.families.toLocaleString()}</Td>
                             </Tr>
                         ))}
                         {filteredData.length === 0 && (
                             <Tr>
-                                <Td colSpan={4} textAlign="center" py={8} color="gray.400">
+                                <Td colSpan={4} textAlign="center" py={8} color="gray.500">
                                     Hech qanday tuman topilmadi
                                 </Td>
                             </Tr>

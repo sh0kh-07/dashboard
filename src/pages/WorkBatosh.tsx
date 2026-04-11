@@ -59,54 +59,54 @@ const WorkBatosh = () => {
             <Flex direction="column" gap={4}>
                 <Flex alignItems="baseline" justifyContent="space-between" flexWrap="wrap" gap={4}>
                     <Box>
-                        <Heading size="xl">Batosh mahallasi – Legallashtiriladigan ish o‘rinlari</Heading>
+                        <Heading size="xl" color="gray.800">Batosh mahallasi – Legallashtiriladigan ish o‘rinlari</Heading>
                         <Text fontSize="md" color="brand.300" mt={1}>
                             Qarshi shahri, 2025-yil 1-chorak
                         </Text>
                     </Box>
                     <Flex align="center" gap={2}>
-                        <Text color="gray.400">Jami ish o‘rinlari:</Text>
+                        <Text color="gray.600">Jami ish o‘rinlari:</Text>
                         <Text fontSize="3xl" fontWeight="bold" color={brand600}>{totalLegalJobs}</Text>
                     </Flex>
                 </Flex>
 
-                <Text color="gray.300" mb={2}>
+                <Text color="gray.600" mb={2}>
                     Batosh mahallasida rasmiy ish o‘rinlarini yaratish va legallashtirish bo‘yicha amalga oshirilayotgan ishlar.
                 </Text>
 
                 {/* Ikkita asosiy karta */}
                 <SimpleGrid columns={{ base: 1, md: 2 }} spacing={6} mb={6}>
-                    <Stat bg="dark.card" p={5} borderRadius="xl" boxShadow="md">
+                    <Stat bg="white" border="1px solid" borderColor="gray.200" boxShadow="sm" p={5} borderRadius="xl" boxShadow="md">
                         <HStack spacing={3} mb={2}>
                             <Briefcase size={28} color={brand600} />
-                            <StatLabel fontSize="lg" color="gray.300">Jami legallashtiriladigan ish o‘rinlari</StatLabel>
+                            <StatLabel fontSize="lg" color="gray.600">Jami legallashtiriladigan ish o‘rinlari</StatLabel>
                         </HStack>
                         <StatNumber fontSize="3xl" color={brand600}>{totalLegalJobs}</StatNumber>
                         <StatHelpText>reja bo‘yicha</StatHelpText>
-                        <Text fontSize="sm" color="gray.400" mt={2}>Shundan {executedJobs} tasi (92%) allaqachon yaratilgan.</Text>
+                        <Text fontSize="sm" color="gray.600" mt={2}>Shundan {executedJobs} tasi (92%) allaqachon yaratilgan.</Text>
                     </Stat>
 
-                    <Stat bg="dark.card" p={5} borderRadius="xl" boxShadow="md">
+                    <Stat bg="white" border="1px solid" borderColor="gray.200" boxShadow="sm" p={5} borderRadius="xl" boxShadow="md">
                         <HStack spacing={3} mb={2}>
                             <TrendingUp size={28} color={green400} />
-                            <StatLabel fontSize="lg" color="gray.300">Rejaning bajarilishi</StatLabel>
+                            <StatLabel fontSize="lg" color="gray.600">Rejaning bajarilishi</StatLabel>
                         </HStack>
                         <StatNumber fontSize="3xl" color={green400}>{coveragePercent}%</StatNumber>
                         <StatHelpText>maqsadga erishish</StatHelpText>
-                        <Text fontSize="sm" color="gray.400" mt={2}>Yil oxirigacha 500 ta ish o‘rni rejalashtirilgan.</Text>
+                        <Text fontSize="sm" color="gray.600" mt={2}>Yil oxirigacha 500 ta ish o‘rni rejalashtirilgan.</Text>
                     </Stat>
                 </SimpleGrid>
 
                 {/* Idoralar bo‘yicha taqsimot */}
-                <Heading size="lg" mb={4}>Idoralar (tashkilotlar) bo‘yicha ish o‘rinlari</Heading>
-                <Box bg="dark.card" p={4} borderRadius="xl" mb={8}>
+                <Heading size="lg" mb={4} color="gray.800">Idoralar (tashkilotlar) bo‘yicha ish o‘rinlari</Heading>
+                <Box bg="white" border="1px solid" borderColor="gray.200" boxShadow="sm" p={4} borderRadius="xl" mb={8}>
                     <ResponsiveContainer width="100%" height={350}>
                         <BarChart data={agencyChartData} margin={{ top: 20, right: 30, left: 20, bottom: 60 }}>
-                            <CartesianGrid strokeDasharray="3 3" stroke="#2d3748" />
-                            <XAxis dataKey="name" tick={{ fill: "#cbd5e0", fontSize: 12 }} angle={-30} textAnchor="end" height={70} />
-                            <YAxis tick={{ fill: "#cbd5e0" }} label={{ value: "Ish o‘rinlari soni", angle: -90, position: "insideLeft", fill: "#cbd5e0" }} />
-                            <Tooltip formatter={(v: number) => v} contentStyle={{ backgroundColor: "#1a202c", border: "none" }} />
-                            <Legend wrapperStyle={{ color: "white" }} />
+                            <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                            <XAxis dataKey="name" tick={{ fill: "#4a5568", fontSize: 12 }} angle={-30} textAnchor="end" height={70} />
+                            <YAxis tick={{ fill: "#4a5568" }} label={{ value: "Ish o‘rinlari soni", angle: -90, position: "insideLeft", fill: "#4a5568" }} />
+                            <Tooltip formatter={(v: number) => v} contentStyle={{ backgroundColor: "#ffffff", border: "1px solid #e2e8f0" }} />
+                            <Legend wrapperStyle={{ color: "#1a202c" }} />
                             <Bar dataKey="jobs" fill={brand600} radius={[8, 8, 0, 0]}>
                                 {agencyChartData.map((_, idx) => <Cell key={idx} fill={agencies[idx].color} />)}
                             </Bar>
@@ -115,14 +115,14 @@ const WorkBatosh = () => {
                 </Box>
 
                 {/* Tumanlar bilan taqqoslash (qo‘shimcha) */}
-                <Heading size="lg" mb={4}>Tumanlar bilan solishtirma tahlil</Heading>
-                <Box bg="dark.card" p={4} borderRadius="xl" mb={8}>
+                <Heading size="lg" mb={4} color="gray.800">Tumanlar bilan solishtirma tahlil</Heading>
+                <Box bg="white" border="1px solid" borderColor="gray.200" boxShadow="sm" p={4} borderRadius="xl" mb={8}>
                     <ResponsiveContainer width="100%" height={350}>
                         <BarChart data={comparisonChartData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
-                            <CartesianGrid strokeDasharray="3 3" stroke="#2d3748" />
-                            <XAxis dataKey="name" tick={{ fill: "#cbd5e0" }} />
-                            <YAxis tick={{ fill: "#cbd5e0" }} label={{ value: "Ish o‘rinlari soni", angle: -90, position: "insideLeft", fill: "#cbd5e0" }} />
-                            <Tooltip formatter={(v: number) => v} contentStyle={{ backgroundColor: "#1a202c", border: "none" }} />
+                            <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                            <XAxis dataKey="name" tick={{ fill: "#4a5568" }} />
+                            <YAxis tick={{ fill: "#4a5568" }} label={{ value: "Ish o‘rinlari soni", angle: -90, position: "insideLeft", fill: "#4a5568" }} />
+                            <Tooltip formatter={(v: number) => v} contentStyle={{ backgroundColor: "#ffffff", border: "1px solid #e2e8f0" }} />
                             <Bar dataKey="jobs" fill={brand600} radius={[8, 8, 0, 0]}>
                                 <Cell fill={brand600} />
                                 <Cell fill="#3182CE" />
@@ -131,16 +131,16 @@ const WorkBatosh = () => {
                             </Bar>
                         </BarChart>
                     </ResponsiveContainer>
-                    <Text fontSize="xs" color="gray.400" mt={2}>* Batosh mahallasi Qarshi shahri tarkibida eng yuqori ko‘rsatkichga ega.</Text>
+                    <Text fontSize="xs" color="gray.600" mt={2}>* Batosh mahallasi Qarshi shahri tarkibida eng yuqori ko‘rsatkichga ega.</Text>
                 </Box>
 
                 {/* Xulosa va tavsiyalar */}
-                <Box bg="dark.card" p={5} borderRadius="xl">
+                <Box bg="white" border="1px solid" borderColor="gray.200" boxShadow="sm" p={5} borderRadius="xl">
                     <Flex gap={3} align="center" mb={3}>
                         <AlertTriangle size={20} color={yellow400} />
-                        <Heading size="sm">Asosiy xulosalar</Heading>
+                        <Heading size="sm" color="gray.800">Asosiy xulosalar</Heading>
                     </Flex>
-                    <Text fontSize="sm" color="gray.300">
+                    <Text fontSize="sm" color="gray.600">
                         • Batosh mahallasida jami <strong>{totalLegalJobs}</strong> ta legallashtiriladigan ish o‘rni rejalashtirilgan bo‘lib, ulardan <strong>{executedJobs}</strong> tasi (92%) yaratilgan.<br />
                         • Eng ko‘p ish o‘rinlari Soliq qo‘mitasi ({agencies[0].jobs}) va Qishloq xo‘jaligi vazirligi ({agencies[3].jobs}) hissasiga to‘g‘ri keladi.<br />
                         • Qolgan 8% ish o‘rinlarini yaratish uchun Transport va Qurilish vazirliklari faolligini oshirish tavsiya etiladi.<br />

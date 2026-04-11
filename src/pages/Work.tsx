@@ -44,8 +44,7 @@ const regionsData: RegionJobs[] = [
     { name: "Toshkent shahri", total: 214522, soliq: 130528, ijtimoiy: 14273, bandlik: 27040, qishloq: 0, transport: 14047, qurilish: 27344, turizm: 1290 },
 ];
 
-// Umumiy ma'lumotlar
-const totalJobs = 1000000; // jadvalda 1 000 000
+const totalJobs = 1000000;
 const ministryData = [
     { name: "Soliq qoʻmitasi", value: 460000, icon: Landmark, color: "#3182CE" },
     { name: "Ijtimoiy himoya agentligi", value: 100000, icon: Users, color: "#38A169" },
@@ -56,7 +55,6 @@ const ministryData = [
     { name: "Turizm qoʻmitasi", value: 10000, icon: Camera, color: "#9F7AEA" },
 ];
 
-// Xarita mapping (avvalgi kabi)
 const regionNameMap: Record<string, string> = {
     "Karakalpakstan": "Qoraqalpogʻiston Respublikasi",
     "Qoraqalpog‘iston": "Qoraqalpogʻiston Respublikasi",
@@ -91,10 +89,9 @@ const getRegionName = (svgName: string): string | null => {
     return regionNameMap[svgName] || regionNameMap[normalized] || null;
 };
 
-// Ranglar: legallashtirilgan ish o‘rinlari soniga qarab
 const getRegionColor = (total: number, maxTotal: number): string => {
     const ratio = total / maxTotal;
-    if (ratio > 0.7) return "#2B6CB0"; // to'q ko'k
+    if (ratio > 0.7) return "#2B6CB0";
     if (ratio > 0.4) return "#4299E1";
     if (ratio > 0.2) return "#63B3ED";
     return "#90CDF4";
@@ -111,7 +108,6 @@ const Work = () => {
     const topRegion = regionsData.reduce((max, r) => r.total > max.total ? r : max, regionsData[0]);
     const bottomRegion = regionsData.reduce((min, r) => r.total < min.total ? r : min, regionsData[0]);
 
-    // Grafiklar uchun ma'lumotlar
     const regionsChartData = [...regionsData].sort((a, b) => b.total - a.total).map(r => ({ name: r.name, total: r.total }));
     const ministryChartData = ministryData.map(m => ({ name: m.name, value: m.value, icon: m.icon, color: m.color }));
 
@@ -144,23 +140,23 @@ const Work = () => {
                             onClick={() => handleRegionClick(regionFull)}
                             style={{
                                 fill: fillColor,
-                                stroke: "#1a202c",
+                                stroke: "#cbd5e0",
                                 strokeWidth: 1.2,
                                 cursor: "pointer",
                                 transition: "all 0.2s ease",
                                 opacity: 0.85,
                             }}
-                            onMouseOver={(e) => { e.currentTarget.style.opacity = "1"; e.currentTarget.style.strokeWidth = "2.5"; e.currentTarget.style.stroke = "#ffffff"; }}
-                            onMouseOut={(e) => { e.currentTarget.style.opacity = "0.85"; e.currentTarget.style.strokeWidth = "1.2"; e.currentTarget.style.stroke = "#1a202c"; }}
+                            onMouseOver={(e) => { e.currentTarget.style.opacity = "1"; e.currentTarget.style.strokeWidth = "2.5"; e.currentTarget.style.stroke = "#4a5568"; }}
+                            onMouseOut={(e) => { e.currentTarget.style.opacity = "0.85"; e.currentTarget.style.strokeWidth = "1.2"; e.currentTarget.style.stroke = "#cbd5e0"; }}
                         />
                     );
                 })}
             </svg>
             {tooltip.visible && tooltip.data && (
-                <Box position="fixed" top={tooltip.y + 12} left={tooltip.x + 12} bg="gray.800" color="white" px={4} py={2} borderRadius="md" zIndex={1000} pointerEvents="none" backdropFilter="blur(4px)" bgColor="rgba(0,0,0,0.85)">
+                <Box position="fixed" top={tooltip.y + 12} left={tooltip.x + 12} bg="white" color="gray.800" px={4} py={2} borderRadius="md" boxShadow="lg" zIndex={1000} pointerEvents="none" border="1px solid" borderColor="gray.200">
                     <Text fontWeight="bold">{tooltip.data.name}</Text>
                     <Text fontSize="sm">Legallashtiriladigan ish o‘rinlari: <strong>{tooltip.data.total.toLocaleString()}</strong></Text>
-                    {tooltip.data.regionFull === "Qashqadaryo viloyati" && <Text fontSize="xs" color="brand.300">💡 Bosing – batafsil maʼlumot</Text>}
+                    {tooltip.data.regionFull === "Qashqadaryo viloyati" && <Text fontSize="xs" color={brand600}>💡 Bosing – batafsil maʼlumot</Text>}
                 </Box>
             )}
         </Box>
@@ -169,50 +165,47 @@ const Work = () => {
     return (
         <Box>
             <Flex direction="column" gap={4}>
-                <Heading as="h1" size="xl" fontWeight="bold">Legallashtiriladigan ish o‘rinlari monitoringi</Heading>
-                <Text color="gray.300">2025-yil, vazirlik va qo‘mitalar kesimida. Maqsad: 1 000 000 ish o‘rnini legallashtirish.</Text>
+                <Heading as="h1" size="xl" fontWeight="bold" color="gray.800">Legallashtiriladigan ish o‘rinlari monitoringi</Heading>
+                <Text color="gray.600">2025-yil, vazirlik va qo‘mitalar kesimida. Maqsad: 1 000 000 ish o‘rnini legallashtirish.</Text>
 
-                {/* Xarita birinchi */}
                 {renderMap()}
 
-                {/* Statistik kartalar */}
                 <SimpleGrid columns={{ base: 1, md: 4 }} spacing={4} my={2}>
-                    <Stat bg="dark.card" p={4} borderRadius="lg">
-                        <Flex align="center" gap={2}><Briefcase size={20} color={brand600} /><StatLabel>Jami legallashtiriladigan ish o‘rinlari</StatLabel></Flex>
-                        <StatNumber>{totalJobs.toLocaleString()}</StatNumber><StatHelpText>davlat maqsadi</StatHelpText>
+                    <Stat bg="white" p={4} borderRadius="lg" border="1px solid" borderColor="gray.200" boxShadow="sm">
+                        <Flex align="center" gap={2}><Briefcase size={20} color={brand600} /><StatLabel color="gray.700">Jami legallashtiriladigan ish o‘rinlari</StatLabel></Flex>
+                        <StatNumber color="gray.900">{totalJobs.toLocaleString()}</StatNumber><StatHelpText color="gray.600">davlat maqsadi</StatHelpText>
                     </Stat>
-                    <Stat bg="dark.card" p={4} borderRadius="lg">
-                        <Flex align="center" gap={2}><TrendingUp size={20} color={green400} /><StatLabel>Eng ko‘p – {topRegion.name}</StatLabel></Flex>
-                        <StatNumber>{topRegion.total.toLocaleString()}</StatNumber><StatHelpText>ish o‘rni</StatHelpText>
+                    <Stat bg="white" p={4} borderRadius="lg" border="1px solid" borderColor="gray.200" boxShadow="sm">
+                        <Flex align="center" gap={2}><TrendingUp size={20} color={green400} /><StatLabel color="gray.700">Eng ko‘p – {topRegion.name}</StatLabel></Flex>
+                        <StatNumber color="gray.900">{topRegion.total.toLocaleString()}</StatNumber><StatHelpText color="gray.600">ish o‘rni</StatHelpText>
                     </Stat>
-                    <Stat bg="dark.card" p={4} borderRadius="lg">
-                        <Flex align="center" gap={2}><AlertTriangle size={20} color={yellow400} /><StatLabel>Eng kam – {bottomRegion.name}</StatLabel></Flex>
-                        <StatNumber>{bottomRegion.total.toLocaleString()}</StatNumber><StatHelpText>ish o‘rni</StatHelpText>
+                    <Stat bg="white" p={4} borderRadius="lg" border="1px solid" borderColor="gray.200" boxShadow="sm">
+                        <Flex align="center" gap={2}><AlertTriangle size={20} color={yellow400} /><StatLabel color="gray.700">Eng kam – {bottomRegion.name}</StatLabel></Flex>
+                        <StatNumber color="gray.900">{bottomRegion.total.toLocaleString()}</StatNumber><StatHelpText color="gray.600">ish o‘rni</StatHelpText>
                     </Stat>
-                    <Stat bg="dark.card" p={4} borderRadius="lg">
-                        <Flex align="center" gap={2}><Landmark size={20} color={brand600} /><StatLabel>Eng faol vazirlik</StatLabel></Flex>
-                        <StatNumber>Soliq qo‘mitasi</StatNumber><StatHelpText>460 000 ish o‘rni</StatHelpText>
+                    <Stat bg="white" p={4} borderRadius="lg" border="1px solid" borderColor="gray.200" boxShadow="sm">
+                        <Flex align="center" gap={2}><Landmark size={20} color={brand600} /><StatLabel color="gray.700">Eng faol vazirlik</StatLabel></Flex>
+                        <StatNumber color="gray.900">Soliq qo‘mitasi</StatNumber><StatHelpText color="gray.600">460 000 ish o‘rni</StatHelpText>
                     </Stat>
                 </SimpleGrid>
 
                 <Tabs variant="soft-rounded" colorScheme="blue" mt={4}>
-                    <TabList bg="dark.card" borderRadius="xl" p={2}>
-                        <Tab _selected={{ bg: brand600, color: "white" }}>Vazirliklar kesimi</Tab>
-                        <Tab _selected={{ bg: brand600, color: "white" }}>Hududlar kesimi</Tab>
-                        <Tab _selected={{ bg: brand600, color: "white" }}>Batafsil jadval</Tab>
+                    <TabList bg="white" borderRadius="xl" p={2} border="1px solid" borderColor="gray.200">
+                        <Tab _selected={{ bg: "brand.50", color: "brand.600" }} color="gray.700">Vazirliklar kesimi</Tab>
+                        <Tab _selected={{ bg: "brand.50", color: "brand.600" }} color="gray.700">Hududlar kesimi</Tab>
+                        <Tab _selected={{ bg: "brand.50", color: "brand.600" }} color="gray.700">Batafsil jadval</Tab>
                     </TabList>
 
                     <TabPanels mt={6}>
-                        {/* Panel 1: Vazirliklar bo‘yicha taqsimot */}
                         <TabPanel p={0}>
-                            <Box bg="dark.card" borderRadius="xl" p={5} mb={6}>
-                                <Heading size="md" mb={4}>Vazirlik va qo‘mitalar bo‘yicha legallashtiriladigan ish o‘rinlari</Heading>
+                            <Box bg="white" borderRadius="xl" p={5} mb={6} border="1px solid" borderColor="gray.200" boxShadow="sm">
+                                <Heading size="md" mb={4} color="gray.800">Vazirlik va qo‘mitalar bo‘yicha legallashtiriladigan ish o‘rinlari</Heading>
                                 <ResponsiveContainer width="100%" height={400}>
                                     <BarChart data={ministryChartData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-                                        <CartesianGrid strokeDasharray="3 3" stroke="#2d3748" />
-                                        <XAxis dataKey="name" tick={{ fill: "#cbd5e0", fontSize: 12 }} angle={-20} textAnchor="end" height={60} />
-                                        <YAxis tick={{ fill: "#cbd5e0" }} label={{ value: "Ish o‘rinlari soni", angle: -90, position: "insideLeft", fill: "#cbd5e0" }} />
-                                        <RechartsTooltip formatter={(v: number) => v.toLocaleString()} contentStyle={{ backgroundColor: "#1a202c", border: "none" }} />
+                                        <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                                        <XAxis dataKey="name" tick={{ fill: "#4a5568", fontSize: 12 }} angle={-20} textAnchor="end" height={60} />
+                                        <YAxis tick={{ fill: "#4a5568" }} label={{ value: "Ish o‘rinlari soni", angle: -90, position: "insideLeft", fill: "#4a5568" }} />
+                                        <RechartsTooltip formatter={(v: number) => v.toLocaleString()} contentStyle={{ backgroundColor: "white", border: "1px solid #e2e8f0", borderRadius: "8px", color: "#1a202c" }} />
                                         <Bar dataKey="value" radius={[8, 8, 0, 0]}>
                                             {ministryChartData.map((entry, idx) => (
                                                 <Cell key={idx} fill={entry.color} />
@@ -221,14 +214,19 @@ const Work = () => {
                                     </BarChart>
                                 </ResponsiveContainer>
                             </Box>
-                            <TableContainer bg="dark.card" borderRadius="xl" overflowX="auto">
+                            <TableContainer bg="white" borderRadius="xl" overflowX="auto" border="1px solid" borderColor="gray.200">
                                 <Table variant="simple">
-                                    <Thead bg="gray.800"><Tr><Th>Vazirlik / Qo‘mita</Th><Th isNumeric>Ish o‘rinlari soni</Th></Tr></Thead>
+                                    <Thead bg="gray.50" color="gray.700">
+                                        <Tr>
+                                            <Th color="gray.700">Vazirlik / Qo‘mita</Th>
+                                            <Th isNumeric color="gray.700">Ish o‘rinlari soni</Th>
+                                        </Tr>
+                                    </Thead>
                                     <Tbody>
                                         {ministryData.map(m => (
                                             <Tr key={m.name}>
-                                                <Td><Flex gap={2}><m.icon size={16} />{m.name}</Flex></Td>
-                                                <Td isNumeric>{m.value.toLocaleString()}</Td>
+                                                <Td color="gray.800"><Flex gap={2} color="gray.800"><m.icon size={16} />{m.name}</Flex></Td>
+                                                <Td isNumeric color="gray.700">{m.value.toLocaleString()}</Td>
                                             </Tr>
                                         ))}
                                     </Tbody>
@@ -236,51 +234,49 @@ const Work = () => {
                             </TableContainer>
                         </TabPanel>
 
-                        {/* Panel 2: Hududlar bo‘yicha taqsimot (grafik) */}
                         <TabPanel p={0}>
-                            <Box bg="dark.card" borderRadius="xl" p={5} mb={6}>
-                                <Heading size="md" mb={4}>Hududlar bo‘yicha legallashtiriladigan ish o‘rinlari</Heading>
+                            <Box bg="white" borderRadius="xl" p={5} mb={6} border="1px solid" borderColor="gray.200" boxShadow="sm">
+                                <Heading size="md" mb={4} color="gray.800">Hududlar bo‘yicha legallashtiriladigan ish o‘rinlari</Heading>
                                 <ResponsiveContainer width="100%" height={500}>
                                     <BarChart layout="vertical" data={regionsChartData} margin={{ left: 100 }}>
-                                        <CartesianGrid strokeDasharray="3 3" stroke="#2d3748" />
-                                        <XAxis type="number" tick={{ fill: "#cbd5e0" }} label={{ value: "Ish o‘rinlari soni", position: "insideBottom", offset: -5, fill: "#cbd5e0" }} />
-                                        <YAxis type="category" dataKey="name" width={150} tick={{ fontSize: 11, fill: "#cbd5e0" }} />
-                                        <RechartsTooltip formatter={(v: number) => v.toLocaleString()} contentStyle={{ backgroundColor: "#1a202c", border: "none" }} />
+                                        <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                                        <XAxis type="number" tick={{ fill: "#4a5568" }} label={{ value: "Ish o‘rinlari soni", position: "insideBottom", offset: -5, fill: "#4a5568" }} />
+                                        <YAxis type="category" dataKey="name" width={150} tick={{ fontSize: 11, fill: "#4a5568" }} />
+                                        <RechartsTooltip formatter={(v: number) => v.toLocaleString()} contentStyle={{ backgroundColor: "white", border: "1px solid #e2e8f0", borderRadius: "8px", color: "#1a202c" }} />
                                         <Bar dataKey="total" fill={brand600} radius={[0, 8, 8, 0]} />
                                     </BarChart>
                                 </ResponsiveContainer>
                             </Box>
                         </TabPanel>
 
-                        {/* Panel 3: Batafsil jadval (hududlar va vazirliklar kesimi) */}
                         <TabPanel p={0}>
-                            <TableContainer bg="dark.card" borderRadius="xl" overflowX="auto">
+                            <TableContainer bg="white" borderRadius="xl" overflowX="auto" border="1px solid" borderColor="gray.200">
                                 <Table variant="simple">
-                                    <Thead bg="gray.800">
+                                    <Thead bg="gray.50" color="gray.700">
                                         <Tr>
-                                            <Th>Hudud</Th>
-                                            <Th isNumeric>Jami</Th>
-                                            <Th isNumeric>Soliq</Th>
-                                            <Th isNumeric>Ijtimoiy</Th>
-                                            <Th isNumeric>Bandlik</Th>
-                                            <Th isNumeric>Qishloq</Th>
-                                            <Th isNumeric>Transport</Th>
-                                            <Th isNumeric>Qurilish</Th>
-                                            <Th isNumeric>Turizm</Th>
+                                            <Th color="gray.700">Hudud</Th>
+                                            <Th isNumeric color="gray.700">Jami</Th>
+                                            <Th isNumeric color="gray.700">Soliq</Th>
+                                            <Th isNumeric color="gray.700">Ijtimoiy</Th>
+                                            <Th isNumeric color="gray.700">Bandlik</Th>
+                                            <Th isNumeric color="gray.700">Qishloq</Th>
+                                            <Th isNumeric color="gray.700">Transport</Th>
+                                            <Th isNumeric color="gray.700">Qurilish</Th>
+                                            <Th isNumeric color="gray.700">Turizm</Th>
                                         </Tr>
                                     </Thead>
                                     <Tbody>
                                         {regionsData.map(r => (
                                             <Tr key={r.name}>
-                                                <Td fontWeight="medium">{r.name}</Td>
-                                                <Td isNumeric>{r.total.toLocaleString()}</Td>
-                                                <Td isNumeric>{r.soliq.toLocaleString()}</Td>
-                                                <Td isNumeric>{r.ijtimoiy.toLocaleString()}</Td>
-                                                <Td isNumeric>{r.bandlik.toLocaleString()}</Td>
-                                                <Td isNumeric>{r.qishloq.toLocaleString()}</Td>
-                                                <Td isNumeric>{r.transport.toLocaleString()}</Td>
-                                                <Td isNumeric>{r.qurilish.toLocaleString()}</Td>
-                                                <Td isNumeric>{r.turizm.toLocaleString()}</Td>
+                                                <Td fontWeight="medium" color="gray.800">{r.name}</Td>
+                                                <Td isNumeric color="gray.700">{r.total.toLocaleString()}</Td>
+                                                <Td isNumeric color="gray.700">{r.soliq.toLocaleString()}</Td>
+                                                <Td isNumeric color="gray.700">{r.ijtimoiy.toLocaleString()}</Td>
+                                                <Td isNumeric color="gray.700">{r.bandlik.toLocaleString()}</Td>
+                                                <Td isNumeric color="gray.700">{r.qishloq.toLocaleString()}</Td>
+                                                <Td isNumeric color="gray.700">{r.transport.toLocaleString()}</Td>
+                                                <Td isNumeric color="gray.700">{r.qurilish.toLocaleString()}</Td>
+                                                <Td isNumeric color="gray.700">{r.turizm.toLocaleString()}</Td>
                                             </Tr>
                                         ))}
                                     </Tbody>
@@ -290,10 +286,9 @@ const Work = () => {
                     </TabPanels>
                 </Tabs>
 
-                {/* Xulosa */}
-                <Box bg="dark.card" p={5} borderRadius="xl" mt={6}>
-                    <Flex gap={3} align="center"><TrendingUp size={20} color={green400} /><Heading size="sm">Asosiy xulosalar</Heading></Flex>
-                    <Text fontSize="sm" color="gray.300" mt={2}>
+                <Box bg="white" p={5} borderRadius="xl" mt={6} border="1px solid" borderColor="gray.200" boxShadow="sm">
+                    <Flex gap={3} align="center"><TrendingUp size={20} color={green400} /><Heading size="sm" color="gray.800">Asosiy xulosalar</Heading></Flex>
+                    <Text fontSize="sm" color="gray.600" mt={2}>
                         • Jami <strong>1 000 000</strong> ish o‘rnini legallashtirish rejalashtirilgan.<br />
                         • Eng ko‘p ish o‘rinlari <strong>Toshkent shahri</strong> (214 522) va <strong>Toshkent viloyati</strong> (111 630) da legallashtiriladi.<br />
                         • Eng faol vazirlik – <strong>Soliq qo‘mitasi</strong> (460 000 ish o‘rni).<br />

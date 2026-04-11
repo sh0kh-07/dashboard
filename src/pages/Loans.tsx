@@ -14,7 +14,6 @@ import {
   useToken,
   Flex,
   IconButton,
-  Badge,
 } from "@chakra-ui/react";
 import {
   BarChart,
@@ -32,13 +31,9 @@ const Loans = () => {
   const [brand600] = useToken("colors", ["brand.600"]);
   const navigate = useNavigate();
 
-  // Общая сумма кредитов
-  const totalLoans = 140; // трлн сум
+  const totalLoans = 140; // trln so‘m
+  const supportAmount = 0.14; // trln so‘m (140 mlrd)
 
-  // Сумма поддержки МСБ
-  const supportAmount = 0.14; // трлн сум (140 млрд)
-
-  // Данные для карточек
   const loanItems = [
     {
       id: 1,
@@ -59,7 +54,6 @@ const Loans = () => {
     },
   ];
 
-  // Данные для графика: показываем долю поддержки МСБ на фоне всех кредитов
   const chartData = [
     {
       name: "Boshqa kreditlar",
@@ -73,23 +67,22 @@ const Loans = () => {
     },
   ];
 
-  // Цвета для столбцов
   const barColors = ["#3182CE", brand600];
 
   const handleDetailClick = (itemId: number) => {
     if (itemId === 1) {
-      navigate("/loans-detail"); // замените на нужный путь
+      navigate("/loans-detail");
     }
   };
 
   return (
     <Box>
       <Flex justifyContent="space-between" alignItems="start" mb={8}>
-        <Heading as="h1" size="xl" fontWeight="bold">
+        <Heading as="h1" size="xl" fontWeight="bold" color="gray.800">
           Tijorat bank kreditlari
         </Heading>
         <Box textAlign="right">
-          <Text fontSize="lg" fontWeight="medium" color="gray.400">
+          <Text fontSize="lg" fontWeight="medium" color="gray.600">
             Jami kreditlar hajmi
           </Text>
           <Text fontSize="2xl" fontWeight="extrabold" color={brand600}>
@@ -98,7 +91,6 @@ const Loans = () => {
         </Box>
       </Flex>
 
-      {/* Карточки направлений */}
       <SimpleGrid columns={{ base: 1, md: 2 }} spacing={6} mb={12}>
         {loanItems.map((item) => {
           const isClickable = item.id === 1;
@@ -106,14 +98,15 @@ const Loans = () => {
             <Card
               key={item.id}
               variant="outline"
-              border="none"
+              border="1px solid"
+              borderColor="gray.200"
               borderRadius="xl"
               transition="0.2s"
-              bg="dark.card"
+              bg="white"
               cursor={isClickable ? "pointer" : "default"}
               _hover={
                 isClickable
-                  ? { boxShadow: "lg", transform: "translateY(-4px)" }
+                  ? { boxShadow: "lg", transform: "translateY(-4px)", borderColor: brand600 }
                   : {}
               }
               onClick={() => handleDetailClick(item.id)}
@@ -121,16 +114,16 @@ const Loans = () => {
             >
               <CardBody>
                 <Stat>
-                  <StatLabel fontSize="lg" fontWeight="bold" color="white">
+                  <StatLabel fontSize="lg" fontWeight="bold" color="gray.800">
                     {item.title}
                   </StatLabel>
-                  <StatHelpText fontSize="sm" color="gray.400" mb={2}>
+                  <StatHelpText fontSize="sm" color="gray.600" mb={2}>
                     {item.subtitle}
                   </StatHelpText>
                   <StatNumber fontSize="2xl" fontWeight="black" color={brand600} mt={2}>
                     {item.amount} {item.unit}
                   </StatNumber>
-                  <StatHelpText fontSize="xs" color="gray.500" mt={2}>
+                  <StatHelpText fontSize="xs" color="gray.600" mt={2}>
                     {item.description}
                   </StatHelpText>
                 </Stat>
@@ -143,7 +136,7 @@ const Loans = () => {
                     size="sm"
                     variant="ghost"
                     color={brand600}
-                    _hover={{ bg: "rgba(49,130,206,0.2)" }}
+                    _hover={{ bg: "gray.100", color: brand600 }}
                     onClick={(e) => {
                       e.stopPropagation();
                       handleDetailClick(item.id);
@@ -155,7 +148,7 @@ const Loans = () => {
                     icon={<Lock size={18} />}
                     size="sm"
                     variant="ghost"
-                    color="gray.500"
+                    color="gray.600"
                     isDisabled
                     _hover={{}}
                   />
@@ -166,12 +159,11 @@ const Loans = () => {
         })}
       </SimpleGrid>
 
-      {/* График распределения */}
       <Box mt={10}>
-        <Text fontSize="2xl" fontWeight="bold" mb={2}>
+        <Text fontSize="2xl" fontWeight="bold" mb={2} color="gray.800">
           Kreditlarning taqsimoti (trln so‘mda)
         </Text>
-        <Text fontSize="sm" color="gray.500" mb={6}>
+        <Text fontSize="sm" color="gray.600" mb={6}>
           MSBni qo‘llab-quvvatlash ulushi atigi 0,1% ni tashkil qiladi
         </Text>
         <ResponsiveContainer width="100%" height={500}>
@@ -179,18 +171,18 @@ const Loans = () => {
             data={chartData}
             margin={{ top: 20, right: 30, left: 20, bottom: 80 }}
           >
-            <CartesianGrid strokeDasharray="3 3" stroke="#2d3748" />
+            <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
             <XAxis
               dataKey="name"
               angle={-25}
               textAnchor="end"
               interval={0}
               height={80}
-              tick={{ fontSize: 12, fill: "#cbd5e0" }}
+              tick={{ fontSize: 12, fill: "#4a5568" }}
             />
             <YAxis
-              label={{ value: "trln so‘m", angle: -90, position: "insideLeft", fill: "#cbd5e0" }}
-              tick={{ fill: "#cbd5e0" }}
+              label={{ value: "trln so‘m", angle: -90, position: "insideLeft", fill: "#4a5568" }}
+              tick={{ fill: "#4a5568" }}
             />
             <Tooltip
               formatter={(value: number) => [`${value.toFixed(2)} trln so‘m`, "Miqdori"]}
@@ -199,12 +191,12 @@ const Loans = () => {
                 return original ? original.fullName : label;
               }}
               contentStyle={{
-                backgroundColor: "#1a202c",
+                backgroundColor: "#ffffff",
                 borderRadius: "8px",
-                border: "none",
-                color: "white",
+                border: "1px solid #e2e8f0",
+                color: "#1a202c",
               }}
-              itemStyle={{ color: "white" }}
+              itemStyle={{ color: "#1a202c" }}
             />
             <Bar dataKey="value" radius={[8, 8, 0, 0]}>
               {chartData.map((entry, index) => (
@@ -213,7 +205,7 @@ const Loans = () => {
             </Bar>
           </BarChart>
         </ResponsiveContainer>
-        <Text fontSize="sm" color="gray.500" textAlign="left" mt={4}>
+        <Text fontSize="sm" color="gray.600" textAlign="left" mt={4}>
           Eslatma: Jami kreditlar hajmi 140 trln so‘m, shundan faqat 140 mlrd so‘m (0,14 trln)
           kichik va o‘rta biznesni qo‘llab-quvvatlashga yo‘naltirilgan. Qolgan 139,86 trln so‘m
           boshqa yo‘nalishlarga berilgan kreditlardir.

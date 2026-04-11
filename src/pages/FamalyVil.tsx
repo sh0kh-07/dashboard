@@ -138,36 +138,36 @@ const PoorLevelVilFamilies = () => {
   return (
     <Box minH="100vh">
       <Flex justify="space-between" mb={6} flexWrap="wrap" gap={4}>
-        <Heading size="xl">Qashqadaryo viloyati – Kambag‘al oilalar monitoringi</Heading>
+        <Heading size="xl" color="gray.800">Qashqadaryo viloyati – Kambag‘al oilalar monitoringi</Heading>
         <Flex align="center" gap={2}>
-          <Text color="gray.400">Jami kambag‘al oilalar:</Text>
+          <Text color="gray.600">Jami kambag‘al oilalar:</Text>
           <Text color={brand600} fontWeight="bold" fontSize="2xl">{stats.totalPoor.toLocaleString()}</Text>
         </Flex>
       </Flex>
 
-      <Text color="gray.300" mb={4}>
+      <Text color="gray.600" mb={4}>
         Xaritadagi ranglar: <strong style={{ color: green400 }}>Yashil</strong> — kam oila,{" "}
         <strong style={{ color: yellow400 }}>Sariq</strong> — o‘rtacha,{" "}
         <strong style={{ color: red400 }}>Qizil</strong> — ko‘p oila (xavf yuqori).
       </Text>
 
       <SimpleGrid columns={{ base: 1, md: 4 }} spacing={4} mb={6}>
-        <Stat bg="dark.card" p={3} borderRadius="lg">
+        <Stat bg="white" border="1px solid" borderColor="gray.200" boxShadow="sm" p={3} borderRadius="lg">
           <StatLabel><HStack><Users size={16} /><Text>Jami kambag‘al oilalar</Text></HStack></StatLabel>
           <StatNumber>{stats.totalPoor.toLocaleString()}</StatNumber>
           <StatHelpText>viloyat bo‘yicha</StatHelpText>
         </Stat>
-        <Stat bg="dark.card" p={3} borderRadius="lg">
+        <Stat bg="white" border="1px solid" borderColor="gray.200" boxShadow="sm" p={3} borderRadius="lg">
           <StatLabel><HStack><CheckCircle size={16} /><Text>Xizmatlar bilan qamrab olingan</Text></HStack></StatLabel>
           <StatNumber color="green.400">{stats.totalCovered.toLocaleString()}</StatNumber>
           <StatHelpText>5 ta yo‘nalish</StatHelpText>
         </Stat>
-        <Stat bg="dark.card" p={3} borderRadius="lg">
+        <Stat bg="white" border="1px solid" borderColor="gray.200" boxShadow="sm" p={3} borderRadius="lg">
           <StatLabel><HStack><AlertTriangle size={16} /><Text>Xavf ostidagi oilalar</Text></HStack></StatLabel>
           <StatNumber color="yellow.400">{stats.riskFamilies.toLocaleString()}</StatNumber>
           <StatHelpText>daromadi pasayishi mumkin</StatHelpText>
         </Stat>
-        <Stat bg="dark.card" p={3} borderRadius="lg">
+        <Stat bg="white" border="1px solid" borderColor="gray.200" boxShadow="sm" p={3} borderRadius="lg">
           <StatLabel><HStack><TrendingUp size={16} /><Text>Yangi yondashuvlar bilan qamrab olingan</Text></HStack></StatLabel>
           <StatNumber color="blue.300">{stats.newApproach.toLocaleString()}</StatNumber>
           <StatHelpText>ta oila</StatHelpText>
@@ -175,7 +175,7 @@ const PoorLevelVilFamilies = () => {
       </SimpleGrid>
 
       {/* Xarita */}
-      <Box position="relative" bg="dark.card" p={4} borderRadius="xl" mb={8}>
+      <Box position="relative" bg="white" border="1px solid" borderColor="gray.200" boxShadow="sm" p={4} borderRadius="xl" mb={8}>
         <svg viewBox={kashkadaryaMap.viewBox} style={{ width: "80%", height: "auto", margin: "0 auto", display: "block" }}>
           {kashkadaryaMap.layers.map((layer: any) => {
             const families = getDistrictFamilies(layer.name);
@@ -193,14 +193,14 @@ const PoorLevelVilFamilies = () => {
                 onMouseMove={handleMouseMove}
                 onMouseLeave={handleMouseLeave}
                 onClick={() => handleClick(layer.name)}
-                onMouseOver={(e) => { e.currentTarget.style.opacity = "1"; e.currentTarget.style.strokeWidth = "2"; e.currentTarget.style.stroke = "#ffffff"; }}
+                onMouseOver={(e) => { e.currentTarget.style.opacity = "1"; e.currentTarget.style.strokeWidth = "2"; e.currentTarget.style.stroke = "#2b6cb0"; }}
                 onMouseOut={(e) => { e.currentTarget.style.opacity = "0.85"; e.currentTarget.style.strokeWidth = "1"; e.currentTarget.style.stroke = "#1A202C"; }}
               />
             );
           })}
         </svg>
         {tooltip.visible && (
-          <Box position="fixed" top={tooltip.y} left={tooltip.x} bg="gray.800" color="white" px={4} py={2} borderRadius="lg" zIndex={1000} pointerEvents="none" backdropFilter="blur(4px)" bgColor="rgba(0,0,0,0.85)">
+          <Box position="fixed" top={tooltip.y} left={tooltip.x} bg="gray.50" color="gray.800" px={4} py={2} borderRadius="lg" zIndex={1000} pointerEvents="none"  >
             <Text fontWeight="bold">{tooltip.name}</Text>
             <Text fontSize="sm">Kambag‘al oilalar: <strong>{tooltip.families.toLocaleString()}</strong></Text>
             <Text fontSize="xs">Holat: {tooltip.status}</Text>
@@ -209,14 +209,14 @@ const PoorLevelVilFamilies = () => {
       </Box>
 
       {/* Grafik: tumanlar bo‘yicha kambag‘al oilalar soni */}
-      <Heading size="lg" mb={4}>Tumanlar kesimida kambag‘al oilalar soni</Heading>
-      <Box bg="dark.card" p={4} borderRadius="xl" mb={8}>
+      <Heading size="lg" mb={4} color="gray.800">Tumanlar kesimida kambag‘al oilalar soni</Heading>
+      <Box bg="white" border="1px solid" borderColor="gray.200" boxShadow="sm" p={4} borderRadius="xl" mb={8}>
         <ResponsiveContainer width="100%" height={500}>
           <BarChart layout="vertical" data={chartData} margin={{ left: 100 }}>
-            <CartesianGrid stroke="#2d3748" />
-            <XAxis type="number" tick={{ fill: "#cbd5e0" }} label={{ value: "Oilalar soni", position: "insideBottom", offset: -5, fill: "#cbd5e0" }} />
-            <YAxis type="category" dataKey="name" tick={{ fill: "#cbd5e0" }} width={100} />
-            <RechartsTooltip formatter={(v: number) => v.toLocaleString()} contentStyle={{ backgroundColor: "#1a202c", border: "none", borderRadius: "8px" }} />
+            <CartesianGrid stroke="#e2e8f0" />
+            <XAxis type="number" tick={{ fill: "#4a5568" }} label={{ value: "Oilalar soni", position: "insideBottom", offset: -5, fill: "#4a5568" }} />
+            <YAxis type="category" dataKey="name" tick={{ fill: "#4a5568" }} width={100} />
+            <RechartsTooltip formatter={(v: number) => v.toLocaleString()} contentStyle={{ backgroundColor: "#ffffff", border: "1px solid #e2e8f0", borderRadius: "8px" }} />
             <Bar dataKey="families" fill={brand600} radius={[0, 8, 8, 0]}>
               {chartData.map((entry, idx) => (
                 <Cell key={idx} fill={entry.families > 2000 ? red400 : entry.families > 1500 ? yellow400 : green400} />
@@ -227,14 +227,14 @@ const PoorLevelVilFamilies = () => {
       </Box>
 
       {/* Xizmatlar bo‘yicha qamrov */}
-      <Heading size="lg" mb={4}>Kambag‘al oilalarni qo‘llab-quvvatlash xizmatlari</Heading>
-      <Box bg="dark.card" p={4} borderRadius="xl" mb={8}>
+      <Heading size="lg" mb={4} color="gray.800">Kambag‘al oilalarni qo‘llab-quvvatlash xizmatlari</Heading>
+      <Box bg="white" border="1px solid" borderColor="gray.200" boxShadow="sm" p={4} borderRadius="xl" mb={8}>
         <ResponsiveContainer width="100%" height={400}>
           <BarChart data={serviceChartData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#2d3748" />
-            <XAxis dataKey="name" tick={{ fill: "#cbd5e0", fontSize: 12 }} angle={-20} textAnchor="end" height={60} />
-            <YAxis tick={{ fill: "#cbd5e0" }} label={{ value: "Qamrab olingan oilalar", angle: -90, position: "insideLeft", fill: "#cbd5e0" }} />
-            <RechartsTooltip formatter={(v: number) => v.toLocaleString()} contentStyle={{ backgroundColor: "#1a202c", border: "none" }} />
+            <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+            <XAxis dataKey="name" tick={{ fill: "#4a5568", fontSize: 12 }} angle={-20} textAnchor="end" height={60} />
+            <YAxis tick={{ fill: "#4a5568" }} label={{ value: "Qamrab olingan oilalar", angle: -90, position: "insideLeft", fill: "#4a5568" }} />
+            <RechartsTooltip formatter={(v: number) => v.toLocaleString()} contentStyle={{ backgroundColor: "#ffffff", border: "1px solid #e2e8f0" }} />
             <Bar dataKey="families" fill={brand600} radius={[8,8,0,0]}>
               {serviceChartData.map((_, idx) => <Cell key={idx} fill={regionServices[idx].color} />)}
             </Bar>
@@ -243,17 +243,17 @@ const PoorLevelVilFamilies = () => {
       </Box>
 
       {/* Jadval: tumanlar va xizmatlar statistikasi */}
-      <TableContainer bg="dark.card" borderRadius="xl" overflowX="auto" mb={6}>
+      <TableContainer bg="white" border="1px solid" borderColor="gray.200" boxShadow="sm" borderRadius="xl" overflowX="auto" mb={6}>
         <Table variant="simple">
-          <Thead bg="gray.800">
-            <Tr><Th>Tuman</Th><Th isNumeric>Kambag‘al oilalar soni</Th><Th>Holat</Th></Tr>
+          <Thead bg="gray.50" color="gray.700">
+            <Tr><Th color="gray.700">Tuman</Th><Th isNumeric color="gray.700">Kambag‘al oilalar soni</Th><Th color="gray.700">Holat</Th></Tr>
           </Thead>
           <Tbody>
             {districtsData.map(d => (
               <Tr key={d.name}>
-                <Td fontWeight="medium">{d.name}</Td>
-                <Td isNumeric>{d.poorFamilies.toLocaleString()}</Td>
-                <Td><Badge colorScheme={d.status === "good" ? "green" : d.status === "bad" ? "red" : "yellow"}>{d.status === "good" ? "Yaxshi" : d.status === "bad" ? "Xavf ostida" : "O‘rtacha"}</Badge></Td>
+                <Td fontWeight="medium" color="gray.800">{d.name}</Td>
+                <Td isNumeric color="gray.800">{d.poorFamilies.toLocaleString()}</Td>
+                <Td color="gray.800"><Badge colorScheme={d.status === "good" ? "green" : d.status === "bad" ? "red" : "yellow"}>{d.status === "good" ? "Yaxshi" : d.status === "bad" ? "Xavf ostida" : "O‘rtacha"}</Badge></Td>
               </Tr>
             ))}
           </Tbody>
@@ -261,9 +261,9 @@ const PoorLevelVilFamilies = () => {
       </TableContainer>
 
       {/* Xulosa */}
-      <Box bg="dark.card" p={4} borderRadius="lg">
-        <Flex gap={3} align="center"><AlertTriangle size={20} color={red400} /><Heading size="sm">Asosiy xulosalar</Heading></Flex>
-        <Text fontSize="sm" color="gray.300" mt={2}>
+      <Box bg="white" border="1px solid" borderColor="gray.200" boxShadow="sm" p={4} borderRadius="lg">
+        <Flex gap={3} align="center"><AlertTriangle size={20} color={red400} /><Heading size="sm" color="gray.800">Asosiy xulosalar</Heading></Flex>
+        <Text fontSize="sm" color="gray.600" mt={2}>
           • Qashqadaryo viloyatida jami <strong>{stats.totalPoor.toLocaleString()}</strong> ta kambag‘al oila aniqlangan.<br/>
           • Ulardan <strong>{stats.totalCovered.toLocaleString()}</strong> tasi (100%) 5 ta xizmat turi bilan qamrab olingan.<br/>
           • Eng ko‘p oila doimiy ishga joylashtirish ({regionServices[0].families.toLocaleString()}) va tadbirkorlik ({regionServices[1].families.toLocaleString()}) orqali qo‘llab-quvvatlanmoqda.<br/>

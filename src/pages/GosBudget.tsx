@@ -13,7 +13,6 @@ import {
   useToken,
   Flex,
   IconButton,
-  Badge,
 } from "@chakra-ui/react";
 import { useNavigate } from "react-router-dom";
 import { ArrowRight, Lock } from "lucide-react";
@@ -115,11 +114,11 @@ const BudgetPage = () => {
   return (
     <Box>
       <Flex alignItems="start" justifyContent="space-between" mb={8}>
-        <Heading as="h1" size="xl" fontWeight="bold">
+        <Heading as="h1" size="xl" fontWeight="bold" color="gray.800">
           Davlat budjeti
         </Heading>
         <Box>
-          <Text fontSize="lg" fontWeight="medium" color="gray.400">
+          <Text fontSize="lg" fontWeight="medium" color="gray.600">
             Umumiy budjet hajmi
           </Text>
           <Text fontSize="2xl" fontWeight="extrabold" color={brand600}>
@@ -135,10 +134,11 @@ const BudgetPage = () => {
             <Card
               key={item.id}
               variant="outline"
-              border="none"
+              border="1px solid"
+              borderColor="gray.200"
               borderRadius="xl"
               transition="0.2s"
-              bg="dark.card"
+              bg="white"
               cursor={isClickable ? "pointer" : "default"}
               _hover={
                 isClickable
@@ -152,19 +152,18 @@ const BudgetPage = () => {
               onClick={() => handleCardClick(item.id)}
               position="relative"
             >
-
               <CardBody>
                 <Stat>
-                  <StatLabel fontSize="lg" fontWeight="bold" color="white">
+                  <StatLabel fontSize="lg" fontWeight="bold" color="gray.800">
                     {item.title}
                   </StatLabel>
-                  <StatHelpText fontSize="sm" color="gray.400" mb={2}>
+                  <StatHelpText fontSize="sm" color="gray.600" mb={2}>
                     {item.subtitle}
                   </StatHelpText>
                   <StatNumber fontSize="2xl" fontWeight="black" color={brand600} mt={2}>
                     {item.amount} {item.unit}
                   </StatNumber>
-                  <StatHelpText fontSize="xs" color="gray.500" mt={2}>
+                  <StatHelpText fontSize="xs" color="gray.600" mt={2}>
                     {item.description}
                   </StatHelpText>
                 </Stat>
@@ -176,7 +175,7 @@ const BudgetPage = () => {
                       size="sm"
                       variant="ghost"
                       color={brand600}
-                      _hover={{ bg: "rgba(0,0,0,0.2)" }}
+                      _hover={{ bg: "gray.100", color: brand600 }}
                       onClick={(e) => {
                         e.stopPropagation();
                         handleCardClick(item.id);
@@ -188,7 +187,7 @@ const BudgetPage = () => {
                       icon={<Lock size={18} />}
                       size="sm"
                       variant="ghost"
-                      color="gray.500"
+                      color="gray.400"
                       isDisabled
                       _hover={{}}
                     />
@@ -201,10 +200,10 @@ const BudgetPage = () => {
       </SimpleGrid>
 
       <Box mt={10}>
-        <Text fontSize="2xl" fontWeight="bold" mb={2}>
+        <Text fontSize="2xl" fontWeight="bold" mb={2} color="gray.800">
           Budjet mablag‘larining yo‘nalishlar bo‘yicha taqsimoti
         </Text>
-        <Text fontSize="sm" color="gray.500" mb={6}>
+        <Text fontSize="sm" color="gray.600" mb={6}>
           (trln so‘mda)
         </Text>
         <ResponsiveContainer width="100%" height={500}>
@@ -212,18 +211,18 @@ const BudgetPage = () => {
             data={chartData}
             margin={{ top: 20, right: 30, left: 20, bottom: 120 }}
           >
-            <CartesianGrid strokeDasharray="3 3" stroke="#2d3748" />
+            <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
             <XAxis
               dataKey="name"
               angle={-45}
               textAnchor="end"
               interval={0}
               height={100}
-              tick={{ fontSize: 12, fill: "#cbd5e0" }}
+              tick={{ fontSize: 12, fill: "#4a5568" }}
             />
             <YAxis
-              label={{ value: "trln so‘m", angle: -90, position: "insideLeft", fill: "#cbd5e0" }}
-              tick={{ fill: "#cbd5e0" }}
+              label={{ value: "trln so‘m", angle: -90, position: "insideLeft", fill: "#4a5568" }}
+              tick={{ fill: "#4a5568" }}
             />
             <Tooltip
               formatter={(value: number) => [`${value} trln so‘m`, "Miqdori"]}
@@ -232,12 +231,12 @@ const BudgetPage = () => {
                 return original ? original.fullName : label;
               }}
               contentStyle={{
-                backgroundColor: "#1a202c",
+                backgroundColor: "#ffffff",
                 borderRadius: "8px",
-                border: "none",
-                color: "white",
+                border: "1px solid #e2e8f0",
+                color: "#1a202c",
               }}
-              itemStyle={{ color: "white" }}
+              itemStyle={{ color: "#1a202c" }}
             />
             <Bar dataKey="value" radius={[8, 8, 0, 0]}>
               {chartData.map((entry, index) => (
@@ -246,7 +245,7 @@ const BudgetPage = () => {
             </Bar>
           </BarChart>
         </ResponsiveContainer>
-        <Text fontSize="sm" color="gray.500" textAlign="left" mt={4}>
+        <Text fontSize="sm" color="gray.600" textAlign="left" mt={4}>
           Eslatma: 4- va 5-yo‘nalishlar kichik summasi tufayli grafikda deyarli ko‘rinmaydi,
           ammo ular muhim ijtimoiy ahamiyatga ega.
         </Text>

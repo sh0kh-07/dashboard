@@ -146,7 +146,7 @@ const LegalJobsQarshi = () => {
             <Flex direction="column" gap={4}>
                 <Flex alignItems="baseline" justifyContent="space-between" flexWrap="wrap" gap={4}>
                     <Box>
-                        <Heading as="h1" size="xl" fontWeight="bold">
+                        <Heading as="h1" size="xl" fontWeight="bold" color="gray.800">
                             Qarshi shahri mahallalarida legallashtiriladigan ish o‘rinlari
                         </Heading>
                         <Text fontSize="md" color="brand.300" mt={1}>
@@ -154,7 +154,7 @@ const LegalJobsQarshi = () => {
                         </Text>
                     </Box>
                     <Flex alignItems="center" gap={2} textAlign="right">
-                        <Text fontSize="lg" fontWeight="medium" color="gray.400">
+                        <Text fontSize="lg" fontWeight="medium" color="gray.600">
                             Shahar bo‘yicha jami ish o‘rinlari
                         </Text>
                         <Text fontSize="2xl" fontWeight="extrabold" color={brand600}>
@@ -163,33 +163,33 @@ const LegalJobsQarshi = () => {
                     </Flex>
                 </Flex>
 
-                <Text color="gray.300">
+                <Text color="gray.600">
                     Ranglar: <strong style={{ color: green400 }}>Yashil</strong> — ko‘p ish o‘rni (yaxshi),{" "}
                     <strong style={{ color: yellow400 }}>Sariq</strong> — o‘rtacha,{" "}
                     <strong style={{ color: red400 }}>Qizil</strong> — kam ish o‘rni (xavf).
                 </Text>
 
                 <SimpleGrid columns={{ base: 1, md: 3 }} spacing={4} my={2}>
-                    <Stat bg="dark.card" p={4} borderRadius="lg">
+                    <Stat bg="white" border="1px solid" borderColor="gray.200" boxShadow="sm" p={4} borderRadius="lg">
                         <StatLabel>Yaxshi holat</StatLabel>
                         <StatNumber color="green.400">{stats.good}</StatNumber>
                         <StatHelpText>Ko‘p ish o‘rinlari</StatHelpText>
                     </Stat>
-                    <Stat bg="dark.card" p={4} borderRadius="lg">
+                    <Stat bg="white" border="1px solid" borderColor="gray.200" boxShadow="sm" p={4} borderRadius="lg">
                         <StatLabel>O‘rtacha holat</StatLabel>
                         <StatNumber color="yellow.400">{stats.moderate}</StatNumber>
                         <StatHelpText>O‘rtacha ko‘rsatkich</StatHelpText>
                     </Stat>
-                    <Stat bg="dark.card" p={4} borderRadius="lg">
+                    <Stat bg="white" border="1px solid" borderColor="gray.200" boxShadow="sm" p={4} borderRadius="lg">
                         <StatLabel>Xavf ostida</StatLabel>
                         <StatNumber color="red.400">{stats.bad}</StatNumber>
                         <StatHelpText>Kam ish o‘rinlari</StatHelpText>
                     </Stat>
                 </SimpleGrid>
 
-                <Box bg="dark.card" p={4} borderRadius="lg" mb={2}>
-                    <Heading size="sm" mb={2}>📊 Ma’lumotlar qanday hisoblandi?</Heading>
-                    <Text fontSize="sm" color="gray.300">
+                <Box bg="white" border="1px solid" borderColor="gray.200" boxShadow="sm" p={4} borderRadius="lg" mb={2}>
+                    <Heading size="sm" mb={2} color="gray.800">📊 Ma’lumotlar qanday hisoblandi?</Heading>
+                    <Text fontSize="sm" color="gray.600">
                         • <strong>Legallashtiriladigan ish o‘rinlari</strong> – mahalladagi kutilayotgan rasmiy ish o‘rinlari soni.<br />
                         • <strong>Holat</strong> – yashil (ko‘p ish o‘rni), sariq (o‘rtacha), qizil (kam ish o‘rni).<br />
                         • <strong>Prognoz</strong> – joriy reja asosida maqsadga erishish ehtimoli.
@@ -199,11 +199,11 @@ const LegalJobsQarshi = () => {
                 {/* Qidiruv va filtr */}
                 <Flex direction={{ base: "column", md: "row" }} gap={4} mb={6}>
                     <InputGroup maxW="400px">
-                        <InputLeftElement><Search size={18} color="gray.400" /></InputLeftElement>
-                        <Input placeholder="Mahalla nomi..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} bg="gray.900" borderColor="gray.700" color="white" _focus={{ borderColor: brand600 }} />
-                        {searchTerm && <InputRightElement><IconButton aria-label="Tozalash" icon={<X size={16} />} size="xs" variant="ghost" color="gray.400" onClick={clearSearch} /></InputRightElement>}
+                        <InputLeftElement><Search size={18} color="gray.600" /></InputLeftElement>
+                        <Input placeholder="Mahalla nomi..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} bg="white" borderColor="gray.200" color="gray.800" _focus={{ borderColor: brand600 }} />
+                        {searchTerm && <InputRightElement><IconButton aria-label="Tozalash" icon={<X size={16} />} size="xs" variant="ghost" color="gray.600" onClick={clearSearch} /></InputRightElement>}
                     </InputGroup>
-                    <Select width="220px" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value as any)} bg="gray.900" borderColor="gray.700" color="white" _focus={{ borderColor: brand600 }}>
+                    <Select width="220px" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value as any)} bg="white" borderColor="gray.200" color="gray.800" _focus={{ borderColor: brand600 }}>
                         <option value="all">Barcha holatlar</option>
                         <option value="good">Yaxshi (yashil)</option>
                         <option value="moderate">O‘rtacha (sariq)</option>
@@ -212,19 +212,19 @@ const LegalJobsQarshi = () => {
                 </Flex>
 
                 {/* Jadval */}
-                <TableContainer bg="dark.card" borderRadius="xl" overflowX="auto" mb={10}>
+                <TableContainer bg="white" border="1px solid" borderColor="gray.200" boxShadow="sm" borderRadius="xl" overflowX="auto" mb={10}>
                     <Table variant="unstyled">
-                        <Thead bg="gray.800">
+                        <Thead bg="gray.50" color="gray.700">
                             <Tr>
-                                <Th>#</Th><Th>Mahalla</Th>
-                                <Th isNumeric>Legallashtiriladigan ish o‘rinlari</Th>
-                                <Th textAlign="center">Holat</Th>
-                                <Th textAlign="center">Prognoz</Th>
-                                <Th textAlign="center">Harakat</Th>
+                                <Th color="gray.700">#</Th><Th color="gray.700">Mahalla</Th>
+                                <Th isNumeric color="gray.700">Legallashtiriladigan ish o‘rinlari</Th>
+                                <Th textAlign="center" color="gray.700">Holat</Th>
+                                <Th textAlign="center" color="gray.700">Prognoz</Th>
+                                <Th textAlign="center" color="gray.700">Harakat</Th>
                             </Tr>
                         </Thead>
                         <Tbody>
-                            {filteredMahallas.length === 0 ? <Tr><Td colSpan={6} textAlign="center" py={8}>Hech narsa topilmadi</Td></Tr> :
+                            {filteredMahallas.length === 0 ? <Tr><Td colSpan={6} textAlign="center" py={8} color="gray.800">Hech narsa topilmadi</Td></Tr> :
                                 filteredMahallas.map((m, idx) => {
                                     const isActive = m.name === "Batosh";
                                     let statusText = "", statusColor = "";
@@ -232,13 +232,13 @@ const LegalJobsQarshi = () => {
                                     else if (m.status === "moderate") { statusText = "O‘rtacha"; statusColor = "yellow"; }
                                     else { statusText = "Xavf ostida"; statusColor = "red"; }
                                     return (
-                                        <Tr key={idx} _hover={{ bg: "gray.800" }} cursor={isActive ? "pointer" : "default"} onClick={() => isActive && handleDetailClick(m.name)}>
-                                            <Td>{idx + 1}</Td>
-                                            <Td><Flex align="center" gap={2}><MapPin size={14} color={brand600} />{m.name}</Flex></Td>
+                                        <Tr key={idx} bg={isActive ? "blue.50" : "transparent"} _hover={{ bg: isActive ? "blue.100" : "gray.50" }} cursor={isActive ? "pointer" : "default"} onClick={() => isActive && handleDetailClick(m.name)}>
+                                            <Td color="gray.800">{idx + 1}</Td>
+                                            <Td color="gray.800"><Flex align="center" gap={2}><MapPin size={14} color={brand600} />{m.name}</Flex></Td>
                                             <Td isNumeric fontWeight="bold" color={m.status === "bad" ? "red.300" : m.status === "good" ? "green.300" : "yellow.300"}>{m.legalJobs}</Td>
-                                            <Td textAlign="center"><Badge colorScheme={statusColor}>{statusText}</Badge></Td>
-                                            <Td textAlign="center">{m.willReachTarget ? <Flex align="center" gap={1} color="green.300" justify="center"><TrendingUp size={14} /><Text fontSize="sm">Bajariladi</Text></Flex> : <Flex align="center" gap={1} color="red.300" justify="center"><TrendingDown size={14} /><Text fontSize="sm">Bajarilmaydi</Text></Flex>}</Td>
-                                            <Td textAlign="center">{isActive ? <IconButton aria-label="Batafsil" icon={<ArrowRight size={16} />} size="xs" variant="ghost" color={brand600} onClick={(e) => { e.stopPropagation(); handleDetailClick(m.name); }} /> : <IconButton aria-label="Yopiq" icon={<Lock size={14} />} size="xs" variant="ghost" color="gray.500" isDisabled />}</Td>
+                                            <Td textAlign="center" color="gray.800"><Badge colorScheme={statusColor}>{statusText}</Badge></Td>
+                                            <Td textAlign="center" color="gray.800">{m.willReachTarget ? <Flex align="center" gap={1} color="green.300" justify="center"><TrendingUp size={14} /><Text fontSize="sm">Bajariladi</Text></Flex> : <Flex align="center" gap={1} color="red.300" justify="center"><TrendingDown size={14} /><Text fontSize="sm">Bajarilmaydi</Text></Flex>}</Td>
+                                            <Td textAlign="center" color="gray.800">{isActive ? <IconButton aria-label="Batafsil" icon={<ArrowRight size={16} />} size="xs" variant="ghost" color={brand600} onClick={(e) => { e.stopPropagation(); handleDetailClick(m.name); }} /> : <IconButton aria-label="Yopiq" icon={<Lock size={14} />} size="xs" variant="ghost" color="gray.600" isDisabled />}</Td>
                                         </Tr>
                                     );
                                 })}
@@ -248,19 +248,19 @@ const LegalJobsQarshi = () => {
 
                 {/* Gorizontal diagramma */}
                 <Box mt={6}>
-                    <Heading size="lg" mb={4}>Mahallalar kesimida legallashtiriladigan ish o‘rinlari</Heading>
-                    <Text mb={4} color="gray.400">Eng kam ish o‘rni bo‘lgan mahalladan eng ko‘piga (o‘ng tomonda yaxshilar)</Text>
-                    <Box bg="dark.card" p={4} borderRadius="xl" overflowX="auto">
+                    <Heading size="lg" mb={4} color="gray.800">Mahallalar kesimida legallashtiriladigan ish o‘rinlari</Heading>
+                    <Text mb={4} color="gray.600">Eng kam ish o‘rni bo‘lgan mahalladan eng ko‘piga (o‘ng tomonda yaxshilar)</Text>
+                    <Box bg="white" border="1px solid" borderColor="gray.200" boxShadow="sm" p={4} borderRadius="xl" overflowX="auto">
                         <ResponsiveContainer width="100%" height={Math.max(500, chartData.length * 35)}>
                             <BarChart
                                 layout="vertical"
                                 data={chartData}
                                 margin={{ top: 20, right: 30, left: 140, bottom: 20 }}
                             >
-                                <CartesianGrid strokeDasharray="3 3" stroke="#2d3748" />
-                                <XAxis type="number" domain={[0, maxJobs]} tick={{ fill: "#cbd5e0" }} label={{ value: "Ish o‘rinlari soni", position: "insideBottom", offset: -5, fill: "#cbd5e0" }} />
-                                <YAxis type="category" dataKey="name" width={140} tick={{ fontSize: 12, fill: "#cbd5e0" }} interval={0} />
-                                <Tooltip formatter={(value: number) => value.toLocaleString()} contentStyle={{ backgroundColor: "#1a202c", border: "none", borderRadius: "8px", color: "white" }} />
+                                <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                                <XAxis type="number" domain={[0, maxJobs]} tick={{ fill: "#4a5568" }} label={{ value: "Ish o‘rinlari soni", position: "insideBottom", offset: -5, fill: "#4a5568" }} />
+                                <YAxis type="category" dataKey="name" width={140} tick={{ fontSize: 12, fill: "#4a5568" }} interval={0} />
+                                <Tooltip formatter={(value: number) => value.toLocaleString()} contentStyle={{ backgroundColor: "#ffffff", border: "1px solid #e2e8f0", borderRadius: "8px", color: "#1a202c" }} />
                                 <Bar dataKey="Legallashtiriladigan ish o‘rinlari" fill={brand600} />
                             </BarChart>
                         </ResponsiveContainer>
@@ -268,10 +268,10 @@ const LegalJobsQarshi = () => {
                 </Box>
 
                 {/* Xulosa */}
-                <Box bg="dark.card" p={4} borderRadius="lg" mt={6}>
+                <Box bg="white" border="1px solid" borderColor="gray.200" boxShadow="sm" p={4} borderRadius="lg" mt={6}>
                     <Flex gap={3} align="center"><AlertTriangle size={20} color={red400} /><Text fontWeight="medium">Xulosa: Qizil mahallalar (Qat, Qarliqbog‘, Cho‘lquvar, Eski Anxor, Yangi hayot) – ish o‘rinlari soni eng past va rejani bajarish xavfi yuqori.</Text></Flex>
                     <Flex gap={3} align="center" mt={2}><CheckCircle size={20} color={green400} /><Text>Batosh, Ishonch, Amir Temur, Alisher Navoiy, Nasaf kabi mahallalarda ish o‘rinlari ko‘p va reja bajariladi.</Text></Flex>
-                    <Flex gap={3} align="center" mt={2}><Text fontSize="sm" color="gray.400">💡 Batosh mahallasiga bossangiz, batafsil chora-tadbirlar sahifasiga o‘tasiz.</Text></Flex>
+                    <Flex gap={3} align="center" mt={2}><Text fontSize="sm" color="gray.600">💡 Batosh mahallasiga bossangiz, batafsil chora-tadbirlar sahifasiga o‘tasiz.</Text></Flex>
                 </Box>
             </Flex>
         </Box>

@@ -51,50 +51,60 @@ const Mahalla = () => {
 
   return (
     <Box>
-      <Heading as="h1" size="xl" mb={2}>
-        Og‘ir mahallalar ro‘yxati 
+      <Heading as="h1" size="xl" mb={2} color="gray.800">
+        Og‘ir mahallalar ro‘yxati
       </Heading>
- 
+
       <InputGroup maxW="400px" mb={6}>
         <InputLeftElement pointerEvents="none">
-          <Search size={18} color="gray.400" />
+          <Search size={18} color="#4a5568" />
         </InputLeftElement>
         <Input
           placeholder="Mahalla, tuman yoki viloyat nomi bo‘yicha qidirish..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          bg="gray.900"
-          borderColor="gray.700"
-          color="white"
+          bg="white"
+          borderColor="gray.200"
+          color="gray.800"
+          _placeholder={{ color: "gray.400" }}
+          _hover={{ borderColor: "gray.300" }}
+          _focus={{ borderColor: "brand.500", boxShadow: "0 0 0 1px brand.500" }}
         />
       </InputGroup>
 
-      <TableContainer bg="dark.card" borderRadius="xl" overflowX="auto">
+      <TableContainer
+        bg="white"
+        borderRadius="xl"
+        overflowX="auto"
+        border="1px solid"
+        borderColor="gray.200"
+        boxShadow="sm"
+      >
         <Table variant="simple">
-          <Thead bg="gray.800">
+          <Thead bg="gray.50">
             <Tr>
-              <Th>Mahalla nomi</Th>
-              <Th>Tuman</Th>
-              <Th>Viloyat</Th>
-              <Th isNumeric>Aholi</Th>
-              <Th isNumeric>Xonadonlar</Th>
-              <Th isNumeric>Oilalar</Th>
+              <Th color="gray.700">Mahalla nomi</Th>
+              <Th color="gray.700">Tuman</Th>
+              <Th color="gray.700">Viloyat</Th>
+              <Th isNumeric color="gray.700">Aholi</Th>
+              <Th isNumeric color="gray.700">Xonadonlar</Th>
+              <Th isNumeric color="gray.700">Oilalar</Th>
             </Tr>
           </Thead>
           <Tbody>
             {filteredData.map((item) => (
-              <Tr key={item.id} _hover={{ bg: "gray.800" }}>
-                <Td fontWeight="medium">{item.name}</Td>
-                <Td>{item.district}</Td>
-                <Td>{item.region}</Td>
-                <Td isNumeric>{item.population.toLocaleString()}</Td>
-                <Td isNumeric>{item.households.toLocaleString()}</Td>
-                <Td isNumeric>{item.families.toLocaleString()}</Td>
+              <Tr key={item.id} _hover={{ bg: "gray.50" }}>
+                <Td fontWeight="medium" color="gray.800">{item.name}</Td>
+                <Td color="gray.700">{item.district}</Td>
+                <Td color="gray.700">{item.region}</Td>
+                <Td isNumeric color="gray.700">{item.population.toLocaleString()}</Td>
+                <Td isNumeric color="gray.700">{item.households.toLocaleString()}</Td>
+                <Td isNumeric color="gray.700">{item.families.toLocaleString()}</Td>
               </Tr>
             ))}
             {filteredData.length === 0 && (
               <Tr>
-                <Td colSpan={6} textAlign="center" py={8} color="gray.400">
+                <Td colSpan={6} textAlign="center" py={8} color="gray.500">
                   Hech qanday mahalla topilmadi
                 </Td>
               </Tr>
@@ -103,7 +113,7 @@ const Mahalla = () => {
         </Table>
       </TableContainer>
     </Box>
-  );
+  )
 };
 
 export default Mahalla;

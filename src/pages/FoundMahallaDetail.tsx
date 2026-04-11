@@ -186,7 +186,7 @@ const FoundMahallaDetail = () => {
       <Box mx="auto">
         <Flex alignItems="baseline" justifyContent="space-between" mb={6}>
           <Box>
-            <Heading as="h1" size="xl" fontWeight="bold" color="white">
+            <Heading as="h1" size="xl" fontWeight="bold" color="gray.800">
               Batosh mahallasi – Jamgʻarma kontraktlari
             </Heading>
             <Text fontSize="md" color="brand.300" mt={1}>
@@ -196,64 +196,64 @@ const FoundMahallaDetail = () => {
         </Flex>
 
         <SimpleGrid columns={{ base: 1, md: 3 }} spacing={6} mb={8}>
-          <Stat bg="gray.900" p={5} borderRadius="xl" boxShadow="lg">
+          <Stat bg="white" p={5} borderRadius="xl" boxShadow="lg">
             <Flex align="center" gap={2}>
               <Icon as={DollarSign} boxSize={5} color={brand600} />
-              <StatLabel fontSize="lg" color="gray.400">Umumiy summa</StatLabel>
+              <StatLabel fontSize="lg" color="gray.600">Umumiy summa</StatLabel>
             </Flex>
             <StatNumber fontSize="3xl" fontWeight="bold" color={brand600}>
               {totalAmount.toFixed(2)} mlrd so‘m
             </StatNumber>
-            <StatHelpText color="gray.500">barcha kontraktlar</StatHelpText>
+            <StatHelpText color="gray.600">barcha kontraktlar</StatHelpText>
           </Stat>
 
-          <Stat bg="gray.900" p={5} borderRadius="xl" boxShadow="lg">
+          <Stat bg="white" p={5} borderRadius="xl" boxShadow="lg">
             <Flex align="center" gap={2}>
               <Icon as={FileText} boxSize={5} color={brand600} />
-              <StatLabel fontSize="lg" color="gray.400">Jami kontraktlar</StatLabel>
+              <StatLabel fontSize="lg" color="gray.600">Jami kontraktlar</StatLabel>
             </Flex>
             <StatNumber fontSize="3xl" fontWeight="bold" color={brand600}>
               {totalContracts}
             </StatNumber>
-            <StatHelpText color="gray.500">ta loyiha</StatHelpText>
+            <StatHelpText color="gray.600">ta loyiha</StatHelpText>
           </Stat>
 
-          <Stat bg="gray.900" p={5} borderRadius="xl" boxShadow="lg">
+          <Stat bg="white" p={5} borderRadius="xl" boxShadow="lg">
             <Flex align="center" gap={2}>
               <Icon as={XCircle} boxSize={5} color="red.400" />
-              <StatLabel fontSize="lg" color="gray.400">Rad etilgan kontraktlar</StatLabel>
+              <StatLabel fontSize="lg" color="gray.600">Rad etilgan kontraktlar</StatLabel>
             </Flex>
             <StatNumber fontSize="3xl" fontWeight="bold" color="red.400">
               {failedContracts}
             </StatNumber>
-            <StatHelpText color="gray.500">tekshiruvdan o‘tmagan</StatHelpText>
+            <StatHelpText color="gray.600">tekshiruvdan o‘tmagan</StatHelpText>
           </Stat>
         </SimpleGrid>
 
         <Box mb={10}>
-          <Heading as="h2" size="lg" mb={4} color="white">
+          <Heading as="h2" size="lg" mb={4} color="gray.800">
             Summalarning turlar bo‘yicha taqsimoti (mlrd so‘m)
           </Heading>
-          <Text mb={6} color="gray.400">
+          <Text mb={6} color="gray.600">
             Har bir turdagi kontraktlar bo‘yicha ajratilgan umumiy mablag‘
           </Text>
-          <Box bg="gray.900" p={4} borderRadius="xl" boxShadow="lg">
+          <Box bg="white" p={4} borderRadius="xl" boxShadow="lg">
             <ResponsiveContainer width="100%" height={300}>
               <BarChart
                 layout="vertical"
                 data={chartData}
                 margin={{ top: 20, right: 30, left: 130, bottom: 20 }}
               >
-                <CartesianGrid strokeDasharray="3 3" stroke="#2d3748" />
+                <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
                 <XAxis
                   type="number"
-                  label={{ value: "mlrd so‘m", position: "insideBottom", offset: -5, fill: "#cbd5e0" }}
-                  tick={{ fill: "#cbd5e0" }}
+                  label={{ value: "mlrd so‘m", position: "insideBottom", offset: -5, fill: "#4a5568" }}
+                  tick={{ fill: "#4a5568" }}
                 />
                 <YAxis
                   type="category"
                   dataKey="name"
-                  tick={{ fontSize: 12, fill: "#cbd5e0" }}
+                  tick={{ fontSize: 12, fill: "#4a5568" }}
                   width={120}
                 />
                 <Tooltip
@@ -263,12 +263,12 @@ const FoundMahallaDetail = () => {
                     return item ? item.fullName : label;
                   }}
                   contentStyle={{
-                    backgroundColor: "#1a202c",
+                    backgroundColor: "#ffffff",
                     borderRadius: "8px",
-                    border: "none",
-                    color: "white",
+                    border: "1px solid #e2e8f0",
+                    color: "#1a202c",
                   }}
-                  itemStyle={{ color: "white" }}
+                  itemStyle={{ color: "#1a202c" }}
                 />
                 <Bar dataKey="value" radius={[0, 8, 8, 0]}>
                   {chartData.map((entry, index) => (
@@ -281,14 +281,14 @@ const FoundMahallaDetail = () => {
         </Box>
 
         <HStack mb={6} spacing={4}>
-          <Icon as={Filter} color="gray.400" />
+          <Icon as={Filter} color="gray.600" />
           <Select
             width="280px"
             value={selectedType}
             onChange={(e) => setSelectedType(e.target.value)}
-            bg="gray.900"
-            borderColor="gray.700"
-            color="white"
+            bg="white"
+            borderColor="gray.200"
+            color="gray.800"
             _hover={{ borderColor: "gray.600" }}
             _focus={{ borderColor: brand600 }}
           >
@@ -299,16 +299,16 @@ const FoundMahallaDetail = () => {
           </Select>
         </HStack>
 
-        <TableContainer bg="gray.900" borderRadius="xl" overflow="hidden" boxShadow="lg">
+        <TableContainer bg="white" borderRadius="xl" overflow="hidden" boxShadow="lg">
           <Table variant="unstyled">
-            <Thead bg="gray.800">
+            <Thead bg="gray.50" color="gray.700">
               <Tr>
-                <Th color="gray.400">Kontrakt nomi</Th>
-                <Th color="gray.400">Turi</Th>
-                <Th color="gray.400" textAlign="right">Summa (mlrd so‘m)</Th>
-                <Th color="gray.400">Holati</Th>
-                <Th color="gray.400">Tekshiruv</Th>
-                <Th color="gray.400" textAlign="center">Harakat</Th>
+                <Th color="gray.600">Kontrakt nomi</Th>
+                <Th color="gray.600">Turi</Th>
+                <Th color="gray.600" textAlign="right">Summa (mlrd so‘m)</Th>
+                <Th color="gray.600">Holati</Th>
+                <Th color="gray.600">Tekshiruv</Th>
+                <Th color="gray.600" textAlign="center">Harakat</Th>
               </Tr>
             </Thead>
             <Tbody>
@@ -317,14 +317,14 @@ const FoundMahallaDetail = () => {
                 return (
                   <Tr
                     key={contract.id}
-                    _hover={{ bg: clickable ? "gray.800" : "gray.850" }}
+                    _hover={{ bg: clickable ? "gray.50" : "gray.100" }}
                     cursor={clickable ? "pointer" : "default"}
                     onClick={() => clickable && handleRowClick(contract.id)}
                   >
-                    <Td fontWeight="medium" color="white">{contract.name}</Td>
-                    <Td color="gray.300">{contract.type}</Td>
+                    <Td fontWeight="medium" color="gray.800">{contract.name}</Td>
+                    <Td color="gray.600">{contract.type}</Td>
                     <Td textAlign="right" fontWeight="semibold" color={brand600}>{contract.amount}</Td>
-                    <Td>
+                    <Td color="gray.800">
                       <Badge
                         colorScheme={
                           contract.status === "Bajarildi" ? "green" :
@@ -335,7 +335,7 @@ const FoundMahallaDetail = () => {
                         {contract.status}
                       </Badge>
                     </Td>
-                    <Td>
+                    <Td color="gray.800">
                       {!contract.checkPassed ? (
                         <HStack spacing={1}>
                           <AlertTriangle size={16} color="#e53e3e" />
@@ -348,7 +348,7 @@ const FoundMahallaDetail = () => {
                         </HStack>
                       )}
                     </Td>
-                    <Td textAlign="center">
+                    <Td textAlign="center" color="gray.800">
                       {clickable ? (
                         <IconButton
                           aria-label="Batafsil"
@@ -368,7 +368,7 @@ const FoundMahallaDetail = () => {
                           icon={<Lock size={14} />}
                           size="xs"
                           variant="ghost"
-                          color="gray.500"
+                          color="gray.600"
                           isDisabled
                           _hover={{}}
                         />
@@ -381,7 +381,7 @@ const FoundMahallaDetail = () => {
           </Table>
         </TableContainer>
 
-        <Text fontSize="xs" mt={4} color="gray.500" textAlign="left">
+        <Text fontSize="xs" mt={4} color="gray.600" textAlign="left">
           * Rad etilgan kontraktlar 10 bosqichli tekshiruvdan o‘tmagan. Faqat birinchi ikkita kontrakt (id 1 va 2) uchun batafsil maʼlumot mavjud.
         </Text>
       </Box>

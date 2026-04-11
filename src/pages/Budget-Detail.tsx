@@ -167,11 +167,11 @@ const BudgetDetailPage = () => {
     return (
         <Box>
             <Flex alignItems="start" justifyContent="space-between" mb={8}>
-                <Heading as="h1" size="xl" fontWeight="bold">
+                <Heading as="h1" size="xl" fontWeight="bold" color="gray.800">
                     Davlat budjeti (Mahallalar infratuzilmasini rivojlantirish)
                 </Heading>
                 <Box>
-                    <Text fontSize="lg" fontWeight="medium" color="gray.400">
+                    <Text fontSize="lg" fontWeight="medium" color="gray.600">
                         Respublika budjeti mablag‘lari
                     </Text>
                     <Text fontSize="2xl" fontWeight="extrabold" color={brand600}>
@@ -180,7 +180,7 @@ const BudgetDetailPage = () => {
                 </Box>
             </Flex>
 
-            <Text fontSize="md" color="gray.300" mb={8}>
+            <Text fontSize="md" color="gray.600" mb={8}>
                 Mahallalar infratuzilmasini rivojlantirishga qaratilgan loyihalarni amalga oshirish.
                 Quyidagi xaritada har bir viloyat bo‘yicha ajratilgan mablag‘lar va tavsiflarni ko‘rishingiz mumkin.
             </Text>
@@ -232,8 +232,8 @@ const BudgetDetailPage = () => {
                         position="fixed"
                         top={tooltip.y + 12}
                         left={tooltip.x + 12}
-                        bg="gray.800"
-                        color="white"
+                        bg="gray.50"
+                        color="gray.800"
                         px={4}
                         py={2}
                         borderRadius="md"
@@ -254,10 +254,10 @@ const BudgetDetailPage = () => {
 
             {/* График */}
             <Box mt={8}>
-                <Heading as="h2" size="lg" mb={4}>
+                <Heading as="h2" size="lg" mb={4} color="gray.800">
                     Viloyatlar kesimida taqsimot (mlrd so‘m)
                 </Heading>
-                <Text fontSize="sm" color="gray.400" mb={6}>
+                <Text fontSize="sm" color="gray.600" mb={6}>
                     Loyihalar doirasida ajratilgan mablag‘lar viloyatlarning ehtiyojiga qarab taqsimlanadi.
                     Quyidagi diagrammada eng ko‘p mablag‘ oladigan hududlar keltirilgan.
                 </Text>
@@ -267,16 +267,16 @@ const BudgetDetailPage = () => {
                         layout="vertical"
                         margin={{ top: 20, right: 30, left: 80, bottom: 20 }}
                     >
-                        <CartesianGrid strokeDasharray="3 3" stroke="#2d3748" />
+                        <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
                         <XAxis
                             type="number"
-                            label={{ value: "mlrd so‘m", position: "insideBottom", offset: -5, fill: "#cbd5e0" }}
-                            tick={{ fill: "#cbd5e0" }}
+                            label={{ value: "mlrd so‘m", position: "insideBottom", offset: -5, fill: "#4a5568" }}
+                            tick={{ fill: "#4a5568" }}
                         />
                         <YAxis
                             type="category"
                             dataKey="name"
-                            tick={{ fontSize: 12, fill: "#cbd5e0" }}
+                            tick={{ fontSize: 12, fill: "#4a5568" }}
                             width={100}
                         />
                         <RechartsTooltip
@@ -286,12 +286,12 @@ const BudgetDetailPage = () => {
                                 return `${label} - ${item?.description || ""}`;
                             }}
                             contentStyle={{
-                                backgroundColor: "#1a202c",
+                                backgroundColor: "#ffffff",
                                 borderRadius: "8px",
-                                border: "none",
-                                color: "white",
+                                border: "1px solid #e2e8f0",
+                                color: "#1a202c",
                             }}
-                            itemStyle={{ color: "white" }}
+                            itemStyle={{ color: "#1a202c" }}
                         />
                         <Bar dataKey="value" radius={[0, 8, 8, 0]}>
                             {chartData.map((entry, index) => (
@@ -300,7 +300,7 @@ const BudgetDetailPage = () => {
                         </Bar>
                     </BarChart>
                 </ResponsiveContainer>
-                <Text fontSize="xs" color="gray.500" mt={4}>
+                <Text fontSize="xs" color="gray.600" mt={4}>
                     *Eslatma: Raqamlar Davlat budjetining 26.8 trln so‘mlik qismining viloyatlar bo‘yicha taqsimoti.
                     Eng ko‘p mablag‘ Qashqadaryo, Toshkent va Samarqand viloyatlariga yo‘naltirilmoqda.
                 </Text>

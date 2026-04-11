@@ -167,7 +167,7 @@ const FamaliyVilDetail = () => {
             <Flex direction="column" gap={4}>
                 <Flex alignItems="baseline" justifyContent="space-between" flexWrap="wrap" gap={4}>
                     <Box>
-                        <Heading as="h1" size="xl" fontWeight="bold">
+                        <Heading as="h1" size="xl" fontWeight="bold" color="gray.800">
                             Qarshi shahri mahallalarida kambag‘al oilalar monitoringi
                         </Heading>
                         <Text fontSize="md" color="brand.300" mt={1}>
@@ -175,7 +175,7 @@ const FamaliyVilDetail = () => {
                         </Text>
                     </Box>
                     <Flex alignItems="center" gap={2} textAlign="right">
-                        <Text fontSize="lg" fontWeight="medium" color="gray.400">
+                        <Text fontSize="lg" fontWeight="medium" color="gray.600">
                             Shahar bo‘yicha jami kambag‘al oilalar
                         </Text>
                         <Text fontSize="2xl" fontWeight="extrabold" color={brand600}>
@@ -184,24 +184,24 @@ const FamaliyVilDetail = () => {
                     </Flex>
                 </Flex>
 
-                <Text color="gray.300">
+                <Text color="gray.600">
                     Ranglar: <strong style={{ color: green400 }}>Yashil</strong> — kam oila (yaxshi),{" "}
                     <strong style={{ color: yellow400 }}>Sariq</strong> — o‘rtacha,{" "}
                     <strong style={{ color: red400 }}>Qizil</strong> — ko‘p oila (xavf yuqori).
                 </Text>
 
                 <SimpleGrid columns={{ base: 1, md: 3 }} spacing={4} my={2}>
-                    <Stat bg="dark.card" p={4} borderRadius="lg">
+                    <Stat bg="white" border="1px solid" borderColor="gray.200" boxShadow="sm" p={4} borderRadius="lg">
                         <StatLabel>Yaxshi holatdagi mahallalar</StatLabel>
                         <StatNumber color="green.400">{stats.good}</StatNumber>
                         <StatHelpText>Kam kambag‘al oila</StatHelpText>
                     </Stat>
-                    <Stat bg="dark.card" p={4} borderRadius="lg">
+                    <Stat bg="white" border="1px solid" borderColor="gray.200" boxShadow="sm" p={4} borderRadius="lg">
                         <StatLabel>O‘rtacha holat</StatLabel>
                         <StatNumber color="yellow.400">{stats.moderate}</StatNumber>
                         <StatHelpText>O‘rtacha ko‘rsatkich</StatHelpText>
                     </Stat>
-                    <Stat bg="dark.card" p={4} borderRadius="lg">
+                    <Stat bg="white" border="1px solid" borderColor="gray.200" boxShadow="sm" p={4} borderRadius="lg">
                         <StatLabel>Xavf ostidagi mahallalar</StatLabel>
                         <StatNumber color="red.400">{stats.bad}</StatNumber>
                         <StatHelpText>Ko‘p kambag‘al oila</StatHelpText>
@@ -209,9 +209,9 @@ const FamaliyVilDetail = () => {
                 </SimpleGrid>
 
                 {/* Tushuntirish bloki */}
-                <Box bg="dark.card" p={4} borderRadius="lg" mb={2}>
-                    <Heading size="sm" mb={2}>📊 Ma’lumotlar qanday hisoblandi?</Heading>
-                    <Text fontSize="sm" color="gray.300">
+                <Box bg="white" border="1px solid" borderColor="gray.200" boxShadow="sm" p={4} borderRadius="lg" mb={2}>
+                    <Heading size="sm" mb={2} color="gray.800">📊 Ma’lumotlar qanday hisoblandi?</Heading>
+                    <Text fontSize="sm" color="gray.600">
                         • <strong>Kambag‘al oilalar</strong> – mahalladagi jami kam ta’minlangan oilalar soni.<br />
                         • <strong>Xizmat bilan qamrov</strong> – bandlik, tadbirkorlik, ta’lim va ijtimoiy yordam bilan qamrab olingan oilalar.<br />
                         • <strong>Xavf ostidagilar</strong> – daromadi pasayish ehtimoli yuqori bo‘lgan oilalar.<br />
@@ -222,11 +222,11 @@ const FamaliyVilDetail = () => {
                 {/* Qidiruv va filtr */}
                 <Flex direction={{ base: "column", md: "row" }} gap={4} mb={6}>
                     <InputGroup maxW="400px">
-                        <InputLeftElement><Search size={18} color="gray.400" /></InputLeftElement>
-                        <Input placeholder="Mahalla nomi..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} bg="gray.900" borderColor="gray.700" color="white" _focus={{ borderColor: brand600 }} />
-                        {searchTerm && <InputRightElement><IconButton aria-label="Tozalash" icon={<X size={16} />} size="xs" variant="ghost" color="gray.400" onClick={clearSearch} /></InputRightElement>}
+                        <InputLeftElement><Search size={18} color="gray.600" /></InputLeftElement>
+                        <Input placeholder="Mahalla nomi..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} bg="white" borderColor="gray.200" color="gray.800" _focus={{ borderColor: brand600 }} />
+                        {searchTerm && <InputRightElement><IconButton aria-label="Tozalash" icon={<X size={16} />} size="xs" variant="ghost" color="gray.600" onClick={clearSearch} /></InputRightElement>}
                     </InputGroup>
-                    <Select width="220px" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value as any)} bg="gray.900" borderColor="gray.700" color="white" _focus={{ borderColor: brand600 }}>
+                    <Select width="220px" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value as any)} bg="white" borderColor="gray.200" color="gray.800" _focus={{ borderColor: brand600 }}>
                         <option value="all">Barcha holatlar</option>
                         <option value="good">Yaxshi (yashil)</option>
                         <option value="moderate">O‘rtacha (sariq)</option>
@@ -235,16 +235,16 @@ const FamaliyVilDetail = () => {
                 </Flex>
 
                 {/* Jadval */}
-                <TableContainer bg="dark.card" borderRadius="xl" overflowX="auto" mb={10}>
+                <TableContainer bg="white" border="1px solid" borderColor="gray.200" boxShadow="sm" borderRadius="xl" overflowX="auto" mb={10}>
                     <Table variant="unstyled">
-                        <Thead bg="gray.800">
+                        <Thead bg="gray.50" color="gray.700">
                             <Tr>
-                                <Th>#</Th><Th>Mahalla</Th><Th isNumeric>Kambag‘al oilalar</Th>
-                                <Th isNumeric>Xizmat bilan qamrov</Th><Th isNumeric>Xavf ostidagilar</Th>
+                                <Th color="gray.700">#</Th><Th color="gray.700">Mahalla</Th><Th isNumeric color="gray.700">Kambag‘al oilalar</Th>
+                                <Th isNumeric color="gray.700">Xizmat bilan qamrov</Th><Th isNumeric color="gray.700">Xavf ostidagilar</Th>
                             </Tr>
                         </Thead>
                         <Tbody>
-                            {filteredMahallas.length === 0 ? <Tr><Td colSpan={8} textAlign="center" py={8}>Hech narsa topilmadi</Td></Tr> :
+                            {filteredMahallas.length === 0 ? <Tr><Td colSpan={8} textAlign="center" py={8} color="gray.800">Hech narsa topilmadi</Td></Tr> :
                                 filteredMahallas.map((m, idx) => {
                                     const isActive = m.name === "Batosh";
                                     let statusText = "", statusColor = "";
@@ -252,14 +252,14 @@ const FamaliyVilDetail = () => {
                                     else if (m.status === "moderate") { statusText = "O‘rtacha"; statusColor = "yellow"; }
                                     else { statusText = "Xavf ostida"; statusColor = "red"; }
                                     return (
-                                        <Tr key={idx} _hover={{ bg: "gray.800" }} cursor={isActive ? "pointer" : "default"} onClick={() => isActive && handleDetailClick(m.name)}>
-                                            <Td>{idx + 1}</Td>
-                                            <Td><Flex align="center" gap={2}><MapPin size={14} color={brand600} />{m.name}</Flex></Td>
+                                        <Tr key={idx} bg={isActive ? "blue.50" : "transparent"} _hover={{ bg: isActive ? "blue.100" : "gray.50" }} cursor={isActive ? "pointer" : "default"} onClick={() => isActive && handleDetailClick(m.name)}>
+                                            <Td color="gray.800">{idx + 1}</Td>
+                                            <Td color="gray.800"><Flex align="center" gap={2}><MapPin size={14} color={brand600} />{m.name}</Flex></Td>
                                             <Td isNumeric fontWeight="bold" color={m.status === "bad" ? "red.300" : m.status === "good" ? "green.300" : "yellow.300"}>{m.poorFamilies}</Td>
-                                            <Td isNumeric>{m.coveredByServices}</Td>
-                                            <Td isNumeric>{m.riskFamilies}</Td>
-                                            <Td textAlign="center">{m.willReachTarget ? <Flex align="center" gap={1} color="green.300" justify="center"><TrendingUp size={14} /><Text fontSize="sm">Yaxshilanadi</Text></Flex> : <Flex align="center" gap={1} color="red.300" justify="center"><TrendingDown size={14} /><Text fontSize="sm">Yaxshilanmaydi</Text></Flex>}</Td>
-                                            <Td textAlign="center">{isActive ? <IconButton aria-label="Batafsil" icon={<ArrowRight size={16} />} size="xs" variant="ghost" color={brand600} onClick={(e) => { e.stopPropagation(); handleDetailClick(m.name); }} /> : <IconButton aria-label="Yopiq" icon={<Lock size={14} />} size="xs" variant="ghost" color="gray.500" isDisabled />}</Td>
+                                            <Td isNumeric color="gray.800">{m.coveredByServices}</Td>
+                                            <Td isNumeric color="gray.800">{m.riskFamilies}</Td>
+                                            <Td textAlign="center" color="gray.800">{m.willReachTarget ? <Flex align="center" gap={1} color="green.300" justify="center"><TrendingUp size={14} /><Text fontSize="sm">Yaxshilanadi</Text></Flex> : <Flex align="center" gap={1} color="red.300" justify="center"><TrendingDown size={14} /><Text fontSize="sm">Yaxshilanmaydi</Text></Flex>}</Td>
+                                            <Td textAlign="center" color="gray.800">{isActive ? <IconButton aria-label="Batafsil" icon={<ArrowRight size={16} />} size="xs" variant="ghost" color={brand600} onClick={(e) => { e.stopPropagation(); handleDetailClick(m.name); }} /> : <IconButton aria-label="Yopiq" icon={<Lock size={14} />} size="xs" variant="ghost" color="gray.600" isDisabled />}</Td>
                                         </Tr>
                                     );
                                 })}
@@ -269,20 +269,20 @@ const FamaliyVilDetail = () => {
 
                 {/* Gorizontal diagramma – oilalar soni taqsimoti */}
                 <Box mt={6}>
-                    <Heading size="lg" mb={4}>Mahallalar kesimida kambag‘al oilalar, qamrov va xavf</Heading>
-                    <Text mb={4} color="gray.400">Eng yomon holatdan eng yaxshiga tartiblangan (o‘ng tomonda yaxshilar)</Text>
-                    <Box bg="dark.card" p={4} borderRadius="xl" overflowX="auto">
+                    <Heading size="lg" mb={4} color="gray.800">Mahallalar kesimida kambag‘al oilalar, qamrov va xavf</Heading>
+                    <Text mb={4} color="gray.600">Eng yomon holatdan eng yaxshiga tartiblangan (o‘ng tomonda yaxshilar)</Text>
+                    <Box bg="white" border="1px solid" borderColor="gray.200" boxShadow="sm" p={4} borderRadius="xl" overflowX="auto">
                         <ResponsiveContainer width="100%" height={Math.max(500, chartData.length * 38)}>
                             <BarChart
                                 layout="vertical"
                                 data={chartData}
                                 margin={{ top: 20, right: 30, left: 140, bottom: 20 }}
                             >
-                                <CartesianGrid strokeDasharray="3 3" stroke="#2d3748" />
-                                <XAxis type="number" domain={[0, maxFamilies]} tick={{ fill: "#cbd5e0" }} label={{ value: "Oilalar soni", position: "insideBottom", offset: -5, fill: "#cbd5e0" }} />
-                                <YAxis type="category" dataKey="name" width={140} tick={{ fontSize: 12, fill: "#cbd5e0" }} interval={0} />
-                                <Tooltip formatter={(value: number) => value.toLocaleString()} contentStyle={{ backgroundColor: "#1a202c", border: "none", borderRadius: "8px", color: "white" }} />
-                                <Legend wrapperStyle={{ color: "white" }} verticalAlign="top" height={36} />
+                                <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                                <XAxis type="number" domain={[0, maxFamilies]} tick={{ fill: "#4a5568" }} label={{ value: "Oilalar soni", position: "insideBottom", offset: -5, fill: "#4a5568" }} />
+                                <YAxis type="category" dataKey="name" width={140} tick={{ fontSize: 12, fill: "#4a5568" }} interval={0} />
+                                <Tooltip formatter={(value: number) => value.toLocaleString()} contentStyle={{ backgroundColor: "#ffffff", border: "1px solid #e2e8f0", borderRadius: "8px", color: "#1a202c" }} />
+                                <Legend wrapperStyle={{ color: "#1a202c" }} verticalAlign="top" height={36} />
                                 <Bar dataKey="Kambag‘al oilalar" fill={red400} />
                                 <Bar dataKey="Xizmat bilan qamrov" fill={brand600} />
                                 <Bar dataKey="Xavf ostidagilar" fill={yellow400} />
@@ -292,10 +292,10 @@ const FamaliyVilDetail = () => {
                 </Box>
 
                 {/* Xulosa */}
-                <Box bg="dark.card" p={4} borderRadius="lg" mt={6}>
+                <Box bg="white" border="1px solid" borderColor="gray.200" boxShadow="sm" p={4} borderRadius="lg" mt={6}>
                     <Flex gap={3} align="center"><AlertTriangle size={20} color={red400} /><Text fontWeight="medium">Xulosa: Qizil mahallalar (Qat, Qarliqbog‘, Cho‘lquvar, Eski Anxor, Yangi hayot) – kambag‘al oilalar soni eng yuqori va xavf katta.</Text></Flex>
                     <Flex gap={3} align="center" mt={2}><CheckCircle size={20} color={green400} /><Text>Batosh, Ishonch, Amir Temur, Alisher Navoiy, Nasaf kabi mahallalarda kambag‘al oilalar kam va yaxshi qamrov mavjud.</Text></Flex>
-                    <Flex gap={3} align="center" mt={2}><Text fontSize="sm" color="gray.400">💡 Batosh mahallasiga bossangiz, batafsil chora-tadbirlar sahifasiga o‘tasiz.</Text></Flex>
+                    <Flex gap={3} align="center" mt={2}><Text fontSize="sm" color="gray.600">💡 Batosh mahallasiga bossangiz, batafsil chora-tadbirlar sahifasiga o‘tasiz.</Text></Flex>
                 </Box>
             </Flex>
         </Box>

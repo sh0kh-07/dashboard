@@ -235,17 +235,17 @@ const PoorLevelDashboard = () => {
     };
 
     const renderTable = () => (
-        <Box overflowX="auto" mt={8} bg="dark.card" borderRadius="xl" p={4}>
-            <Heading size="md" mb={4}>Viloyatlar kesimida tahlil (kambag‘allik foizi)</Heading>
-            <Table variant="simple" colorScheme="whiteAlpha">
-                <Thead>
+        <Box overflowX="auto" mt={8} bg="white" border="1px solid" borderColor="gray.200" boxShadow="sm" borderRadius="xl" p={4}>
+            <Heading size="md" mb={4} color="gray.800">Viloyatlar kesimida tahlil (kambag‘allik foizi)</Heading>
+            <Table variant="simple" colorScheme="gray">
+                <Thead color="gray.700">
                     <Tr>
-                        <Th>Viloyat</Th>
-                        <Th isNumeric>Yil boshi (%)</Th>
-                        <Th isNumeric>Maqsad (yil oxiri)</Th>
-                        <Th isNumeric>Hozirgi real (%)</Th>
-                        <Th>Holat</Th>
-                        <Th>Bashorat</Th>
+                        <Th color="gray.700">Viloyat</Th>
+                        <Th isNumeric color="gray.700">Yil boshi (%)</Th>
+                        <Th isNumeric color="gray.700">Maqsad (yil oxiri)</Th>
+                        <Th isNumeric color="gray.700">Hozirgi real (%)</Th>
+                        <Th color="gray.700">Holat</Th>
+                        <Th color="gray.700">Bashorat</Th>
                     </Tr>
                 </Thead>
                 <Tbody>
@@ -264,13 +264,13 @@ const PoorLevelDashboard = () => {
                         }
                         return (
                             <Tr key={row.name}>
-                                <Td fontWeight="medium">{row.name}</Td>
-                                <Td isNumeric>{row.startYear.toFixed(1)}%</Td>
-                                <Td isNumeric>{row.targetEndYear.toFixed(1)}%</Td>
+                                <Td fontWeight="medium" color="gray.800">{row.name}</Td>
+                                <Td isNumeric color="gray.800">{row.startYear.toFixed(1)}%</Td>
+                                <Td isNumeric color="gray.800">{row.targetEndYear.toFixed(1)}%</Td>
                                 <Td isNumeric fontWeight="bold" color={row.status === "bad" ? "red.300" : row.status === "good" ? "green.300" : "yellow.300"}>
                                     {row.actualCurrent.toFixed(1)}%
                                 </Td>
-                                <Td>
+                                <Td color="gray.800">
                                     <Flex align="center" gap={2}>
                                         {statusIcon}
                                         <Badge colorScheme={row.status === "bad" ? "red" : row.status === "good" ? "green" : "yellow"}>
@@ -278,7 +278,7 @@ const PoorLevelDashboard = () => {
                                         </Badge>
                                     </Flex>
                                 </Td>
-                                <Td>
+                                <Td color="gray.800">
                                     {!row.willMeetTarget ? (
                                         <Flex align="center" gap={1} color="red.300">
                                             <TrendingDown size={14} />
@@ -348,7 +348,7 @@ const PoorLevelDashboard = () => {
                             onMouseOver={(e) => {
                                 e.currentTarget.style.opacity = "1";
                                 e.currentTarget.style.strokeWidth = "2.5";
-                                e.currentTarget.style.stroke = "#ffffff";
+                                e.currentTarget.style.stroke = "#2b6cb0";
                             }}
                             onMouseOut={(e) => {
                                 e.currentTarget.style.opacity = "0.85";
@@ -364,16 +364,16 @@ const PoorLevelDashboard = () => {
                     position="fixed"
                     top={tooltip.y + 12}
                     left={tooltip.x + 12}
-                    bg="gray.800"
-                    color="white"
+                    bg="gray.50"
+                    color="gray.800"
                     px={4}
                     py={2}
                     borderRadius="md"
                     boxShadow="lg"
                     zIndex={1000}
                     pointerEvents="none"
-                    backdropFilter="blur(4px)"
-                    bgColor="rgba(0,0,0,0.85)"
+                    
+                    
                 >
                     <Text fontWeight="bold" mb={1}>{tooltip.data.name}</Text>
                     {tooltip.data.regionKey ? (
@@ -417,27 +417,27 @@ const PoorLevelDashboard = () => {
     return (
         <Box>
             <Flex direction="column" gap={4}>
-                <Heading as="h1" size="xl" fontWeight="bold">
+                <Heading as="h1" size="xl" fontWeight="bold" color="gray.800">
                     Kambag‘allik darajasi monitoringi
                 </Heading>
-                <Text color="gray.300">
+                <Text color="gray.600">
                     Xaritada viloyatlar holati: <strong style={{ color: green400 }}>Yashil</strong> — yaxshi,{" "}
                     <strong style={{ color: yellow400 }}>Sariq</strong> — o‘rtacha,{" "}
                     <strong style={{ color: red400 }}>Qizil</strong> — xavf ostida.
                 </Text>
 
                 <SimpleGrid columns={{ base: 1, md: 3 }} spacing={4} my={2}>
-                    <Stat bg="dark.card" p={4} borderRadius="lg">
+                    <Stat bg="white" border="1px solid" borderColor="gray.200" boxShadow="sm" p={4} borderRadius="lg">
                         <StatLabel>Yaxshi holat</StatLabel>
                         <StatNumber color="green.400">{stats.goodCount}</StatNumber>
                         <StatHelpText>Maqsadga ishonchli</StatHelpText>
                     </Stat>
-                    <Stat bg="dark.card" p={4} borderRadius="lg">
+                    <Stat bg="white" border="1px solid" borderColor="gray.200" boxShadow="sm" p={4} borderRadius="lg">
                         <StatLabel>O‘rtacha holat</StatLabel>
                         <StatNumber color="yellow.400">{stats.moderateCount}</StatNumber>
                         <StatHelpText>Harakat kerak</StatHelpText>
                     </Stat>
-                    <Stat bg="dark.card" p={4} borderRadius="lg">
+                    <Stat bg="white" border="1px solid" borderColor="gray.200" boxShadow="sm" p={4} borderRadius="lg">
                         <StatLabel>Xavf ostida</StatLabel>
                         <StatNumber color="red.400">{stats.badCount}</StatNumber>
                         <StatHelpText>Rejani bajarmaslik xavfi</StatHelpText>
@@ -446,27 +446,27 @@ const PoorLevelDashboard = () => {
 
                 {renderMap()}
 
-                <Box bg="dark.card" borderRadius="xl" p={5} mt={4}>
-                    <Heading size="md" mb={2}>Pasayish dinamikasi (foiz)</Heading>
-                    <Text fontSize="sm" color="gray.400" mb={4}>
+                <Box bg="white" border="1px solid" borderColor="gray.200" boxShadow="sm" borderRadius="xl" p={5} mt={4}>
+                    <Heading size="md" mb={2} color="gray.800">Pasayish dinamikasi (foiz)</Heading>
+                    <Text fontSize="sm" color="gray.600" mb={4}>
                         Yil boshi, hozirgi (4 oy) va yil oxiri maqsadi
                     </Text>
                     <ResponsiveContainer width="100%" height={450}>
                         <BarChart data={chartComparison} margin={{ top: 20, right: 30, left: 0, bottom: 5 }}>
-                            <CartesianGrid strokeDasharray="3 3" stroke="#2d3748" />
+                            <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
                             <XAxis
                                 dataKey="name"
-                                tick={{ fill: "#cbd5e0", fontSize: 11 }}
+                                tick={{ fill: "#4a5568", fontSize: 11 }}
                                 angle={-35}
                                 textAnchor="end"
                                 height={70}
                             />
                             <YAxis
-                                tick={{ fill: "#cbd5e0" }}
-                                label={{ value: "Kambag‘allik %", angle: -90, position: "insideLeft", fill: "#cbd5e0" }}
+                                tick={{ fill: "#4a5568" }}
+                                label={{ value: "Kambag‘allik %", angle: -90, position: "insideLeft", fill: "#4a5568" }}
                             />
-                            <RechartsTooltip contentStyle={{ backgroundColor: "#1e2533", border: "none", borderRadius: "8px" }} />
-                            <Legend wrapperStyle={{ color: "white" }} />
+                            <RechartsTooltip contentStyle={{ backgroundColor: "#ffffff", color: "#1a202c", border: "1px solid #e2e8f0", borderRadius: "8px" }} />
+                            <Legend wrapperStyle={{ color: "#1a202c" }} />
                             <Bar dataKey="Yil boshi (%)" fill="#4A5568" />
                             <Bar dataKey="Hozirgi (4 oy)" fill={brand600} />
                             <Bar dataKey="Yil oxiri maqsadi (%)" fill="#38A169" />

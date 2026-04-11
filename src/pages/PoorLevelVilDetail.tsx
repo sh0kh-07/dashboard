@@ -200,7 +200,7 @@ const QarshiMahallaPoverty = () => {
       <Flex direction="column" gap={4}>
         <Flex alignItems="baseline" justifyContent="space-between" flexWrap="wrap" gap={4}>
           <Box>
-            <Heading as="h1" size="xl" fontWeight="bold">
+            <Heading as="h1" size="xl" fontWeight="bold" color="gray.800">
               Qarshi shahri mahallalarida kambag‘allik monitoringi
             </Heading>
             <Text fontSize="md" color="brand.300" mt={1}>
@@ -208,7 +208,7 @@ const QarshiMahallaPoverty = () => {
             </Text>
           </Box>
           <Flex alignItems="center" gap={2} textAlign="right">
-            <Text fontSize="lg" fontWeight="medium" color="gray.400">
+            <Text fontSize="lg" fontWeight="medium" color="gray.600">
               Shahar bo‘yicha o‘rtacha maqsad
             </Text>
             <Text fontSize="2xl" fontWeight="extrabold" color={brand600}>
@@ -217,7 +217,7 @@ const QarshiMahallaPoverty = () => {
           </Flex>
         </Flex>
 
-        <Text color="gray.300">
+        <Text color="gray.600">
           Xaritadagi ranglar: <strong style={{ color: green400 }}>Yashil</strong> — yaxshi (maqsadga erishadi),{" "}
           <strong style={{ color: yellow400 }}>Sariq</strong> — o‘rtacha,{" "}
           <strong style={{ color: red400 }}>Qizil</strong> — xavf ostida (maqsadga erisha olmasligi mumkin).
@@ -225,17 +225,17 @@ const QarshiMahallaPoverty = () => {
 
         {/* 3 ta statistik karta */}
         <SimpleGrid columns={{ base: 1, md: 3 }} spacing={4} my={2}>
-          <Stat bg="dark.card" p={4} borderRadius="lg">
+          <Stat bg="white" border="1px solid" borderColor="gray.200" boxShadow="sm" p={4} borderRadius="lg">
             <StatLabel>Yaxshi holat</StatLabel>
             <StatNumber color="green.400">{stats.good}</StatNumber>
             <StatHelpText>Maqsadga ishonchli</StatHelpText>
           </Stat>
-          <Stat bg="dark.card" p={4} borderRadius="lg">
+          <Stat bg="white" border="1px solid" borderColor="gray.200" boxShadow="sm" p={4} borderRadius="lg">
             <StatLabel>O‘rtacha holat</StatLabel>
             <StatNumber color="yellow.400">{stats.moderate}</StatNumber>
             <StatHelpText>Harakat kerak</StatHelpText>
           </Stat>
-          <Stat bg="dark.card" p={4} borderRadius="lg">
+          <Stat bg="white" border="1px solid" borderColor="gray.200" boxShadow="sm" p={4} borderRadius="lg">
             <StatLabel>Xavf ostida</StatLabel>
             <StatNumber color="red.400">{stats.bad}</StatNumber>
             <StatHelpText>Rejani bajarmaslik xavfi</StatHelpText>
@@ -243,9 +243,9 @@ const QarshiMahallaPoverty = () => {
         </SimpleGrid>
 
         {/* Tushuntirish bloki */}
-        <Box bg="dark.card" p={4} borderRadius="lg" mb={2}>
-          <Heading size="sm" mb={2}>📊 Foizlar qanday hisoblandi?</Heading>
-          <Text fontSize="sm" color="gray.300">
+        <Box bg="white" border="1px solid" borderColor="gray.200" boxShadow="sm" p={4} borderRadius="lg" mb={2}>
+          <Heading size="sm" mb={2} color="gray.800">📊 Foizlar qanday hisoblandi?</Heading>
+          <Text fontSize="sm" color="gray.600">
             • <strong>Yil boshi</strong> – Qarshi shahri mahallalarining kambag‘allik darajasi (o‘rtacha 3.5%).<br />
             • <strong>Maqsad (yil oxiri)</strong> – shahar bo‘yicha reja (3.3%).<br />
             • <strong>Hozirgi (4 oy)</strong> – real pasayish sur’ati. Yaxshi mahallalar (Batosh, Ishonch, Nasaf) tezroq pasaygan, xavf ostidagilar (Qat, Qarliqbog‘) sekinroq.<br />
@@ -257,18 +257,18 @@ const QarshiMahallaPoverty = () => {
         <Flex direction={{ base: "column", md: "row" }} gap={4} mb={6}>
           <InputGroup maxW="400px">
             <InputLeftElement pointerEvents="none">
-              <Search size={18} color="gray.400" />
+              <Search size={18} color="gray.600" />
             </InputLeftElement>
             <Input
               placeholder="Mahalla nomi bo‘yicha qidirish..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              bg="gray.900"
+              bg="white"
               border="1px solid"
-              borderColor="gray.700"
+              borderColor="gray.200"
               _hover={{ borderColor: "gray.600" }}
               _focus={{ borderColor: brand600 }}
-              color="white"
+              color="gray.800"
             />
             {searchTerm && (
               <InputRightElement>
@@ -277,9 +277,9 @@ const QarshiMahallaPoverty = () => {
                   icon={<X size={16} />}
                   size="xs"
                   variant="ghost"
-                  color="gray.400"
+                  color="gray.600"
                   onClick={clearSearch}
-                  _hover={{ color: "white" }}
+                  _hover={{ color: "#1a202c" }}
                 />
               </InputRightElement>
             )}
@@ -288,9 +288,9 @@ const QarshiMahallaPoverty = () => {
             width="220px"
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value as any)}
-            bg="gray.900"
-            borderColor="gray.700"
-            color="white"
+            bg="white"
+            borderColor="gray.200"
+            color="gray.800"
             _focus={{ borderColor: brand600 }}
           >
             <option value="all">Barcha holatlar</option>
@@ -301,24 +301,24 @@ const QarshiMahallaPoverty = () => {
         </Flex>
 
         {/* Jadval */}
-        <TableContainer bg="dark.card" borderRadius="xl" overflow="hidden" mb={10}>
+        <TableContainer bg="white" border="1px solid" borderColor="gray.200" boxShadow="sm" borderRadius="xl" overflow="hidden" mb={10}>
           <Table variant="unstyled">
-            <Thead bg="gray.800">
+            <Thead bg="gray.50" color="gray.700">
               <Tr>
-                <Th color="gray.400" fontSize="sm" borderBottom="1px solid" borderColor="gray.700">#</Th>
-                <Th color="gray.400" fontSize="sm" borderBottom="1px solid" borderColor="gray.700">Mahalla nomi</Th>
-                <Th color="gray.400" fontSize="sm" borderBottom="1px solid" borderColor="gray.700" textAlign="right">Yil boshi (%)</Th>
-                <Th color="gray.400" fontSize="sm" borderBottom="1px solid" borderColor="gray.700" textAlign="right">Maqsad (%)</Th>
-                <Th color="gray.400" fontSize="sm" borderBottom="1px solid" borderColor="gray.700" textAlign="right">Hozirgi (%)</Th>
-                <Th color="gray.400" fontSize="sm" borderBottom="1px solid" borderColor="gray.700" textAlign="center">Holat</Th>
-                <Th color="gray.400" fontSize="sm" borderBottom="1px solid" borderColor="gray.700" textAlign="center">Bashorat</Th>
-                <Th color="gray.400" fontSize="sm" borderBottom="1px solid" borderColor="gray.700" textAlign="center">Harakat</Th>
+                <Th color="gray.600" fontSize="sm" borderBottom="1px solid" borderColor="gray.200">#</Th>
+                <Th color="gray.600" fontSize="sm" borderBottom="1px solid" borderColor="gray.200">Mahalla nomi</Th>
+                <Th color="gray.600" fontSize="sm" borderBottom="1px solid" borderColor="gray.200" textAlign="right">Yil boshi (%)</Th>
+                <Th color="gray.600" fontSize="sm" borderBottom="1px solid" borderColor="gray.200" textAlign="right">Maqsad (%)</Th>
+                <Th color="gray.600" fontSize="sm" borderBottom="1px solid" borderColor="gray.200" textAlign="right">Hozirgi (%)</Th>
+                <Th color="gray.600" fontSize="sm" borderBottom="1px solid" borderColor="gray.200" textAlign="center">Holat</Th>
+                <Th color="gray.600" fontSize="sm" borderBottom="1px solid" borderColor="gray.200" textAlign="center">Bashorat</Th>
+                <Th color="gray.600" fontSize="sm" borderBottom="1px solid" borderColor="gray.200" textAlign="center">Harakat</Th>
               </Tr>
             </Thead>
             <Tbody>
               {filteredMahallas.length === 0 ? (
                 <Tr>
-                  <Td colSpan={8} textAlign="center" py={8} color="gray.400">
+                  <Td colSpan={8} textAlign="center" py={8} color="gray.600">
                     Hech qanday mahalla topilmadi
                   </Td>
                 </Tr>
@@ -332,26 +332,26 @@ const QarshiMahallaPoverty = () => {
                   return (
                     <Tr
                       key={idx}
-                      _hover={{ bg: "gray.800" }}
+                      _hover={{ bg: "gray.50" }}
                       cursor={isActive ? "pointer" : "default"}
                       onClick={() => isActive && handleDetailClick(mahalla.name)}
                     >
-                      <Td color="gray.500" fontSize="sm" borderBottom="1px solid" borderColor="gray.700">{idx + 1}</Td>
-                      <Td fontWeight="medium" borderBottom="1px solid" borderColor="gray.700">
+                      <Td color="gray.600" fontSize="sm" borderBottom="1px solid" borderColor="gray.200">{idx + 1}</Td>
+                      <Td fontWeight="medium" borderBottom="1px solid" borderColor="gray.200" color="gray.800">
                         <Flex align="center" gap={2}>
                           <MapPin size={14} color={brand600} />
                           {mahalla.name}
                         </Flex>
                       </Td>
-                      <Td textAlign="right" borderBottom="1px solid" borderColor="gray.700">{mahalla.startYear.toFixed(1)}%</Td>
-                      <Td textAlign="right" borderBottom="1px solid" borderColor="gray.700">{mahalla.targetEndYear.toFixed(1)}%</Td>
-                      <Td textAlign="right" fontWeight="bold" color={mahalla.status === "bad" ? "red.300" : mahalla.status === "good" ? "green.300" : "yellow.300"} borderBottom="1px solid" borderColor="gray.700">
+                      <Td textAlign="right" borderBottom="1px solid" borderColor="gray.200" color="gray.800">{mahalla.startYear.toFixed(1)}%</Td>
+                      <Td textAlign="right" borderBottom="1px solid" borderColor="gray.200" color="gray.800">{mahalla.targetEndYear.toFixed(1)}%</Td>
+                      <Td textAlign="right" fontWeight="bold" color={mahalla.status === "bad" ? "red.300" : mahalla.status === "good" ? "green.300" : "yellow.300"} borderBottom="1px solid" borderColor="gray.200">
                         {mahalla.actualCurrent.toFixed(1)}%
                       </Td>
-                      <Td textAlign="center" borderBottom="1px solid" borderColor="gray.700">
+                      <Td textAlign="center" borderBottom="1px solid" borderColor="gray.200" color="gray.800">
                         <Badge colorScheme={statusColor} borderRadius="full" px={2}>{statusText}</Badge>
                       </Td>
-                      <Td textAlign="center" borderBottom="1px solid" borderColor="gray.700">
+                      <Td textAlign="center" borderBottom="1px solid" borderColor="gray.200" color="gray.800">
                         {mahalla.willMeetTarget ? (
                           <Flex align="center" gap={1} color="green.300" justify="center">
                             <TrendingUp size={14} />
@@ -365,7 +365,7 @@ const QarshiMahallaPoverty = () => {
                           </Flex>
                         )}
                       </Td>
-                      <Td textAlign="center" borderBottom="1px solid" borderColor="gray.700">
+                      <Td textAlign="center" borderBottom="1px solid" borderColor="gray.200" color="gray.800">
                         {isActive ? (
                           <IconButton
                             aria-label="Batafsil"
@@ -382,7 +382,7 @@ const QarshiMahallaPoverty = () => {
                             icon={<Lock size={14} />}
                             size="xs"
                             variant="ghost"
-                            color="gray.500"
+                            color="gray.600"
                             isDisabled
                           />
                         )}
@@ -397,21 +397,21 @@ const QarshiMahallaPoverty = () => {
 
         {/* Gorizontal diagramma */}
         <Box mt={6}>
-          <Heading as="h2" size="lg" mb={4}>Kambag‘allik darajasi (yil boshi, hozirgi, maqsad)</Heading>
-          <Text mb={4} color="gray.400">Mahallalar bo‘yicha solishtirma tahlil (eng yomon holatdan eng yaxshiga)</Text>
-          <Box bg="dark.card" p={4} borderRadius="xl">
+          <Heading as="h2" size="lg" mb={4} color="gray.800">Kambag‘allik darajasi (yil boshi, hozirgi, maqsad)</Heading>
+          <Text mb={4} color="gray.600">Mahallalar bo‘yicha solishtirma tahlil (eng yomon holatdan eng yaxshiga)</Text>
+          <Box bg="white" border="1px solid" borderColor="gray.200" boxShadow="sm" p={4} borderRadius="xl">
             <ResponsiveContainer width="100%" height={Math.max(500, chartData.length * 32)}>
               <BarChart layout="vertical" data={chartData} margin={{ top: 20, right: 30, left: 120, bottom: 20 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#2d3748" />
-                <XAxis type="number" domain={[0, 5]} tick={{ fill: "#cbd5e0" }} label={{ value: "Kambag‘allik %", position: "insideBottom", offset: -5, fill: "#cbd5e0" }} />
-                <YAxis type="category" dataKey="name" tick={{ fontSize: 11, fill: "#cbd5e0" }} width={110} />
+                <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                <XAxis type="number" domain={[0, 5]} tick={{ fill: "#4a5568" }} label={{ value: "Kambag‘allik %", position: "insideBottom", offset: -5, fill: "#4a5568" }} />
+                <YAxis type="category" dataKey="name" tick={{ fontSize: 11, fill: "#4a5568" }} width={110} />
                 <Tooltip
                   formatter={(value: number) => `${value.toFixed(1)}%`}
                   labelFormatter={(label) => {
                     const item = chartData.find(d => d.name === label);
                     return item ? item.fullName : label;
                   }}
-                  contentStyle={{ backgroundColor: "#1a202c", borderRadius: "8px", border: "none", color: "white" }}
+                  contentStyle={{ backgroundColor: "#ffffff", borderRadius: "8px", border: "1px solid #e2e8f0", color: "#1a202c" }}
                 />
                 <Bar dataKey="startYear" fill="#4A5568" name="Yil boshi" />
                 <Bar dataKey="current" fill={brand600} name="Hozirgi (4 oy)" />
@@ -422,7 +422,7 @@ const QarshiMahallaPoverty = () => {
         </Box>
 
         {/* Xulosa */}
-        <Box bg="dark.card" p={4} borderRadius="lg" mt={6}>
+        <Box bg="white" border="1px solid" borderColor="gray.200" boxShadow="sm" p={4} borderRadius="lg" mt={6}>
           <Flex gap={3} align="center">
             <AlertTriangle size={20} color={red400} />
             <Text fontWeight="medium">
@@ -434,7 +434,7 @@ const QarshiMahallaPoverty = () => {
             <Text>Batosh, Ishonch, Amir Temur, Alisher Navoiy, Nasaf kabi mahallalar yaxshi natija ko‘rsatmoqda.</Text>
           </Flex>
           <Flex gap={3} align="center" mt={2}>
-            <Text fontSize="sm" color="gray.400">💡 Eslatma: Batosh mahallasiga bossangiz, batafsil sahifaga o‘tasiz.</Text>
+            <Text fontSize="sm" color="gray.600">💡 Eslatma: Batosh mahallasiga bossangiz, batafsil sahifaga o‘tasiz.</Text>
           </Flex>
         </Box>
       </Flex>

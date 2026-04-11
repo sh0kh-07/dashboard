@@ -55,8 +55,8 @@ const ContractDetail = () => {
 
   if (!contract) {
     return (
-      <Box p={6} bg="gray.800" minH="100vh">
-        <Text color="white" fontSize="xl">Noma'lum kontrakt</Text>
+      <Box p={6} bg="gray.50" minH="100vh">
+        <Text color="gray.800" fontSize="xl">Noma'lum kontrakt</Text>
         <Button mt={4} onClick={() => navigate(-1)}>Orqaga</Button>
       </Box>
     );
@@ -69,10 +69,10 @@ const ContractDetail = () => {
       <Box  mx="auto">
         <Flex justify="space-between" align="center" mb={8}>
           <Box>
-            <Heading as="h1" size="xl" color="white">
+            <Heading as="h1" size="xl" color="gray.800">
               {contract.name}
             </Heading>
-            <Text color="gray.400" mt={1}>
+            <Text color="gray.600" mt={1}>
               {contract.type} | {contract.amount} {contract.amount < 10 ? "mln $" : "mlrd so‘m"}
             </Text>
           </Box>
@@ -89,7 +89,7 @@ const ContractDetail = () => {
           </Badge>
         </Flex>
 
-        <Heading as="h2" size="lg" mb={6} color="white">
+        <Heading as="h2" size="lg" mb={6} color="gray.800">
           10 bosqichli tekshiruv natijalari
         </Heading>
 
@@ -99,7 +99,7 @@ const ContractDetail = () => {
             return (
               <Box
                 key={stage.id}
-                bg="gray.900"
+                bg="white"
                 p={4}
                 borderRadius="xl"
                 borderLeft="4px solid"
@@ -113,8 +113,8 @@ const ContractDetail = () => {
                       boxSize={5}
                     />
                     <Box>
-                      <Text fontWeight="bold" color="white">{stage.name}</Text>
-                      <Text fontSize="sm" color="gray.400">{stage.description}</Text>
+                      <Text fontWeight="bold" color="gray.800">{stage.name}</Text>
+                      <Text fontSize="sm" color="gray.600">{stage.description}</Text>
                     </Box>
                   </Flex>
                   <Badge colorScheme={stagePassed ? "green" : "red"}>
@@ -126,8 +126,8 @@ const ContractDetail = () => {
           })}
         </VStack>
 
-        <Box mt={8} p={4} bg="gray.900" borderRadius="xl">
-          <Text fontSize="sm" color="gray.400">
+        <Box mt={8} p={4} bg="white" borderRadius="xl">
+          <Text fontSize="sm" color="gray.600">
             * Umumiy xulosa:{" "}
             {contract.checkPassed
               ? "Kontrakt barcha tekshiruv bosqichlaridan muvaffaqiyatli o‘tdi."

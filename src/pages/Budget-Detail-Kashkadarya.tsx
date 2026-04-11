@@ -122,16 +122,16 @@ const KashkadaryaDistricts = () => {
   return (
     <Box minH="100vh">
       <Flex justify="space-between" mb={6}>
-        <Heading color="white">Qashqadaryo viloyati</Heading>
+        <Heading color="gray.800">Qashqadaryo viloyati</Heading>
         <Box textAlign="right">
-          <Text color="gray.400">Jami budjet</Text>
+          <Text color="gray.600">Jami budjet</Text>
           <Text color={brand600} fontWeight="bold">
             {totalBudget.toFixed(1)} mlrd so'm
           </Text>
         </Box>
       </Flex>
 
-      <Box position="relative" bg="gray.900" p={4} borderRadius="xl" mb={10}>
+      <Box position="relative" bg="white" p={4} borderRadius="xl" mb={10}>
         <svg
           viewBox={kashkadaryaMap.viewBox}
           style={{ width: "80%", height: "auto", margin: "0 auto" }}
@@ -155,8 +155,8 @@ const KashkadaryaDistricts = () => {
             position="fixed"
             top={tooltip.y}
             left={tooltip.x}
-            bg="gray.800"
-            color="white"
+            bg="gray.50"
+            color="gray.800"
             px={4}
             py={2}
             borderRadius="lg"
@@ -175,18 +175,18 @@ const KashkadaryaDistricts = () => {
         )}
       </Box>
 
-      <Heading size="lg" mb={4} color="white">
+      <Heading size="lg" mb={4} color="gray.800">
         Budjet taqsimoti
       </Heading>
-      <Box bg="gray.900" p={4} borderRadius="xl">
+      <Box bg="white" p={4} borderRadius="xl">
         <ResponsiveContainer width="100%" height={500}>
           <BarChart layout="vertical" data={chartData}>
-            <CartesianGrid stroke="#2d3748" />
-            <XAxis type="number" tick={{ fill: "#cbd5e0" }} />
-            <YAxis type="category" dataKey="name" tick={{ fill: "#cbd5e0" }} />
+            <CartesianGrid stroke="#e2e8f0" />
+            <XAxis type="number" tick={{ fill: "#4a5568" }} />
+            <YAxis type="category" dataKey="name" tick={{ fill: "#4a5568" }} />
             <RechartsTooltip
               formatter={(value: number) => `${value} mlrd so'm`}
-              contentStyle={{ backgroundColor: "#1a202c", border: "none", color: "white" }}
+              contentStyle={{ backgroundColor: "#ffffff", border: "1px solid #e2e8f0", color: "#1a202c" }}
             />
             <Bar dataKey="budget" fill={brand600} radius={[0, 8, 8, 0]} />
           </BarChart>

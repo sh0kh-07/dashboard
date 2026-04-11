@@ -13,7 +13,7 @@ const PageHeader = ({ title, breadcrumbs }: PageHeaderProps) => {
     <Box mb={8}>
       <Breadcrumb spacing="8px" separator={<ChevronRight size={14} color="#718096" />} mb={2}>
         <BreadcrumbItem>
-          <BreadcrumbLink as={Link} to="/" color="gray.500" fontSize="xs">Asosiy</BreadcrumbLink>
+          <BreadcrumbLink as={Link} to="/" color="gray.400" fontSize="xs">Asosiy</BreadcrumbLink>
         </BreadcrumbItem>
         {breadcrumbs.map((bc, idx) => (
           <BreadcrumbItem key={idx} isCurrentPage={idx === breadcrumbs.length - 1}>

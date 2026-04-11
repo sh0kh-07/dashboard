@@ -171,13 +171,13 @@ const MainKashkadarya = () => {
   const chartColors = [brand600, "#3182CE", "#DD6B20", "#38A169", "#D53F8C", "#805AD5", "#00A3C4", "#C53030", "#2C7A7B", "#6B46C1", "#E53E3E", "#319795", "#D69E2E"];
 
   const renderBarChart = (data: any[], yLabel: string, tooltipSuffix: string) => (
-    <Box bg="gray.900" p={4} borderRadius="xl" mb={6}>
+    <Box bg="white" p={4} borderRadius="xl" mb={6}>
       <ResponsiveContainer width="100%" height={500}>
         <BarChart layout="vertical" data={data} margin={{ left: 140, bottom: 20 }}>
-          <CartesianGrid stroke="#2d3748" />
-          <XAxis type="number" tick={{ fill: "#cbd5e0" }} label={{ value: yLabel, position: "insideBottom", offset: -5, fill: "#cbd5e0" }} />
-          <YAxis type="category" dataKey="name" width={130} tick={{ fill: "#cbd5e0", fontSize: 11 }} />
-          <Tooltip formatter={(v) => `${v} ${tooltipSuffix}`} contentStyle={{ backgroundColor: "#1a202c", border: "none", color: "white" }} />
+          <CartesianGrid stroke="#e2e8f0" />
+          <XAxis type="number" tick={{ fill: "#4a5568" }} label={{ value: yLabel, position: "insideBottom", offset: -5, fill: "#4a5568" }} />
+          <YAxis type="category" dataKey="name" width={130} tick={{ fill: "#4a5568", fontSize: 11 }} />
+          <Tooltip formatter={(v) => `${v} ${tooltipSuffix}`} contentStyle={{ backgroundColor: "#ffffff", border: "1px solid #e2e8f0", color: "#1a202c" }} />
           <Bar dataKey="value" radius={[0, 8, 8, 0]}>
             {data.map((_, idx) => <Cell key={idx} fill={chartColors[idx % chartColors.length]} />)}
           </Bar>
@@ -191,22 +191,22 @@ const MainKashkadarya = () => {
       <Box>
         <Flex align="center" gap={3} mb={6}>
           <Icon as={TrendingUp} boxSize={7} color={brand600} />
-          <Heading size="xl" color="white">Qashqadaryo viloyati – moliyaviy taqsimot</Heading>
+          <Heading size="xl" color="gray.800">Qashqadaryo viloyati – moliyaviy taqsimot</Heading>
         </Flex>
-        <Text color="gray.300" mb={6}>Har bir yo‘nalish bo‘yicha tuman va shaharlarga ajratilgan mablag‘lar. Xaritada ustiga bosing yoki bosing.</Text>
+        <Text color="gray.600" mb={6}>Har bir yo‘nalish bo‘yicha tuman va shaharlarga ajratilgan mablag‘lar. Xaritada ustiga bosing yoki bosing.</Text>
 
         <Tabs variant="soft-rounded" colorScheme="blue" index={tabIndex} onChange={setTabIndex} mb={8}>
-          <TabList bg="gray.900" borderRadius="xl" p={2}>
-            <Tab _selected={{ bg: brand600, color: "white" }} color="gray.300">
+          <TabList bg="white" borderRadius="xl" p={2}>
+            <Tab _selected={{ bg: "brand.50", color: "brand.600" }} color="gray.600">
               <Flex align="center" gap={2}><Icon as={Landmark} boxSize={4} /> Davlat byudjeti</Flex>
             </Tab>
-            <Tab _selected={{ bg: brand600, color: "white" }} color="gray.300">
+            <Tab _selected={{ bg: "brand.50", color: "brand.600" }} color="gray.600">
               <Flex align="center" gap={2}><Icon as={Wallet} boxSize={4} /> Jamgʻarma</Flex>
             </Tab>
-            <Tab _selected={{ bg: brand600, color: "white" }} color="gray.300">
+            <Tab _selected={{ bg: "brand.50", color: "brand.600" }} color="gray.600">
               <Flex align="center" gap={2}><Icon as={CreditCard} boxSize={4} /> Kreditlar</Flex>
             </Tab>
-            <Tab _selected={{ bg: brand600, color: "white" }} color="gray.300">
+            <Tab _selected={{ bg: "brand.50", color: "brand.600" }} color="gray.600">
               <Flex align="center" gap={2}><Icon as={Globe} boxSize={4} /> Tashqi moliya</Flex>
             </Tab>
           </TabList>
@@ -220,8 +220,8 @@ const MainKashkadarya = () => {
               return (
                 <TabPanel key={idx} p={0}>
                   <SimpleGrid columns={{ base: 1, md: 2 }} gap={6} mb={6}>
-                    <Stat bg="gray.900" p={5} borderRadius="xl">
-                      <StatLabel color="gray.400">{label} (viloyat)</StatLabel>
+                    <Stat bg="white" p={5} borderRadius="xl">
+                      <StatLabel color="gray.600">{label} (viloyat)</StatLabel>
                       <StatNumber fontSize="3xl" color={brand600}>
                         {idx === 0 && `${(total / 1000).toFixed(2)} trln so‘m`}
                         {idx === 1 && `${(total / 1000).toFixed(2)} trln so‘m`}
@@ -232,7 +232,7 @@ const MainKashkadarya = () => {
                   </SimpleGrid>
 
                   {/* Карта */}
-                  <Box position="relative" bg="gray.900" p={4} borderRadius="xl" mb={6}>
+                  <Box position="relative" bg="white" p={4} borderRadius="xl" mb={6}>
                     <svg viewBox={kashkadaryaMap.viewBox} style={{ width: "100%", height: "auto" }}>
                       {kashkadaryaMap.layers.map((layer: any) => (
                         <path
@@ -253,8 +253,8 @@ const MainKashkadarya = () => {
                         position="fixed"
                         top={tooltip.y}
                         left={tooltip.x}
-                        bg="gray.800"
-                        color="white"
+                        bg="gray.50"
+                        color="gray.800"
                         px={4}
                         py={2}
                         borderRadius="lg"
@@ -278,7 +278,7 @@ const MainKashkadarya = () => {
           </TabPanels>
         </Tabs>
 
-        <Text fontSize="xs" textAlign="center" color="gray.500">
+        <Text fontSize="xs" textAlign="center" color="gray.600">
           * Qarshi shahri ustiga bosish orqali batafsil maʼlumotga o‘tishingiz mumkin.
         </Text>
       </Box>

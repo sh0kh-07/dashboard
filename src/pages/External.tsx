@@ -14,7 +14,6 @@ import {
     useToken,
     Flex,
     IconButton,
-    Badge,
 } from "@chakra-ui/react";
 import {
     BarChart,
@@ -32,10 +31,8 @@ const External = () => {
     const [brand600] = useToken("colors", ["brand.600"]);
     const navigate = useNavigate();
 
-    // Общая сумма внешних источников
-    const totalExternal = 8.33; // млрд долл
+    const totalExternal = 8.33; // mlrd AQSH dollari
 
-    // Данные по проектам (4 направления)
     const projectItems = [
         {
             id: 1,
@@ -75,7 +72,6 @@ const External = () => {
         },
     ];
 
-    // Данные по банкам (суммы в млрд долларов)
     const correctBankItems = [
         { name: "TRUSTBANK", amount: 1.5, unit: "mlrd AQSH dollari" },
         { name: "Agrobank ATB", amount: 0.6, unit: "mlrd AQSH dollari" },
@@ -89,7 +85,6 @@ const External = () => {
         { name: "Xususiy banklar", amount: 1.55, unit: "mlrd AQSH dollari" },
     ];
 
-    // Данные для графика (банки)
     const chartData = correctBankItems.map((item) => ({
         name: item.name.length > 15 ? item.name.substring(0, 12) + "..." : item.name,
         fullName: item.name,
@@ -111,18 +106,18 @@ const External = () => {
 
     const handleDetailClick = (itemId: number) => {
         if (itemId === 1) {
-            navigate("/external-detail"); // замените на нужный путь
+            navigate("/external-detail");
         }
     };
 
     return (
         <Box>
             <Flex justifyContent="space-between" alignItems="start" mb={8}>
-                <Heading as="h1" size="xl" fontWeight="bold">
+                <Heading as="h1" size="xl" fontWeight="bold" color="gray.800">
                     Tashqi moliya manbalari
                 </Heading>
                 <Box textAlign="right">
-                    <Text fontSize="lg" fontWeight="medium" color="gray.400">
+                    <Text fontSize="lg" fontWeight="medium" color="gray.600">
                         Jami jalb qilingan mablag‘lar
                     </Text>
                     <Text fontSize="2xl" fontWeight="extrabold" color={brand600}>
@@ -131,8 +126,7 @@ const External = () => {
                 </Box>
             </Flex>
 
-            {/* Проекты (4 карточки) */}
-            <Text fontSize="xl" fontWeight="bold" mb={4}>
+            <Text fontSize="xl" fontWeight="bold" mb={4} color="gray.800">
                 Loyihalar va yo‘nalishlar
             </Text>
             <SimpleGrid columns={{ base: 1, md: 2, lg: 4 }} spacing={6} mb={12}>
@@ -142,32 +136,32 @@ const External = () => {
                         <Card
                             key={item.id}
                             variant="outline"
-                            border="none"
+                            border="1px solid"
+                            borderColor="gray.200"
                             borderRadius="xl"
                             transition="0.2s"
-                            bg="dark.card"
+                            bg="white"
                             cursor={isClickable ? "pointer" : "default"}
                             _hover={
                                 isClickable
-                                    ? { boxShadow: "lg", transform: "translateY(-4px)" }
+                                    ? { boxShadow: "lg", transform: "translateY(-4px)", borderColor: brand600 }
                                     : {}
                             }
                             onClick={() => handleDetailClick(item.id)}
                             position="relative"
                         >
-                      
                             <CardBody>
                                 <Stat>
-                                    <StatLabel fontSize="md" fontWeight="bold" color="white">
+                                    <StatLabel fontSize="md" fontWeight="bold" color="gray.800">
                                         {item.title}
                                     </StatLabel>
-                                    <StatHelpText fontSize="xs" color="gray.400" mb={1}>
+                                    <StatHelpText fontSize="xs" color="gray.600" mb={1}>
                                         {item.subtitle}
                                     </StatHelpText>
                                     <StatNumber fontSize="xl" fontWeight="black" color={brand600} mt={2}>
                                         {item.amount} {item.unit}
                                     </StatNumber>
-                                    <StatHelpText fontSize="xs" color="gray.500" mt={2}>
+                                    <StatHelpText fontSize="xs" color="gray.600" mt={2}>
                                         {item.description}
                                     </StatHelpText>
                                 </Stat>
@@ -180,7 +174,7 @@ const External = () => {
                                         size="sm"
                                         variant="ghost"
                                         color={brand600}
-                                        _hover={{ bg: "rgba(49,130,206,0.2)" }}
+                                        _hover={{ bg: "gray.100", color: brand600 }}
                                         onClick={(e) => {
                                             e.stopPropagation();
                                             handleDetailClick(item.id);
@@ -192,7 +186,7 @@ const External = () => {
                                         icon={<Lock size={18} />}
                                         size="sm"
                                         variant="ghost"
-                                        color="gray.500"
+                                        color="gray.600"
                                         isDisabled
                                         _hover={{}}
                                     />
@@ -203,8 +197,7 @@ const External = () => {
                 })}
             </SimpleGrid>
 
-            {/* Банки (без изменений, не кликабельны) */}
-            <Text fontSize="xl" fontWeight="bold" mb={4}>
+            <Text fontSize="xl" fontWeight="bold" mb={4} color="gray.800">
                 Banklar tomonidan jalb qilingan mablag‘lar (jami 8 mlrd AQSH dollari)
             </Text>
             <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={6} mb={12}>
@@ -212,15 +205,16 @@ const External = () => {
                     <Card
                         key={idx}
                         variant="outline"
-                        border="none"
+                        border="1px solid"
+                        borderColor="gray.200"
                         borderRadius="xl"
                         transition="0.2s"
-                        bg="dark.card"
+                        bg="white"
                         _hover={{ boxShadow: "lg", transform: "translateY(-4px)" }}
                     >
                         <CardBody>
                             <Stat>
-                                <StatLabel fontSize="md" fontWeight="bold" color="white">
+                                <StatLabel fontSize="md" fontWeight="bold" color="gray.800">
                                     {item.name}
                                 </StatLabel>
                                 <StatNumber fontSize="xl" fontWeight="black" color={brand600} mt={2}>
@@ -232,12 +226,11 @@ const External = () => {
                 ))}
             </SimpleGrid>
 
-            {/* График: распределение по банкам */}
             <Box mt={10}>
-                <Text fontSize="2xl" fontWeight="bold" mb={2}>
+                <Text fontSize="2xl" fontWeight="bold" mb={2} color="gray.800">
                     Banklarning tashqi manbalardan jalb qilgan mablag‘lari (mlrd AQSH dollari)
                 </Text>
-                <Text fontSize="sm" color="gray.500" mb={6}>
+                <Text fontSize="sm" color="gray.600" mb={6}>
                     Jami 8 mlrd dollar – markaziy va tijorat banklari hissasi
                 </Text>
                 <ResponsiveContainer width="100%" height={500}>
@@ -245,18 +238,18 @@ const External = () => {
                         data={chartData}
                         margin={{ top: 20, right: 30, left: 20, bottom: 100 }}
                     >
-                        <CartesianGrid strokeDasharray="3 3" stroke="#2d3748" />
+                        <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
                         <XAxis
                             dataKey="name"
                             angle={-45}
                             textAnchor="end"
                             interval={0}
                             height={100}
-                            tick={{ fontSize: 11, fill: "#cbd5e0" }}
+                            tick={{ fontSize: 11, fill: "#4a5568" }}
                         />
                         <YAxis
-                            label={{ value: "mlrd AQSH dollari", angle: -90, position: "insideLeft", fill: "#cbd5e0" }}
-                            tick={{ fill: "#cbd5e0" }}
+                            label={{ value: "mlrd AQSH dollari", angle: -90, position: "insideLeft", fill: "#4a5568" }}
+                            tick={{ fill: "#4a5568" }}
                         />
                         <Tooltip
                             formatter={(value: number) => [`${value} mlrd $`, "Miqdori"]}
@@ -265,12 +258,12 @@ const External = () => {
                                 return original ? original.fullName : label;
                             }}
                             contentStyle={{
-                                backgroundColor: "#1a202c",
+                                backgroundColor: "#ffffff",
                                 borderRadius: "8px",
-                                border: "none",
-                                color: "white",
+                                border: "1px solid #e2e8f0",
+                                color: "#1a202c",
                             }}
-                            itemStyle={{ color: "white" }}
+                            itemStyle={{ color: "#1a202c" }}
                         />
                         <Bar dataKey="value" radius={[8, 8, 0, 0]}>
                             {chartData.map((entry, index) => (
@@ -279,7 +272,7 @@ const External = () => {
                         </Bar>
                     </BarChart>
                 </ResponsiveContainer>
-                <Text fontSize="sm" color="gray.500" textAlign="left" mt={4}>
+                <Text fontSize="sm" color="gray.600" textAlign="left" mt={4}>
                     Eslatma: UZSANOATQURILISHBANK (1,2 mlrd $), Xususiy banklar (1,55 mlrd $) va TRUSTBANK (1,5 mlrd $)
                     eng katta ulushga ega. Qolgan banklar jami 3,75 mlrd $ jalb qilgan.
                 </Text>

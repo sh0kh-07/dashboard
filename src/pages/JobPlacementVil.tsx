@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import {
   Box, Text, Heading, Flex, useToken, SimpleGrid, Stat, StatLabel,
   StatNumber, StatHelpText, Badge, Table, Thead, Tbody, Tr, Th, Td,
-  TableContainer, HStack, Icon,
+  TableContainer, HStack
 } from "@chakra-ui/react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -11,35 +11,32 @@ import {
 } from "recharts";
 import {
   AlertTriangle, CheckCircle, Briefcase, Building, Users,
-  Landmark, HeartHandshake, GraduationCap, Truck, Home, Camera,
+  Landmark, Home, BookOpen, MapPin,
 } from "lucide-react";
 import kashkadaryaMap from "../data/kashkadaryaMap";
 
 // ------------------------------
-// QASHQADARYO VILOYATI UCHUN MA'LUMOTLAR (JADVALDAN)
+// QASHQADARYO VILOYATI MA'LUMOTLARI (2026 DOIMIY ISH O'RINLARI)
 // ------------------------------
-const totalLegalJobs = 77737; // Jami legallashtiriladigan ish o‘rinlari
+const totalLegalJobs = 86763; 
 
-// Idoralar bo‘yicha taqsimot (jadvaldagi ustunlar)
 const agencies = [
-  { name: "Soliq qo‘mitasi", jobs: 26750, icon: Landmark, color: "#3182CE" },
-  { name: "Ijtimoiy himoya milliy agentligi", jobs: 9030, icon: HeartHandshake, color: "#38A169" },
-  { name: "Kambag‘allikni qisqartirish va bandlik vazirligi", jobs: 9640, icon: Briefcase, color: "#DD6B20" },
-  { name: "Qishloq xo‘jaligi vazirligi", jobs: 15800, icon: GraduationCap, color: "#805AD5" },
-  { name: "Transport vazirligi", jobs: 7836, icon: Truck, color: "#D53F8C" },
-  { name: "Qurilish va uy-joy kommunal xo‘jaligi vazirligi", jobs: 8231, icon: Home, color: "#ED8936" },
-  { name: "Turizm qo‘mitasi", jobs: 450, icon: Camera, color: "#9F7AEA" },
+  { name: "Investitsiya loyihalari", jobs: 11977, icon: Landmark, color: "#3182CE" },
+  { name: "Xizmat/Servis", jobs: 20151, icon: Briefcase, color: "#38A169" },
+  { name: "Qishloq xoʻjaligi", jobs: 7718, icon: Home, color: "#DD6B20" },
+  { name: "Qurilish", jobs: 2753, icon: Building, color: "#805AD5" },
+  { name: "Boʻsh ish oʻrinlari", jobs: 13164, icon: Users, color: "#D53F8C" },
+  { name: "Moliyaviy koʻmak", jobs: 31000, icon: BookOpen, color: "#ED8936" },
 ];
 
-// Jami tekshiruv: 26750+9030+9640+15800+7836+8231+450 = 77737
 const totalByAgencies = agencies.reduce((sum, a) => sum + a.jobs, 0);
 
 // ------------------------------
-// TUMANLAR KESIMIDA TAQSIMOT (og‘irlik koeffitsiyentlari asosida)
+// TUMANLAR KESIMIDA TAQSIMOT
 // ------------------------------
 interface DistrictJobData {
   name: string;
-  legalJobs: number;   // legallashtiriladigan ish o‘rinlari soni
+  legalJobs: number;   
   status: "bad" | "moderate" | "good";
 }
 
@@ -66,17 +63,15 @@ const totalWeight = districtsRaw.reduce((s, d) => s + d.weight, 0);
 const jobsPerWeight = totalLegalJobs / totalWeight;
 
 const districtsData: DistrictJobData[] = districtsRaw.map(d => {
-  let jobs = Math.round(jobsPerWeight * d.weight);
-  // statusni aniqlash: o‘rtacha ish o‘rinlari sonidan kelib chiqib
+  const jobs = Math.round(jobsPerWeight * d.weight);
   const avgJobs = totalLegalJobs / districtsRaw.length;
   let status: "bad" | "moderate" | "good";
-  if (jobs < avgJobs * 0.8) status = "bad";      // kam ish o‘rni – yomon
-  else if (jobs > avgJobs * 1.2) status = "good"; // ko‘p ish o‘rni – yaxshi
+  if (jobs < avgJobs * 0.8) status = "bad";    
+  else if (jobs > avgJobs * 1.2) status = "good"; 
   else status = "moderate";
   return { name: d.name, legalJobs: jobs, status };
 }).sort((a, b) => b.legalJobs - a.legalJobs);
 
-// Xarita mapping
 const getDistrictJobs = (name: string): number => {
   const found = districtsData.find(d => d.name === name);
   return found ? found.legalJobs : 0;
@@ -87,7 +82,7 @@ const getDistrictStatus = (name: string): "bad" | "moderate" | "good" | undefine
   return found?.status;
 };
 
-const LegalJobsVil = () => {
+const JobPlacementVil = () => {
   const [brand600, red400, yellow400, green400] = useToken("colors", [
     "brand.600", "red.500", "yellow.500", "green.500",
   ]);
@@ -98,9 +93,9 @@ const LegalJobsVil = () => {
 
   const getPathColor = (jobs: number): string => {
     const avg = totalLegalJobs / districtsRaw.length;
-    if (jobs < avg * 0.8) return red400;      // kam ish o‘rni – yomon (qizil)
-    if (jobs > avg * 1.2) return green400;    // ko‘p ish o‘rni – yaxshi (yashil)
-    return yellow400;                         // o‘rtacha
+    if (jobs < avg * 0.8) return red400;      
+    if (jobs > avg * 1.2) return green400;    
+    return yellow400;                         
   };
 
   const handleMouseEnter = (e: React.MouseEvent<SVGPathElement>, name: string) => {
@@ -109,7 +104,7 @@ const LegalJobsVil = () => {
     setTooltip({
       visible: true, x: e.clientX + 15, y: e.clientY + 15,
       name, jobs,
-      status: status === "bad" ? "Kam ish o‘rni (xavf)" : status === "good" ? "Ko‘p ish o‘rni (yaxshi)" : "O‘rtacha",
+      status: status === "bad" ? "Kam ehtiyoj (xavf)" : status === "good" ? "Yuqori bandlik" : "O‘rtacha",
     });
   };
   const handleMouseMove = (e: React.MouseEvent<SVGPathElement>) => {
@@ -117,7 +112,7 @@ const LegalJobsVil = () => {
   };
   const handleMouseLeave = () => setTooltip({ visible: false, x: 0, y: 0, name: "", jobs: 0 });
   const handleClick = (name: string) => {
-    if (name === "Qarshi shahri") navigate("/swork/vil/qarshi");
+    if (name === "Qarshi shahri") navigate("/job-placement/vil/qarshi");
   };
 
   const chartData = districtsData.map(d => ({
@@ -127,49 +122,34 @@ const LegalJobsVil = () => {
 
   const agencyChartData = agencies.map(a => ({ name: a.name, jobs: a.jobs }));
 
-  const stats = {
-    totalJobs: totalLegalJobs,
-    totalByAgencies,
-    goodCount: districtsData.filter(d => d.status === "good").length,
-    moderateCount: districtsData.filter(d => d.status === "moderate").length,
-    badCount: districtsData.filter(d => d.status === "bad").length,
-  };
-
   return (
     <Box minH="100vh">
       <Flex justify="space-between" mb={6} flexWrap="wrap" gap={4}>
-        <Heading size="xl" color="gray.800">Qashqadaryo viloyati – Legallashtiriladigan ish o‘rinlari</Heading>
+        <Heading size="xl" color="gray.800">Qashqadaryo viloyati – Doimiy ish o‘rinlari</Heading>
         <Flex align="center" gap={2}>
-          <Text color="gray.600">Jami ish o‘rinlari:</Text>
-          <Text color={brand600} fontWeight="bold" fontSize="2xl">{stats.totalJobs.toLocaleString()}</Text>
+          <Text color="gray.600">Viloyat bo'yicha jami:</Text>
+          <Text color={brand600} fontWeight="bold" fontSize="2xl">{totalLegalJobs.toLocaleString()}</Text>
         </Flex>
       </Flex>
 
-      <Text color="gray.600" mb={4}>
-        Xaritadagi ranglar: <strong style={{ color: green400 }}>Yashil</strong> — ko‘p ish o‘rni (yaxshi),{" "}
-        <strong style={{ color: yellow400 }}>Sariq</strong> — o‘rtacha,{" "}
-        <strong style={{ color: red400 }}>Qizil</strong> — kam ish o‘rni (xavf).
-      </Text>
-
       <SimpleGrid columns={{ base: 1, md: 3 }} spacing={4} mb={6}>
         <Stat bg="white" border="1px solid" borderColor="gray.200" boxShadow="sm" p={3} borderRadius="lg">
-          <StatLabel><HStack><Briefcase size={16} /><Text>Jami legallashtiriladigan ish o‘rinlari</Text></HStack></StatLabel>
-          <StatNumber>{stats.totalJobs.toLocaleString()}</StatNumber>
-          <StatHelpText>viloyat bo‘yicha</StatHelpText>
+          <StatLabel><HStack><Briefcase size={16} /><Text>Viloyat ko'rsatkichi</Text></HStack></StatLabel>
+          <StatNumber>{totalLegalJobs.toLocaleString()}</StatNumber>
+          <StatHelpText>2026 yil maqsadi</StatHelpText>
         </Stat>
         <Stat bg="white" border="1px solid" borderColor="gray.200" boxShadow="sm" p={3} borderRadius="lg">
-          <StatLabel><HStack><CheckCircle size={16} /><Text>Idoralar bo‘yicha jami</Text></HStack></StatLabel>
-          <StatNumber color="green.400">{stats.totalByAgencies.toLocaleString()}</StatNumber>
-          <StatHelpText>7 ta tashkilot</StatHelpText>
+          <StatLabel><HStack><CheckCircle size={16} /><Text>Sohalar kesimida taqsimot</Text></HStack></StatLabel>
+          <StatNumber color="green.400">{totalByAgencies.toLocaleString()}</StatNumber>
+          <StatHelpText>6 ta yo'nalish</StatHelpText>
         </Stat>
         <Stat bg="white" border="1px solid" borderColor="gray.200" boxShadow="sm" p={3} borderRadius="lg">
-          <StatLabel><HStack><Users size={16} /><Text>Eng faol idora</Text></HStack></StatLabel>
-          <StatNumber color="blue.300">{agencies[0].jobs.toLocaleString()}</StatNumber>
-          <StatHelpText>Soliq qo‘mitasi</StatHelpText>
+          <StatLabel><HStack><BookOpen size={16} /><Text>Asosiy yo'nalish</Text></HStack></StatLabel>
+          <StatNumber color="brand.400">{agencies[5].jobs.toLocaleString()}</StatNumber>
+          <StatHelpText>Moliyaviy ko'mak orqali</StatHelpText>
         </Stat>
       </SimpleGrid>
 
-      {/* Xarita */}
       <Box position="relative" bg="white" border="1px solid" borderColor="gray.200" boxShadow="sm" p={4} borderRadius="xl" mb={8}>
         <svg viewBox={kashkadaryaMap.viewBox} style={{ width: "80%", height: "auto", margin: "0 auto", display: "block" }}>
           {kashkadaryaMap.layers.map((layer: any) => {
@@ -195,79 +175,47 @@ const LegalJobsVil = () => {
           })}
         </svg>
         {tooltip.visible && (
-          <Box position="fixed" top={tooltip.y} left={tooltip.x} bg="gray.50" color="gray.800" px={4} py={2} borderRadius="lg" zIndex={1000} pointerEvents="none"  >
+          <Box position="fixed" top={tooltip.y} left={tooltip.x} bg="gray.50" color="gray.800" px={4} py={2} borderRadius="lg" zIndex={1000} pointerEvents="none">
             <Text fontWeight="bold">{tooltip.name}</Text>
-            <Text fontSize="sm">Legallashtiriladigan ish o‘rinlari: <strong>{tooltip.jobs.toLocaleString()}</strong></Text>
-            <Text fontSize="xs">Holat: {tooltip.status}</Text>
+            <Text fontSize="sm">Ishga joylashtirish: <strong>{tooltip.jobs.toLocaleString()}</strong> nafar</Text>
+            {tooltip.name === "Qarshi shahri" && <Text fontSize="xs" color="brand.300">Bosing - batafsil ma'lumot</Text>}
           </Box>
         )}
       </Box>
 
-      {/* Grafik: tumanlar bo‘yicha ish o‘rinlari */}
-      <Heading size="lg" mb={4} color="gray.800">Tumanlar kesimida legallashtiriladigan ish o‘rinlari</Heading>
+      <Heading size="lg" mb={4} color="gray.800">Tumanlar kesimida aholi bandligini ta'minlash</Heading>
       <Box bg="white" border="1px solid" borderColor="gray.200" boxShadow="sm" p={4} borderRadius="xl" mb={8}>
         <ResponsiveContainer width="100%" height={500}>
           <BarChart layout="vertical" data={chartData} margin={{ left: 100 }}>
             <CartesianGrid stroke="#e2e8f0" />
-            <XAxis type="number" tick={{ fill: "#4a5568" }} label={{ value: "Ish o‘rinlari soni", position: "insideBottom", offset: -5, fill: "#4a5568" }} />
+            <XAxis type="number" tick={{ fill: "#4a5568" }} />
             <YAxis type="category" dataKey="name" tick={{ fill: "#4a5568" }} width={100} />
             <RechartsTooltip formatter={(v: number) => v.toLocaleString()} contentStyle={{ backgroundColor: "#ffffff", border: "1px solid #e2e8f0", borderRadius: "8px" }} />
             <Bar dataKey="jobs" fill={brand600} radius={[0, 8, 8, 0]}>
               {chartData.map((entry, idx) => (
-                <Cell key={idx} fill={entry.jobs > 5500 ? green400 : entry.jobs < 4000 ? red400 : yellow400} />
+                <Cell key={idx} fill={entry.jobs > 6000 ? green400 : entry.jobs < 4000 ? red400 : yellow400} />
               ))}
             </Bar>
           </BarChart>
         </ResponsiveContainer>
       </Box>
 
-      {/* Idoralar bo‘yicha taqsimot */}
-      <Heading size="lg" mb={4} color="gray.800">Idoralar (tashkilotlar) bo‘yicha taqsimot</Heading>
+      <Heading size="lg" mb={4} color="gray.800">Yo'nalishlar bo'yicha taqsimot</Heading>
       <Box bg="white" border="1px solid" borderColor="gray.200" boxShadow="sm" p={4} borderRadius="xl" mb={8}>
         <ResponsiveContainer width="100%" height={400}>
           <BarChart data={agencyChartData} margin={{ top: 20, right: 30, left: 20, bottom: 60 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
             <XAxis dataKey="name" tick={{ fill: "#4a5568", fontSize: 11 }} angle={-30} textAnchor="end" height={80} />
-            <YAxis tick={{ fill: "#4a5568" }} label={{ value: "Ish o‘rinlari soni", angle: -90, position: "insideLeft", fill: "#4a5568" }} />
+            <YAxis tick={{ fill: "#4a5568" }} />
             <RechartsTooltip formatter={(v: number) => v.toLocaleString()} contentStyle={{ backgroundColor: "#ffffff", border: "1px solid #e2e8f0" }} />
-            <Legend wrapperStyle={{ color: "#1a202c" }} />
             <Bar dataKey="jobs" fill={brand600} radius={[8,8,0,0]}>
               {agencyChartData.map((_, idx) => <Cell key={idx} fill={agencies[idx].color} />)}
             </Bar>
           </BarChart>
         </ResponsiveContainer>
       </Box>
-
-      {/* Jadval: tumanlar va ish o‘rinlari */}
-      <TableContainer bg="white" border="1px solid" borderColor="gray.200" boxShadow="sm" borderRadius="xl" overflowX="auto" mb={6}>
-        <Table variant="simple">
-          <Thead bg="gray.50" color="gray.700">
-            <Tr><Th color="gray.700">Tuman</Th><Th isNumeric color="gray.700">Legallashtiriladigan ish o‘rinlari</Th><Th color="gray.700">Holat</Th></Tr>
-          </Thead>
-          <Tbody>
-            {districtsData.map(d => (
-              <Tr key={d.name}>
-                <Td fontWeight="medium" color="gray.800">{d.name}</Td>
-                <Td isNumeric color="gray.800">{d.legalJobs.toLocaleString()}</Td>
-                <Td color="gray.800"><Badge colorScheme={d.status === "good" ? "green" : d.status === "bad" ? "red" : "yellow"}>{d.status === "good" ? "Ko‘p (yaxshi)" : d.status === "bad" ? "Kam (xavf)" : "O‘rtacha"}</Badge></Td>
-              </Tr>
-            ))}
-          </Tbody>
-        </Table>
-      </TableContainer>
-
-      {/* Xulosa */}
-      <Box bg="white" border="1px solid" borderColor="gray.200" boxShadow="sm" p={4} borderRadius="lg">
-        <Flex gap={3} align="center"><AlertTriangle size={20} color={yellow400} /><Heading size="sm" color="gray.800">Asosiy xulosalar</Heading></Flex>
-        <Text fontSize="sm" color="gray.600" mt={2}>
-          • Qashqadaryo viloyatida jami <strong>{stats.totalJobs.toLocaleString()}</strong> ta legallashtiriladigan ish o‘rni rejalashtirilgan.<br/>
-          • Eng ko‘p ish o‘rni Soliq qo‘mitasi ({agencies[0].jobs.toLocaleString()}) va Qishloq xo‘jaligi vazirligi ({agencies[3].jobs.toLocaleString()}) hissasiga to‘g‘ri keladi.<br/>
-          • Tumanlar kesimida Qarshi shahri, Shahrisabz va Kitobda ish o‘rinlari ko‘p (yashil), Qamashi, Mirishkor va Dehqonoboda esa kam (qizil).<br/>
-          • Kam ish o‘rni bo‘lgan tumanlarda bandlikka ko‘maklashish choralari kuchaytirilishi kerak.
-        </Text>
-      </Box>
     </Box>
   );
 };
 
-export default LegalJobsVil;
+export default JobPlacementVil;
