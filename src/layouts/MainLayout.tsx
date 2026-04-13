@@ -18,6 +18,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import SidebarItem from '../components/SidebarItem';
 import Logo from '../Logo/Logo.jpg';
+import Foto from '../Logo/Foto.jpg';
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -330,7 +331,7 @@ const MainLayout = ({ children }: MainLayoutProps) => {
                     <Text fontSize="sm" fontWeight="bold" color="gray.800">{adminName}</Text>
                     <Text fontSize="xs" color="gray.500">Прокурор</Text>
                   </VStack>
-                  <Avatar size="sm" name={adminName} bg="brand.500" color="white" />
+                  <Avatar size="md" name={adminName} src={Foto} bg="brand.500" color="white" />
                 </HStack>
               </MenuButton>
               <MenuList bg="white" borderColor="gray.200" boxShadow="lg">
