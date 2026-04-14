@@ -93,7 +93,7 @@ const creditsData = generateData(newTotalCredits, "mlrd so‘m");
 const externalData = generateData(newTotalExternal, "mlrd so‘m"); // теперь в млрд сум, не в долларах
 
 const MainKashkadarya = () => {
-  const [brand600] = useToken("colors", ["brand.600"]);
+  const [brand600] = useToken("colors", ['#3182CE']);
   const [tabIndex, setTabIndex] = useState(0);
   const [hoveredDistrict, setHoveredDistrict] = useState<string | null>(null);
   const [tooltip, setTooltip] = useState<{

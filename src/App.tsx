@@ -14,6 +14,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import LoginPage from './pages/LoginPage';
 import DashboardPage from './pages/DashboardPage';
 import GosBudget from './pages/GosBudget';
+import GosBudget2 from './pages/GosBudget2';
 import Found from './pages/Found';
 import Loans from './pages/Loans';
 import External from './pages/External';
@@ -87,6 +88,7 @@ export default function App() {
               <Route path="/kashkadarya/qarshi-detail/batosh/contract/:id" element={<MainContract />} />
 
               <Route path="/budget" element={<GosBudget />} />
+              <Route path="/budget2" element={<GosBudget2 />} />
               <Route path="/budget-detail" element={<BudgetDetail />} />
               <Route path="/budget-detail/kashkadarya" element={<BudgetDetailKashkadarya />} />
               <Route path="/budget-detail/kashkadarya/mahallalar" element={<KashkadaryaMahalla />} />

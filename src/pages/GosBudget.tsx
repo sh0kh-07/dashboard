@@ -1,257 +1,464 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Box,
   Text,
+  useToken,
   SimpleGrid,
-  Card,
-  CardBody,
   Stat,
   StatLabel,
   StatNumber,
   StatHelpText,
-  Heading,
-  useToken,
   Flex,
-  IconButton,
-} from "@chakra-ui/react";
-import { useNavigate } from "react-router-dom";
-import { ArrowRight, Lock } from "lucide-react";
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
+  Heading,
+  Container,
+  Grid,
+  GridItem,
+  Icon,
   Tooltip,
-  ResponsiveContainer,
+} from "@chakra-ui/react";
+import { keyframes } from "@emotion/react";
+import { Landmark, Wallet, Banknote, Globe, TrendingUp } from "lucide-react";
+import Uzbekistan from "@svg-maps/uzbekistan";
+import { NavLink, useNavigate } from "react-router-dom";
+import {
+  PieChart,
+  Pie,
   Cell,
-  CartesianGrid,
+  Tooltip as RechartsTooltip,
+  ResponsiveContainer,
+  Legend,
 } from "recharts";
 
-const BudgetPage = () => {
+// Анимация для карточек
+const fadeInUp = keyframes`
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+`;
+
+const DashboardPage = () => {
   const navigate = useNavigate();
-  const [brand600] = useToken("colors", ["brand.600"]);
+  const [tooltip, setTooltip] = useState<any>({
+    visible: false,
+    x: 0,
+    y: 0,
+    data: null,
+  });
+  const [brand600, green400, orange400, purple400] = useToken("colors", [
+    "#3182CE",
+    "#38A169",
+    "#DD6B20",
+    "#805AD5",
+  ]);
 
-  const totalBudget = 26.8;
+  // Normalizatsiya region nomlari
+  const normalizeRegionName = (name: string): string => {
+    let normalized = name
+      .replace(/ viloyati$/i, "")
+      .replace(/ shahri$/i, "")
+      .replace(/ Respublikasi$/i, "")
+      .replace(/‘/g, "'")
+      .trim();
+    const specialMap: Record<string, string> = {
+      Toshkent: "Tashkent",
+      Samarqand: "Samarkand",
+      Buxoro: "Bukhara",
+      Qashqadaryo: "Kashkadarya",
+      "Farg‘ona": "Fergana",
+      Andijon: "Andijan",
+      Surxondaryo: "Surkhandarya",
+      Jizzax: "Jizzakh",
+      Sirdaryo: "Sirdarya",
+      Navoiy: "Navoi",
+      Xorazm: "Khorezm",
+      "Qoraqalpog‘iston": "Karakalpakstan",
+    };
+    return specialMap[normalized] || normalized;
+  };
 
-  const budgetItems = [
-    {
-      id: 1,
-      title: "Mahallalar infratuzilmasini rivojlantirish loyihalari",
-      subtitle: "Respublika budjeti mablag‘lari",
-      amount: 20.0,
-      unit: "trln so‘m",
-      description:
-        "Mahallalar infratuzilmasini rivojlantirishga qaratilgan loyihalarni amalga oshirish",
-    },
-    {
-      id: 2,
-      title: "Og‘ir tuman va mahallalarda tadbirkorlik infratuzilmasini yaratish",
-      subtitle: "Qo‘shimcha budjet mablag‘lari",
-      amount: 3.7,
-      unit: "trln so‘m",
-      description:
-        "37 ta 'og‘ir' tuman va 903 ta 'og‘ir' mahallalarda tadbirkorlik infratuzilmasini yaratish",
-    },
-    {
-      id: 3,
-      title: "Mahallalar infratuzilmasini yaxshilash",
-      subtitle: "Tadbirkorlik uchun shart-sharoitlar",
-      amount: 1.8,
-      unit: "trln so‘m",
-      description:
-        "Mahallalar infratuzilmasini yaxshilash orqali tadbirkorlik faoliyati uchun shart-sharoitlarni yaratish",
-    },
-    {
-      id: 4,
-      title: "Eng yaxshi natija ko‘rsatgan 100 ta 'og‘ir' mahallaga qo‘shimcha",
-      subtitle: "Rag‘batlantirish fondi",
-      amount: 0.1,
-      unit: "trln so‘m (100 mlrd)",
-      description:
-        "Aholi daromadini oshirish va qambag‘allikni qisqartirish bo‘yicha eng yaxshi natija ko‘rsatgan 100 ta 'og‘ir' mahallaga qo‘shimcha 1 mlrd so‘mdan",
-    },
-    {
-      id: 5,
-      title: "Talabalar loyihalari uchun grantlar",
-      subtitle: "Master reja ishlab chiqish",
-      amount: 0.0001,
-      unit: "trln so‘m (100 mln)",
-      description:
-        "Oliy ta'lim muassasalari talabalariga tanlov asosida 'og‘ir' mahallalar 'master rejasi'ni ishlab chiqish bo‘yicha eng yaxshi loyihalar uchun",
-    },
-    {
-      id: 6,
-      title: "Kredit foiz stavkasining bir qismiga kompensatsiya",
-      subtitle: "Tadbirkorlikni rivojlantirish kompaniyasi",
-      amount: 1.2,
-      unit: "trln so‘m",
-      description:
-        "Kredit foiz stavkasining bir qismiga kompensatsiya taqdim etish uchun 'Tadbirkorlikni rivojlantirish kompaniyasi'ga",
-    },
-  ];
+  // Moliyaviy manbalar (mln so'mda)
+  const sources = {
+    stateBudget: 26800000, // 26.8 trln so'm
+    funds: 1200000, // 1.2 trln so'm
+    bankCredits: 140000000, // 140 trln so'm
+    external: 100000000, // 100 mlrd so'm (shartli)
+  };
 
-  const chartData = budgetItems.map((item) => ({
-    name: item.title.length > 20 ? item.title.substring(0, 20) + "..." : item.title,
-    fullName: item.title,
-    value: item.amount,
+  // Viloyatlar og'irlik koeffitsiyentlari
+  const regionWeights: Record<string, number> = {
+    Tashkent: 1.5,
+    Samarkand: 1.2,
+    Bukhara: 1.0,
+    Kashkadarya: 2.5,
+    Fergana: 1.2,
+    Andijan: 1.0,
+    Namangan: 1.0,
+    Surkhandarya: 0.9,
+    Jizzakh: 0.8,
+    Sirdarya: 0.7,
+    Navoi: 1.1,
+    Khorezm: 0.9,
+    Karakalpakstan: 1.0,
+  };
+
+  const totalWeight = Object.values(regionWeights).reduce((a, b) => a + b, 0);
+
+  // Har bir viloyat uchun mablag'lar hisobi
+  const regionData: Record<string, any> = {};
+  Object.keys(regionWeights).forEach((key) => {
+    const w = regionWeights[key];
+    const state = (sources.stateBudget * w) / totalWeight;
+    const funds = (sources.funds * w) / totalWeight;
+    const bank = (sources.bankCredits * w) / totalWeight;
+    const external = (sources.external * w) / totalWeight;
+    regionData[key] = {
+      state,
+      funds,
+      bank,
+      external,
+      total: state + funds + bank + external,
+    };
+  });
+
+  // Doiraviy diagramma uchun ma'lumotlar
+  const pieData = Object.entries(regionData).map(([key, val]) => ({
+    name: key,
+    value: val.total,
   }));
 
-  const barColors = [
+  const COLORS = [
     brand600,
     "#3182CE",
     "#DD6B20",
     "#38A169",
     "#D53F8C",
     "#805AD5",
+    "#00A3C4",
+    "#C53030",
+    "#2C7A7B",
   ];
 
-  const handleCardClick = (id: number) => {
-    if (id === 1) {
-      navigate("/budget-detail");
+  const getRegionKey = (svgName: string): string | null => {
+    const normalized = normalizeRegionName(svgName);
+    if (regionWeights[normalized]) return normalized;
+    if (regionWeights[svgName]) return svgName;
+    return null;
+  };
+
+  const handleRegionClick = (svgName: string) => {
+    const key = getRegionKey(svgName);
+    if (key === "Kashkadarya") {
+      navigate("/kashkadarya");
     }
   };
 
   return (
     <Box>
-      <Flex alignItems="start" justifyContent="space-between" mb={8}>
-        <Heading as="h1" size="xl" fontWeight="bold" color="gray.800">
-          Davlat budjeti
-        </Heading>
-        <Box>
-          <Text fontSize="lg" fontWeight="medium" color="gray.600">
-            Umumiy budjet hajmi
-          </Text>
-          <Text fontSize="2xl" fontWeight="extrabold" color={brand600}>
-            {totalBudget} trln so‘m
-          </Text>
-        </Box>
-      </Flex>
-
-      <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={6} mb={12}>
-        {budgetItems.map((item) => {
-          const isClickable = item.id === 1;
-          return (
-            <Card
-              key={item.id}
-              variant="outline"
-              border="1px solid"
-              borderColor="gray.200"
-              borderRadius="xl"
-              transition="0.2s"
+      {/* Kartochkalar bloki: Ajratilgan mablag‘lar */}
+      <Box mb={12}>
+        <Flex align="center" gap={2} mb={5}>
+          <TrendingUp size={24} color={brand600} />
+          <Heading as="h2" size="lg" color="gray.800">
+            Ajratilgan mablag‘lar
+          </Heading>
+        </Flex>
+        <SimpleGrid columns={{ base: 1, md: 2, lg: 4 }} spacing={6}>
+          {/* 1 - Davlat byudjeti */}
+          <NavLink to="/budget2">
+            <Box
               bg="white"
-              cursor={isClickable ? "pointer" : "default"}
-              _hover={
-                isClickable
-                  ? {
-                    boxShadow: "lg",
-                    transform: "translateY(-4px)",
-                    borderColor: brand600,
-                  }
-                  : {}
-              }
-              onClick={() => handleCardClick(item.id)}
-              position="relative"
+              p={6}
+              borderRadius="2xl"
+              boxShadow="lg"
+              transition="all 0.3s"
+              _hover={{ transform: "translateY(-5px)", boxShadow: "xl" }}
+              borderLeft="6px solid"
+              borderLeftColor={brand600}
+              animation={`${fadeInUp} 0.5s ease-out`}
             >
-              <CardBody>
-                <Stat>
-                  <StatLabel fontSize="lg" fontWeight="bold" color="gray.800">
-                    {item.title}
-                  </StatLabel>
-                  <StatHelpText fontSize="sm" color="gray.600" mb={2}>
-                    {item.subtitle}
-                  </StatHelpText>
-                  <StatNumber fontSize="2xl" fontWeight="black" color={brand600} mt={2}>
-                    {item.amount} {item.unit}
-                  </StatNumber>
-                  <StatHelpText fontSize="xs" color="gray.600" mt={2}>
-                    {item.description}
-                  </StatHelpText>
-                </Stat>
-                <Flex justify="flex-end" mt={3}>
-                  {isClickable ? (
-                    <IconButton
-                      aria-label="Batafsil"
-                      icon={<ArrowRight size={18} />}
-                      size="sm"
-                      variant="ghost"
-                      color={brand600}
-                      _hover={{ bg: "gray.100", color: brand600 }}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleCardClick(item.id);
-                      }}
-                    />
-                  ) : (
-                    <IconButton
-                      aria-label="Yopiq"
-                      icon={<Lock size={18} />}
-                      size="sm"
-                      variant="ghost"
-                      color="gray.400"
-                      isDisabled
-                      _hover={{}}
-                    />
-                  )}
-                </Flex>
-              </CardBody>
-            </Card>
-          );
-        })}
-      </SimpleGrid>
+              <Flex align="center" gap={3} mb={3}>
+                <Icon as={Landmark} boxSize={6} color={brand600} />
+                <Text fontWeight="bold" fontSize="md" color="gray.700">
+                  Davlat byudjeti
+                </Text>
+              </Flex>
+              <Text fontSize="3xl" fontWeight="extrabold" color="gray.900">
+                26,8 trln
+              </Text>
+              <Text fontSize="sm" color="gray.500">
+                so‘m
+              </Text>
+            </Box>
+          </NavLink>
 
-      <Box mt={10}>
-        <Text fontSize="2xl" fontWeight="bold" mb={2} color="gray.800">
-          Budjet mablag‘larining yo‘nalishlar bo‘yicha taqsimoti
-        </Text>
-        <Text fontSize="sm" color="gray.600" mb={6}>
-          (trln so‘mda)
-        </Text>
-        <ResponsiveContainer width="100%" height={500}>
-          <BarChart
-            data={chartData}
-            margin={{ top: 20, right: 30, left: 20, bottom: 120 }}
-          >
-            <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-            <XAxis
-              dataKey="name"
-              angle={-45}
-              textAnchor="end"
-              interval={0}
-              height={100}
-              tick={{ fontSize: 12, fill: "#4a5568" }}
-            />
-            <YAxis
-              label={{ value: "trln so‘m", angle: -90, position: "insideLeft", fill: "#4a5568" }}
-              tick={{ fill: "#4a5568" }}
-            />
-            <Tooltip
-              formatter={(value: number) => [`${value} trln so‘m`, "Miqdori"]}
-              labelFormatter={(label) => {
-                const original = chartData.find((d) => d.name === label);
-                return original ? original.fullName : label;
-              }}
-              contentStyle={{
-                backgroundColor: "#ffffff",
-                borderRadius: "8px",
-                border: "1px solid #e2e8f0",
-                color: "#1a202c",
-              }}
-              itemStyle={{ color: "#1a202c" }}
-            />
-            <Bar dataKey="value" radius={[8, 8, 0, 0]}>
-              {chartData.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={barColors[index % barColors.length]} />
+          {/* 2 - Davlat va maqsadli jamg‘armalar */}
+          <NavLink to='/fund'>
+            <Box
+              bg="white"
+              p={6}
+              borderRadius="2xl"
+              boxShadow="lg"
+              transition="all 0.3s"
+              _hover={{ transform: "translateY(-5px)", boxShadow: "xl" }}
+              borderLeft="6px solid"
+              borderLeftColor={green400}
+              animation={`${fadeInUp} 0.6s ease-out`}
+            >
+              <Flex align="center" gap={3} mb={3}>
+                <Icon as={Wallet} boxSize={6} color={green400} />
+                <Text fontWeight="bold" fontSize="md" color="gray.700">
+                  Davlat va maqsadli jamg‘armalar
+                </Text>
+              </Flex>
+              <Text fontSize="3xl" fontWeight="extrabold" color="gray.900">
+                1,2 trln
+              </Text>
+              <Text fontSize="sm" color="gray.500">
+                so‘m
+              </Text>
+            </Box>
+          </NavLink>
+
+          <NavLink to='/loans'>
+            {/* 3 - Tijorat bank kreditlari */}
+            <Box
+              bg="white"
+              p={6}
+              borderRadius="2xl"
+              boxShadow="lg"
+              transition="all 0.3s"
+              _hover={{ transform: "translateY(-5px)", boxShadow: "xl" }}
+              borderLeft="6px solid"
+              borderLeftColor={orange400}
+              animation={`${fadeInUp} 0.7s ease-out`}
+            >
+              <Flex align="center" gap={3} mb={3}>
+                <Icon as={Banknote} boxSize={6} color={orange400} />
+                <Text fontWeight="bold" fontSize="md" color="gray.700">
+                  Tijorat bank kreditlari
+                </Text>
+              </Flex>
+              <Text fontSize="3xl" fontWeight="extrabold" color="gray.900">
+                140 trln
+              </Text>
+              <Text fontSize="sm" color="gray.500">
+                so‘m
+              </Text>
+            </Box>
+          </NavLink>
+
+          <NavLink to='/external'>
+            {/* 4 - Tashqi moliya manbalari */}
+            <Box
+              bg="white"
+              p={6}
+              borderRadius="2xl"
+              boxShadow="lg"
+              transition="all 0.3s"
+              _hover={{ transform: "translateY(-5px)", boxShadow: "xl" }}
+              borderLeft="6px solid"
+              borderLeftColor={purple400}
+              animation={`${fadeInUp} 0.8s ease-out`}
+            >
+              <Flex align="center" gap={3} mb={3}>
+                <Icon as={Globe} boxSize={6} color={purple400} />
+                <Text fontWeight="bold" fontSize="md" color="gray.700">
+                  Tashqi moliya manbalari
+                </Text>
+              </Flex>
+              <Text fontSize="3xl" fontWeight="extrabold" color="gray.900">
+                8,33 mlrd
+              </Text>
+              <Text fontSize="sm" color="gray.500">
+                AQSH dollari
+              </Text>
+            </Box>
+          </NavLink>
+
+        </SimpleGrid>
+      </Box>
+
+      {/* Xarita bo‘limi */}
+      <Box mb={10}>
+        <Heading as="h2" size="lg" textAlign="center" mb={5} color="gray.800">
+          Hududlar bo‘yicha moliyalashtirish (xarita)
+        </Heading>
+        <Box position="relative" display="flex" justifyContent="center">
+          <svg viewBox={Uzbekistan.viewBox} width="80%" style={{ cursor: "pointer" }}>
+            {Uzbekistan.locations.map((loc: any) => {
+              const regionKey = getRegionKey(loc.name);
+              const hasData = !!regionKey;
+              return (
+                <path
+                  key={loc.id}
+                  d={loc.path}
+                  onMouseEnter={(e) => {
+                    if (!hasData) return;
+                    setTooltip({
+                      visible: true,
+                      x: e.clientX,
+                      y: e.clientY,
+                      data: { ...loc, regionKey },
+                    });
+                  }}
+                  onMouseMove={(e) =>
+                    setTooltip((prev: any) => ({
+                      ...prev,
+                      x: e.clientX,
+                      y: e.clientY,
+                    }))
+                  }
+                  onMouseLeave={() =>
+                    setTooltip({ visible: false, x: 0, y: 0, data: null })
+                  }
+                  onClick={() => handleRegionClick(loc.name)}
+                  style={{
+                    fill: tooltip.data?.id === loc.id ? "#ffffff" : brand600,
+                    stroke: "#2c3e50",
+                    strokeWidth: 1.2,
+                    transition: "fill 0.2s ease, stroke-width 0.2s",
+                    cursor: hasData ? "pointer" : "default",
+                  }}
+                />
+              );
+            })}
+          </svg>
+
+          {/* Tooltip (ma'lumot oynasi) */}
+          {tooltip.visible && tooltip.data && tooltip.data.regionKey && (
+            <Box
+              position="fixed"
+              top={tooltip.y + 12}
+              left={tooltip.x + 12}
+              bg="gray.900"
+              color="white"
+              px={4}
+              py={3}
+              borderRadius="lg"
+              boxShadow="dark-lg"
+              pointerEvents="none"
+              zIndex={1000}
+              maxW="280px"
+              backdropFilter="blur(4px)"
+            >
+              <Text fontWeight="bold" fontSize="md">
+                {tooltip.data.name}
+              </Text>
+              {regionData[tooltip.data.regionKey] && (
+                <>
+                  <Text fontSize="sm" mt={2}>
+                    Davlat byudjeti:{" "}
+                    <strong>
+                      {Math.round(
+                        regionData[tooltip.data.regionKey].state
+                      ).toLocaleString()}{" "}
+                      mln so‘m
+                    </strong>
+                  </Text>
+                  <Text fontSize="sm">
+                    Jamg‘armalar:{" "}
+                    <strong>
+                      {Math.round(
+                        regionData[tooltip.data.regionKey].funds
+                      ).toLocaleString()}{" "}
+                      mln so‘m
+                    </strong>
+                  </Text>
+                  <Text fontSize="sm">
+                    Bank kreditlari:{" "}
+                    <strong>
+                      {Math.round(
+                        regionData[tooltip.data.regionKey].bank
+                      ).toLocaleString()}{" "}
+                      mln so‘m
+                    </strong>
+                  </Text>
+                  <Text fontSize="sm">
+                    Tashqi moliya:{" "}
+                    <strong>
+                      {Math.round(
+                        regionData[tooltip.data.regionKey].external
+                      ).toLocaleString()}{" "}
+                      mln so‘m
+                    </strong>
+                  </Text>
+                  <Text fontSize="sm" fontWeight="bold" mt={2} color={brand600}>
+                    Jami:{" "}
+                    {Math.round(
+                      regionData[tooltip.data.regionKey].total
+                    ).toLocaleString()}{" "}
+                    mln so‘m
+                  </Text>
+                </>
+              )}
+            </Box>
+          )}
+        </Box>
+      </Box>
+
+      {/* Doiraviy diagramma */}
+      <Box bg="white" borderRadius="2xl" p={6} boxShadow="xl" mt={8}>
+        <Heading as="h2" size="lg" textAlign="center" mb={5} color="gray.800">
+          Hududlar ulushi (jami mablag‘lar asosida)
+        </Heading>
+        <ResponsiveContainer width="100%" height={600}>
+          <PieChart>
+            <Pie
+              data={pieData}
+              dataKey="value"
+              nameKey="name"
+              outerRadius={220}
+              innerRadius={80}
+              label={({ name, percent }) =>
+                `${name} ${(percent * 100).toFixed(0)}%`
+              }
+              labelLine={{ stroke: "#718096", strokeWidth: 1 }}
+              paddingAngle={2}
+            >
+              {pieData.map((_, i) => (
+                <Cell
+                  key={i}
+                  fill={COLORS[i % COLORS.length]}
+                  stroke="#fff"
+                  strokeWidth={2}
+                />
               ))}
-            </Bar>
-          </BarChart>
+            </Pie>
+            <Legend
+              verticalAlign="bottom"
+              height={36}
+              iconType="circle"
+              formatter={(value) => <Text fontSize="sm">{value}</Text>}
+            />
+            <RechartsTooltip
+              formatter={(value: any) => [
+                Number(value).toLocaleString() + " mln so‘m",
+                "Jami mablag‘",
+              ]}
+              contentStyle={{
+                backgroundColor: "#1A202C",
+                border: "none",
+                borderRadius: "8px",
+                color: "white",
+              }}
+            />
+          </PieChart>
         </ResponsiveContainer>
-        <Text fontSize="sm" color="gray.600" textAlign="left" mt={4}>
-          Eslatma: 4- va 5-yo‘nalishlar kichik summasi tufayli grafikda deyarli ko‘rinmaydi,
-          ammo ular muhim ijtimoiy ahamiyatga ega.
+      </Box>
+
+      {/* Qisqa izoh */}
+      <Box mt={8} textAlign="center" fontSize="sm" color="gray.500">
+        <Text>
+          * Qashqadaryo viloyati xaritasini bossangiz, batafsil tumanlar kesimidagi ma’lumotlarga o‘tishingiz mumkin.
         </Text>
       </Box>
     </Box>
   );
 };
 
-export default BudgetPage;
+export default DashboardPage;

@@ -12,7 +12,8 @@ import {
   MapPin,
   ChartColumnBig,
   LogOut,
-  User
+  User,
+  MonitorCloud
 } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -45,48 +46,14 @@ interface AccordionMenuItem extends BaseMenuItem {
 type MenuItem = SimpleMenuItem | AccordionMenuItem;
 
 const menuConfig: MenuItem[] = [
-  { type: 'item', label: 'Dashboard', icon: LayoutDashboard, path: '/' },
+  { type: 'item', label: 'Bosh sahifa', icon: LayoutDashboard, path: '/' },
   { type: 'item', label: 'Xisobotlar', icon: ChartColumnBig, path: '/reports' },
-  {
-    type: 'accordion',
-    label: 'Byudjet',
-    icon: BadgeDollarSign,
-    children: [
-      { type: 'item', label: 'Davlat budjeti', icon: ChevronRight, path: '/budget' },
-      { type: 'item', label: 'Jamgʻarma', icon: ChevronRight, path: '/fund' },
-      { type: 'item', label: 'Kreditlar', icon: ChevronRight, path: '/loans' },
-      { type: 'item', label: 'Tashqi moliya manbalari', icon: ChevronRight, path: '/external' },
-    ],
-  },
-  {
-    type: 'accordion',
-    label: 'Kambagʻalik',
-    icon: Users,
-    children: [
-      { type: 'item', label: 'Kambagʻalik darajasi', icon: ChevronRight, path: '/poor-level' },
-      { type: 'item', label: 'Kambagʻal oilalar ', icon: ChevronRight, path: '/family' },
-      { type: 'item', label: 'Kambagʻal oilalarni qamrab olish', icon: ChevronRight, path: '/poor-services' },
-    ],
-  },
-  {
-    type: 'accordion',
-    label: 'Ishsizlik',
-    icon: BriefcaseBusiness,
-    children: [
-      { type: 'item', label: 'Ishsizlik darajasi', icon: ChevronRight, path: '/work' },
-      { type: 'item', label: 'Ish oʻrinlarini legallashtirish', icon: ChevronRight, path: '/swork' },
-      { type: 'item', label: 'Aholini ishga joylashtirish', icon: ChevronRight, path: '/job-placement' },
-    ],
-  },
-  {
-    type: 'accordion',
-    label: 'Og`ir toifa',
-    icon: MapPin,
-    children: [
-      { type: 'item', label: 'Og`ir toifadagi tumanlar', icon: ChevronRight, path: '/regions' },
-      { type: 'item', label: 'Og`ir toifadagi mahallalar', icon: ChevronRight, path: '/mahalla' },
-    ],
-  },
+  { type: 'item', label: 'Ajratilgan mablag`lar', icon: BadgeDollarSign, path: '/budget' },
+  { type: 'item', label: 'Kambagʻalik darajasi', icon: Users, path: '/poor-level' },
+  { type: 'item', label: 'Bandlik darajasi', icon: BriefcaseBusiness, path: '/job-placement' },
+  { type: 'item', label: 'Ogʻir toifadagi hududlar', icon: MapPin, path: '/regions' },
+  { type: 'item', label: 'Ko‘rsatilgan xizmatlar ', icon: MonitorCloud, path: '/mahalla' },
+ 
 ];
 
 // AccordionItem component adapted for light theme

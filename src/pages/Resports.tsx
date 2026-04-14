@@ -1,240 +1,634 @@
-import React from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import {
-  Box, Heading, SimpleGrid, Stat, StatLabel, StatNumber, StatHelpText,
-  Text, Flex, useToken, Divider, HStack, Icon
+  Box, Heading, Text, Flex, SimpleGrid, Stat, StatLabel, StatNumber, StatHelpText,
+  Button, Table, Thead, Tbody, Tr, Th, Td, TableContainer, Badge, useToken,
+  VStack, HStack, Divider, Drawer, DrawerBody, DrawerHeader, DrawerOverlay,
+  DrawerContent, DrawerCloseButton, useDisclosure, Tabs, TabList, TabPanels,
+  Tab, TabPanel, Grid, GridItem, IconButton, Tooltip, Alert, AlertIcon
 } from "@chakra-ui/react";
 import {
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, Legend
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip,
+  ResponsiveContainer, Legend, Cell, ComposedChart, Line
 } from "recharts";
 import {
-  Users, Home, Briefcase, AlertTriangle, TrendingDown, CheckCircle,
-  Landmark, Wallet, Banknote, Globe, BadgePercent, GraduationCap, Building, Link, Flame, ShieldCheck
+  Users, Home, Briefcase, AlertTriangle, CheckCircle, Building, Flame,
+  BadgePercent, DollarSign, ShieldCheck, Activity, ClipboardList, List,
+  FileSpreadsheet, FileText, Download, TrendingUp, TrendingDown, Minus
 } from "lucide-react";
+import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
+import Uzbekistan from "@svg-maps/uzbekistan";
 
-// ------------------------------
-// RESPUBLIKA DARAJASIDAGI UMUMIY STATISTIKA
-// ------------------------------
+// ------------------------------------------------------------
+// 1. TURLAR
+// ------------------------------------------------------------
+interface DistrictData {
+  id: string;
+  name: string;
+  totalPopulation: number;
+  totalFamilies: number;
+  poorFamilies: number;
+  totalHouseholds: number;
+  poorHouseholds: number;
+  povertyRate: number;
+  unemploymentRate: number;
+  jobsPlaced: number;
+  allocatedFunds: number;
+  difficultZone: boolean;
+  totalServices: number;
+  shortcomings: string[];
+}
 
-// Byudjet va Moliya
-const budgetTotal = 26.8;       // Davlat byudjeti (trln)
-const fundTotal = 1.2;          // Jamg'arma (trln)
-const loansTotal = 140;         // Kreditlar (trln)
-const externalTotal = 8.33;     // Tashqi moliya (mlrd $)
+interface RegionData {
+  id: string;
+  name: string;
+  nameEn: string;
+  totalPopulation: number;
+  totalFamilies: number;
+  poorFamilies: number;
+  totalHouseholds: number;
+  poorHouseholds: number;
+  povertyRate: number;
+  unemploymentRate: number;
+  jobsPlaced: number;
+  allocatedFunds: number;
+  difficultZonesCount: number;
+  totalServices: number;
+  shortcomingsCount: number;
+  districts: DistrictData[];
+}
 
-// Kambag'allik
-const povertyAvg = 2.6;                 // O'rtacha kambag'allik %
-const poorFamilies = 263215;            // Kambag'al oilalar (oila)
-const poorRiskFamilies = 48221;         // Xavf ostidagi oilalar
-const poorServicesTarget = 263215;      // 2026 qamrov maqsadi
+// ------------------------------------------------------------
+// 2. MA'LUMOTLAR (O'ZBEK LOTIN)
+// ------------------------------------------------------------
+const generateDistricts = (regionName: string, basePoverty: number, baseUnemployment: number): DistrictData[] => {
+  const districts = [
+    { name: "Markaziy tuman", pop: 45000, families: 9000, households: 9200 },
+    { name: "Sharqiy tuman", pop: 38000, families: 7600, households: 7800 },
+    { name: "G'arbiy tuman", pop: 42000, families: 8400, households: 8600 },
+    { name: "Shimoliy tuman", pop: 35000, families: 7000, households: 7200 },
+    { name: "Janubiy tuman", pop: 40000, families: 8000, households: 8200 },
+  ];
+  return districts.map((d, idx) => {
+    const variation = (idx - 2) * 0.3;
+    let poverty = Math.max(0.5, Math.min(8, basePoverty + variation));
+    let unemployment = Math.max(2, Math.min(7, baseUnemployment + variation * 0.5));
+    let poorFamilies = Math.floor(d.families * (poverty / 100));
+    let poorHouseholds = Math.floor(d.households * (poverty / 100));
+    let jobsPlaced = Math.floor(d.population * (unemployment / 100) * 0.4);
+    let allocatedFunds = poorFamilies * 1.2;
+    let totalServices = poorFamilies * 3;
+    let shortcomings = [];
+    if (poverty > 4) shortcomings.push("Qashshoqlik darajasi yuqori");
+    if (unemployment > 5) shortcomings.push("Ishsizlik yuqori");
+    if (allocatedFunds < poorFamilies * 1) shortcomings.push("Mablag' yetarli emas");
+    if (shortcomings.length === 0) shortcomings.push("Holat barqaror");
+    return {
+      id: `${regionName}-${idx}`,
+      name: d.name,
+      totalPopulation: d.population,
+      totalFamilies: d.families,
+      poorFamilies,
+      totalHouseholds: d.households,
+      poorHouseholds,
+      povertyRate: parseFloat(poverty.toFixed(1)),
+      unemploymentRate: parseFloat(unemployment.toFixed(1)),
+      jobsPlaced,
+      allocatedFunds: parseFloat(allocatedFunds.toFixed(0)),
+      difficultZone: poverty > 4.5,
+      totalServices,
+      shortcomings,
+    };
+  });
+};
 
-// Bandlik va Ishsizlik
-const unemploymentAvg = 4.4;            // O'rtacha ishsizlik %
-const legalJobsTarget = 1000000;        // Legallashtirish reja
-const jobPlacementTarget = 1000045;     // Doimiy ishga joylashtirish 2026
-
-// Qoshimcha O'rtacha Ma'lumotlar (Respublika bo'yicha)
-const povertyByRegion = [
-  { name: "Qoraqalpog'iston", value: 3.2 }, { name: "Andijon", value: 2.7 },
-  { name: "Buxoro", value: 2.6 }, { name: "Jizzax", value: 2.8 },
-  { name: "Qashqadaryo", value: 3.3 }, { name: "Navoiy", value: 2.1 },
-  { name: "Namangan", value: 2.7 }, { name: "Samarqand", value: 2.0 },
-  { name: "Sirdaryo", value: 3.0 }, { name: "Surxondaryo", value: 2.8 },
-  { name: "Toshkent vil.", value: 2.6 }, { name: "Farg'ona", value: 2.7 },
-  { name: "Xorazm", value: 3.0 }, { name: "Toshkent sh.", value: 1.7 },
+const regionsData: RegionData[] = [
+  { id: "qr", name: "Qoraqalpog'iston", nameEn: "Karakalpakstan", totalPopulation: 1900000, totalFamilies: 380000, poorFamilies: 12160, totalHouseholds: 390000, poorHouseholds: 12480, povertyRate: 3.2, unemploymentRate: 4.8, jobsPlaced: 32000, allocatedFunds: 14500, difficultZonesCount: 2, totalServices: 36500, shortcomingsCount: 3, districts: generateDistricts("Qoraqalpog'iston", 3.2, 4.8) },
+  { id: "an", name: "Andijon", nameEn: "Andijan", totalPopulation: 3300000, totalFamilies: 660000, poorFamilies: 17820, totalHouseholds: 675000, poorHouseholds: 18225, povertyRate: 2.7, unemploymentRate: 4.5, jobsPlaced: 58000, allocatedFunds: 21300, difficultZonesCount: 1, totalServices: 53500, shortcomingsCount: 2, districts: generateDistricts("Andijon", 2.7, 4.5) },
+  { id: "bu", name: "Buxoro", nameEn: "Bukhara", totalPopulation: 1950000, totalFamilies: 390000, poorFamilies: 10140, totalHouseholds: 398000, poorHouseholds: 10348, povertyRate: 2.6, unemploymentRate: 4.5, jobsPlaced: 35000, allocatedFunds: 12200, difficultZonesCount: 0, totalServices: 30400, shortcomingsCount: 1, districts: generateDistricts("Buxoro", 2.6, 4.5) },
+  { id: "ji", name: "Jizzax", nameEn: "Jizzakh", totalPopulation: 1450000, totalFamilies: 290000, poorFamilies: 8120, totalHouseholds: 296000, poorHouseholds: 8288, povertyRate: 2.8, unemploymentRate: 4.6, jobsPlaced: 26000, allocatedFunds: 9700, difficultZonesCount: 1, totalServices: 24400, shortcomingsCount: 2, districts: generateDistricts("Jizzax", 2.8, 4.6) },
+  { id: "qa", name: "Qashqadaryo", nameEn: "Qashqadaryo", totalPopulation: 3350000, totalFamilies: 670000, poorFamilies: 22110, totalHouseholds: 685000, poorHouseholds: 22605, povertyRate: 3.3, unemploymentRate: 5.0, jobsPlaced: 55000, allocatedFunds: 26500, difficultZonesCount: 3, totalServices: 66300, shortcomingsCount: 4, districts: generateDistricts("Qashqadaryo", 3.3, 5.0) },
+  { id: "na", name: "Navoiy", nameEn: "Navoi", totalPopulation: 1050000, totalFamilies: 210000, poorFamilies: 4410, totalHouseholds: 214000, poorHouseholds: 4494, povertyRate: 2.1, unemploymentRate: 3.9, jobsPlaced: 22000, allocatedFunds: 5300, difficultZonesCount: 0, totalServices: 13200, shortcomingsCount: 1, districts: generateDistricts("Navoiy", 2.1, 3.9) },
+  { id: "nm", name: "Namangan", nameEn: "Namangan", totalPopulation: 2950000, totalFamilies: 590000, poorFamilies: 15930, totalHouseholds: 603000, poorHouseholds: 16281, povertyRate: 2.7, unemploymentRate: 4.6, jobsPlaced: 51000, allocatedFunds: 19100, difficultZonesCount: 1, totalServices: 47800, shortcomingsCount: 2, districts: generateDistricts("Namangan", 2.7, 4.6) },
+  { id: "sa", name: "Samarqand", nameEn: "Samarkand", totalPopulation: 4000000, totalFamilies: 800000, poorFamilies: 16000, totalHouseholds: 820000, poorHouseholds: 16400, povertyRate: 2.0, unemploymentRate: 4.5, jobsPlaced: 78000, allocatedFunds: 19200, difficultZonesCount: 0, totalServices: 48000, shortcomingsCount: 1, districts: generateDistricts("Samarqand", 2.0, 4.5) },
+  { id: "si", name: "Sirdaryo", nameEn: "Sirdaryo", totalPopulation: 880000, totalFamilies: 176000, poorFamilies: 5280, totalHouseholds: 180000, poorHouseholds: 5400, povertyRate: 3.0, unemploymentRate: 4.6, jobsPlaced: 15000, allocatedFunds: 6300, difficultZonesCount: 1, totalServices: 15800, shortcomingsCount: 2, districts: generateDistricts("Sirdaryo", 3.0, 4.6) },
+  { id: "su", name: "Surxondaryo", nameEn: "Surxondaryo", totalPopulation: 2750000, totalFamilies: 550000, poorFamilies: 15400, totalHouseholds: 562000, poorHouseholds: 15736, povertyRate: 2.8, unemploymentRate: 4.6, jobsPlaced: 47000, allocatedFunds: 18500, difficultZonesCount: 1, totalServices: 46200, shortcomingsCount: 2, districts: generateDistricts("Surxondaryo", 2.8, 4.6) },
+  { id: "to", name: "Toshkent viloyati", nameEn: "Toshkent viloyati", totalPopulation: 2950000, totalFamilies: 590000, poorFamilies: 15340, totalHouseholds: 603000, poorHouseholds: 15678, povertyRate: 2.6, unemploymentRate: 4.5, jobsPlaced: 62000, allocatedFunds: 18400, difficultZonesCount: 0, totalServices: 46000, shortcomingsCount: 1, districts: generateDistricts("Toshkent viloyati", 2.6, 4.5) },
+  { id: "fa", name: "Farg'ona", nameEn: "Fergana", totalPopulation: 3900000, totalFamilies: 780000, poorFamilies: 21060, totalHouseholds: 798000, poorHouseholds: 21546, povertyRate: 2.7, unemploymentRate: 4.5, jobsPlaced: 72000, allocatedFunds: 25300, difficultZonesCount: 1, totalServices: 63200, shortcomingsCount: 2, districts: generateDistricts("Farg'ona", 2.7, 4.5) },
+  { id: "xo", name: "Xorazm", nameEn: "Xorazm", totalPopulation: 1900000, totalFamilies: 380000, poorFamilies: 11400, totalHouseholds: 388000, poorHouseholds: 11640, povertyRate: 3.0, unemploymentRate: 4.5, jobsPlaced: 34000, allocatedFunds: 13700, difficultZonesCount: 1, totalServices: 34200, shortcomingsCount: 2, districts: generateDistricts("Xorazm", 3.0, 4.5) },
+  { id: "ts", name: "Toshkent shahri", nameEn: "Tashkent", totalPopulation: 2950000, totalFamilies: 590000, poorFamilies: 10030, totalHouseholds: 610000, poorHouseholds: 10370, povertyRate: 1.7, unemploymentRate: 3.8, jobsPlaced: 120000, allocatedFunds: 12000, difficultZonesCount: 0, totalServices: 30100, shortcomingsCount: 1, districts: generateDistricts("Toshkent shahri", 1.7, 3.8) },
 ];
 
-const unemploymentByRegion = [
-  { name: "Qoraqalpog'iston", value: 4.8 }, { name: "Andijon", value: 4.5 },
-  { name: "Buxoro", value: 4.5 }, { name: "Jizzax", value: 4.6 },
-  { name: "Qashqadaryo", value: 5.0 }, { name: "Navoiy", value: 3.9 },
-  { name: "Namangan", value: 4.6 }, { name: "Samarqand", value: 4.5 },
-  { name: "Sirdaryo", value: 4.6 }, { name: "Surxondaryo", value: 4.6 },
-  { name: "Toshkent vil.", value: 4.5 }, { name: "Farg'ona", value: 4.5 },
-  { name: "Xorazm", value: 4.5 }, { name: "Toshkent sh.", value: 3.8 },
+// ------------------------------------------------------------
+// 3. KO'RSATKICHLAR (12 ta)
+// ------------------------------------------------------------
+interface MetricConfig {
+  id: string;
+  label: string;
+  dataKey: keyof RegionData;
+  unit: string;
+  icon: React.ElementType;
+  format?: (value: number) => string;
+}
+
+const metrics: MetricConfig[] = [
+  { id: "population", label: "Jami aholi", dataKey: "totalPopulation", unit: "kishi", icon: Users, format: (v) => v.toLocaleString() },
+  { id: "families", label: "Jami oilalar", dataKey: "totalFamilies", unit: "oila", icon: Home, format: (v) => v.toLocaleString() },
+  { id: "poorFamilies", label: "Kambag'al oilalar", dataKey: "poorFamilies", unit: "oila", icon: AlertTriangle, format: (v) => v.toLocaleString() },
+  { id: "households", label: "Xonadonlar", dataKey: "totalHouseholds", unit: "xonadon", icon: Building, format: (v) => v.toLocaleString() },
+  { id: "poorHouseholds", label: "Kambag'al xonadonlar", dataKey: "poorHouseholds", unit: "xonadon", icon: Flame, format: (v) => v.toLocaleString() },
+  { id: "povertyRate", label: "Kambag'allik darajasi", dataKey: "povertyRate", unit: "%", icon: BadgePercent, format: (v) => `${v}%` },
+  { id: "unemploymentRate", label: "Ishsizlik darajasi", dataKey: "unemploymentRate", unit: "%", icon: Briefcase, format: (v) => `${v}%` },
+  { id: "jobsPlaced", label: "Ishga joylashtirilgan", dataKey: "jobsPlaced", unit: "kishi", icon: CheckCircle, format: (v) => v.toLocaleString() },
+  { id: "allocatedFunds", label: "Ajratilgan mablag'lar", dataKey: "allocatedFunds", unit: "mln so'm", icon: DollarSign, format: (v) => v.toLocaleString() },
+  { id: "difficultZones", label: "Og'ir hududlar", dataKey: "difficultZonesCount", unit: "ta", icon: ShieldCheck, format: (v) => v.toString() },
+  { id: "totalServices", label: "Ko'rsatilgan xizmatlar", dataKey: "totalServices", unit: "ta", icon: Activity, format: (v) => v.toLocaleString() },
+  { id: "shortcomings", label: "Kamchiliklar", dataKey: "shortcomingsCount", unit: "ta", icon: ClipboardList, format: (v) => v.toString() },
 ];
 
-// BarChart uchun qulay data
-const combinedChartData = povertyByRegion.map((reg, i) => ({
-  name: reg.name,
-  Kambagallik: reg.value,
-  Ishsizlik: unemploymentByRegion[i].value
-}));
+// ------------------------------------------------------------
+// 4. XARITA MAPPING (TO'LIQ QO'LLAB-QUVVATLASH)
+// ------------------------------------------------------------
+// To'liq mapping: barcha location.name dan bizning region.name ga
+const mapNameToRegion = (svgName: string): RegionData | undefined => {
+  // To'g'ridan-to'g'ri moslik
+  const directMatch = regionsData.find(r => r.nameEn === svgName);
+  if (directMatch) return directMatch;
 
-const Reports = () => {
-  const [brand600, green500, red500, yellow500, purple500, teal500] = useToken("colors", [
-    "brand.600", "green.500", "red.500", "yellow.500", "purple.500", "teal.500"
-  ]);
+  // Qo'shimcha variantlar
+  const mapping: Record<string, string> = {
+    "Karakalpakstan": "Qoraqalpog'iston",
+    "Andijan": "Andijon",
+    "Bukhara": "Buxoro",
+    "Jizzakh": "Jizzax",
+    "Qashqadaryo": "Qashqadaryo",
+    "Navoi": "Navoiy",
+    "Namangan": "Namangan",
+    "Samarkand": "Samarqand",
+    "Sirdaryo": "Sirdaryo",
+    "Surxondaryo": "Surxondaryo",
+    "Toshkent viloyati": "Toshkent viloyati",
+    "Fergana": "Farg'ona",
+    "Xorazm": "Xorazm",
+    "Tashkent": "Toshkent shahri",
+    // Ba'zi variantlarda qo'shimcha probel yoki apostrof bo'lishi mumkin
+    "Qoraqalpog‘iston": "Qoraqalpog'iston",
+    "Andijon": "Andijon",
+    "Buxoro": "Buxoro",
+    "Jizzax": "Jizzax",
+    "Navoiy": "Navoiy",
+    "Samarqand": "Samarqand",
+    "Farg'ona": "Farg'ona",
+    "Toshkent": "Toshkent shahri",
+  };
+  const mappedName = mapping[svgName];
+  if (mappedName) {
+    return regionsData.find(r => r.name === mappedName);
+  }
+  return undefined;
+};
+
+// Rang sxemasi
+const getColorByValue = (value: number, minVal: number, maxVal: number): string => {
+  if (maxVal === minVal) return "#4299E1";
+  const ratio = (value - minVal) / (maxVal - minVal);
+  const r = Math.floor(56 + (229 - 56) * ratio);
+  const g = Math.floor(161 - (161 - 62) * ratio);
+  const b = Math.floor(105 - (105 - 62) * ratio);
+  return `rgb(${r}, ${g}, ${b})`;
+};
+
+// ------------------------------------------------------------
+// 5. XARITA KOMPONENTI
+// ------------------------------------------------------------
+interface MapWithTooltipProps {
+  dataKey: keyof RegionData;
+  onRegionClick: (region: RegionData) => void;
+}
+
+const MapWithTooltip: React.FC<MapWithTooltipProps> = ({ dataKey, onRegionClick }) => {
+  const [tooltip, setTooltip] = useState<{ visible: boolean; x: number; y: number; data: any }>({
+    visible: false, x: 0, y: 0, data: null
+  });
+
+  // Debug: chiqaramiz barcha location nomlarini
+  useEffect(() => {
+    console.log("Xarita locationlari:", Uzbekistan.locations.map(l => l.name));
+  }, []);
+
+  const validLocations = Uzbekistan.locations.filter(loc => mapNameToRegion(loc.name) !== undefined);
+  console.log("Mos keladigan locationlar:", validLocations.length);
+
+  const values = regionsData.map(r => r[dataKey] as number);
+  const minVal = Math.min(...values);
+  const maxVal = Math.max(...values);
+
+  return (
+    <Box position="relative" display="flex" justifyContent="center" my={4}>
+      <svg viewBox={Uzbekistan.viewBox} width="100%" style={{ maxWidth: "800px", cursor: "pointer" }}>
+        {validLocations.map((loc: any) => {
+          const region = mapNameToRegion(loc.name)!;
+          const value = region[dataKey] as number;
+          const fillColor = getColorByValue(value, minVal, maxVal);
+          return (
+            <path
+              key={loc.id}
+              d={loc.path}
+              onMouseEnter={(e) => {
+                setTooltip({
+                  visible: true,
+                  x: e.clientX, y: e.clientY,
+                  data: { name: region.name, value, unit: metrics.find(m => m.dataKey === dataKey)?.unit || "" }
+                });
+              }}
+              onMouseMove={(e) => setTooltip(prev => ({ ...prev, x: e.clientX, y: e.clientY }))}
+              onMouseLeave={() => setTooltip({ visible: false, x: 0, y: 0, data: null })}
+              onClick={() => onRegionClick(region)}
+              style={{
+                fill: fillColor,
+                stroke: "#2d3748",
+                strokeWidth: 1.2,
+                transition: "all 0.2s ease",
+                opacity: 0.9,
+                cursor: "pointer",
+              }}
+              onMouseOver={(e) => { e.currentTarget.style.opacity = "1"; e.currentTarget.style.strokeWidth = "2"; }}
+              onMouseOut={(e) => { e.currentTarget.style.opacity = "0.9"; e.currentTarget.style.strokeWidth = "1.2"; }}
+            />
+          );
+        })}
+      </svg>
+      {tooltip.visible && tooltip.data && (
+        <Box position="fixed" top={tooltip.y + 12} left={tooltip.x + 12} bg="white" color="gray.800" px={4} py={2} borderRadius="md" boxShadow="lg" zIndex={1000} border="1px solid" borderColor="gray.200">
+          <Text fontWeight="bold">{tooltip.data.name}</Text>
+          <Text fontSize="sm">Qiymat: <strong>{tooltip.data.value?.toLocaleString()} {tooltip.data.unit}</strong></Text>
+          <Text fontSize="xs" color="blue.500">Bosing – batafsil</Text>
+        </Box>
+      )}
+    </Box>
+  );
+};
+
+// ------------------------------------------------------------
+// 6. EKSPORT FUNKSIYALARI (TO'G'RI MIME TURLARI)
+// ------------------------------------------------------------
+const exportToExcel = (data: RegionData[], metric: MetricConfig) => {
+  const excelData = data.map(region => ({
+    "Viloyat": region.name,
+    [metric.label]: metric.format ? metric.format(region[metric.dataKey] as number) : (region[metric.dataKey] as number).toLocaleString(),
+    "Aholi": region.totalPopulation.toLocaleString(),
+    "Oilalar": region.totalFamilies.toLocaleString(),
+    "Kambag'al oilalar": region.poorFamilies.toLocaleString(),
+    "Kambag'allik %": region.povertyRate + "%",
+    "Ishsizlik %": region.unemploymentRate + "%",
+    "Ishga joylashtirilgan": region.jobsPlaced.toLocaleString(),
+    "Ajratilgan mablag' (mln so'm)": region.allocatedFunds.toLocaleString(),
+    "Og'ir hududlar soni": region.difficultZonesCount,
+    "Ko'rsatilgan xizmatlar": region.totalServices.toLocaleString(),
+    "Kamchiliklar soni": region.shortcomingsCount,
+  }));
+
+  const ws = XLSX.utils.json_to_sheet(excelData);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "Hisobot");
+  const excelBuffer = XLSX.write(wb, { bookType: "xlsx", type: "array" });
+  const dataBlob = new Blob([excelBuffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+  saveAs(dataBlob, `Hisobot_${metric.label}_${new Date().toISOString().slice(0, 19)}.xlsx`);
+};
+
+const exportToWord = (data: RegionData[], metric: MetricConfig) => {
+  const maxRegion = data.reduce((max, r) => (r[metric.dataKey] as number) > (max.val as number) ? { name: r.name, val: r[metric.dataKey] as number } : max, { name: "", val: 0 });
+  const minRegion = data.reduce((min, r) => (r[metric.dataKey] as number) < (min.val as number) ? { name: r.name, val: r[metric.dataKey] as number } : min, { name: "", val: Infinity });
+  const avgValue = data.reduce((s, r) => s + (r[metric.dataKey] as number), 0) / data.length;
+
+  const htmlContent = `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>O'zbekiston Respublikasi ijtimoiy-iqtisodiy hisoboti</title>
+  <style>
+    body { font-family: 'Times New Roman', Arial, sans-serif; margin: 40px; }
+    h1 { color: #2d3748; }
+    h2 { color: #4a5568; margin-top: 30px; }
+    table { border-collapse: collapse; width: 100%; margin-top: 20px; }
+    th, td { border: 1px solid #cbd5e0; padding: 8px 12px; text-align: left; }
+    th { background-color: #edf2f7; }
+    .stats { display: flex; gap: 20px; margin: 20px 0; }
+    .stat-card { border: 1px solid #cbd5e0; border-radius: 8px; padding: 16px; flex: 1; }
+    .stat-label { font-size: 14px; color: #718096; }
+    .stat-number { font-size: 24px; font-weight: bold; color: #2d3748; }
+  </style>
+</head>
+<body>
+  <h1>O'zbekiston Respublikasi ijtimoiy-iqtisodiy hisoboti</h1>
+  <p>Sana: ${new Date().toLocaleDateString('uz-UZ')} | Hisobot davri: 2025-yil</p>
+  <h2>Ko'rsatkich: ${metric.label}</h2>
+  <div class="stats">
+    <div class="stat-card">
+      <div class="stat-label">Eng yuqori</div>
+      <div class="stat-number">${maxRegion.name}</div>
+      <div>${maxRegion.val.toLocaleString()} ${metric.unit}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Eng past</div>
+      <div class="stat-number">${minRegion.name}</div>
+      <div>${minRegion.val.toLocaleString()} ${metric.unit}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">O'rtacha</div>
+      <div class="stat-number">${avgValue.toFixed(1)}</div>
+      <div>${metric.unit}</div>
+    </div>
+  </div>
+  <table>
+    <thead>
+      <tr><th>Viloyat</th><th>${metric.label}</th><th>Aholi</th><th>Oilalar</th><th>Kambag'allik %</th><th>Ishsizlik %</th></tr>
+    </thead>
+    <tbody>
+      ${data.map(r => `
+        <tr>
+          <td>${r.name}</td>
+          <td>${metric.format ? metric.format(r[metric.dataKey] as number) : (r[metric.dataKey] as number).toLocaleString()}</td>
+          <td>${r.totalPopulation.toLocaleString()}</td>
+          <td>${r.totalFamilies.toLocaleString()}</td>
+          <td>${r.povertyRate}%</td>
+          <td>${r.unemploymentRate}%</td>
+        </tr>
+      `).join('')}
+    </tbody>
+  </table>
+</body>
+</html>`;
+
+  const blob = new Blob([htmlContent], { type: "application/msword" });
+  saveAs(blob, `Hisobot_${metric.label}_${new Date().toISOString().slice(0, 19)}.doc`);
+};
+
+// ------------------------------------------------------------
+// 7. VILOYAT DETALLARI (DRAWER)
+// ------------------------------------------------------------
+interface RegionDetailProps {
+  region: RegionData;
+  activeMetric: MetricConfig;
+  onClose: () => void;
+}
+
+const RegionDetail: React.FC<RegionDetailProps> = ({ region, activeMetric, onClose }) => {
+  const districtValues = region.districts.map(d => ({
+    name: d.name,
+    value: d[activeMetric.dataKey as keyof DistrictData] as number,
+  }));
+
+  return (
+    <Box>
+      <Heading size="md" mb={4}>{region.name} - {activeMetric.label}</Heading>
+
+      <SimpleGrid columns={{ base: 1, md: 3 }} spacing={4} mb={6}>
+        <Stat bg="gray.50" p={3} borderRadius="lg">
+          <StatLabel>Viloyat bo'yicha</StatLabel>
+          <StatNumber fontSize="xl">{activeMetric.format ? activeMetric.format(region[activeMetric.dataKey] as number) : (region[activeMetric.dataKey] as number).toLocaleString()}</StatNumber>
+          <StatHelpText>{activeMetric.unit}</StatHelpText>
+        </Stat>
+        <Stat bg="gray.50" p={3} borderRadius="lg">
+          <StatLabel>Eng yuqori tuman</StatLabel>
+          <StatNumber fontSize="xl">{districtValues.reduce((a, b) => a.value > b.value ? a : b).name}</StatNumber>
+        </Stat>
+        <Stat bg="gray.50" p={3} borderRadius="lg">
+          <StatLabel>Eng past tuman</StatLabel>
+          <StatNumber fontSize="xl">{districtValues.reduce((a, b) => a.value < b.value ? a : b).name}</StatNumber>
+        </Stat>
+      </SimpleGrid>
+
+      <Tabs variant="soft-rounded" colorScheme="blue" size="sm">
+        <TabList mb={3} overflowX="auto">
+          <Tab>Tumanlar jadvali</Tab>
+          <Tab>Gistogramma</Tab>
+          <Tab>Kamchiliklar</Tab>
+        </TabList>
+        <TabPanels>
+          <TabPanel p={0}>
+            <TableContainer overflowX="auto">
+              <Table size="sm" variant="simple">
+                <Thead bg="gray.50">
+                  <Tr>
+                    <Th>Tuman</Th>
+                    <Th isNumeric>{activeMetric.label}</Th>
+                    <Th isNumeric>Aholi</Th>
+                    <Th isNumeric>Kambag'allik %</Th>
+                    <Th isNumeric>Ishsizlik %</Th>
+                  </Tr>
+                </Thead>
+                <Tbody>
+                  {region.districts.map(d => (
+                    <Tr key={d.id}>
+                      <Td>{d.name}</Td>
+                      <Td isNumeric>{activeMetric.format ? activeMetric.format(d[activeMetric.dataKey as keyof DistrictData] as number) : (d[activeMetric.dataKey as keyof DistrictData] as number).toLocaleString()}</Td>
+                      <Td isNumeric>{d.totalPopulation.toLocaleString()}</Td>
+                      <Td isNumeric>{d.povertyRate}%</Td>
+                      <Td isNumeric>{d.unemploymentRate}%</Td>
+                    </Tr>
+                  ))}
+                </Tbody>
+              </Table>
+            </TableContainer>
+          </TabPanel>
+          <TabPanel p={0}>
+            <Box height="300px">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={districtValues} margin={{ top: 10, right: 10, left: 0, bottom: 40 }}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="name" angle={-45} textAnchor="end" height={60} tick={{ fontSize: 10 }} />
+                  <YAxis />
+                  <RechartsTooltip formatter={(v: number) => `${v.toLocaleString()} ${activeMetric.unit}`} />
+                  <Bar dataKey="value" fill="#3182CE" name={activeMetric.label} />
+                </BarChart>
+              </ResponsiveContainer>
+            </Box>
+          </TabPanel>
+          <TabPanel p={0}>
+            <VStack align="stretch" spacing={3}>
+              {region.districts.map(d => (
+                <Box key={d.id} p={2} bg="gray.50" borderRadius="md">
+                  <Text fontWeight="bold">{d.name}</Text>
+                  <ul style={{ marginLeft: "1.2rem", marginTop: "0.25rem" }}>
+                    {d.shortcomings.map((s, idx) => <li key={idx}><Text fontSize="xs" color="red.500">{s}</Text></li>)}
+                  </ul>
+                </Box>
+              ))}
+            </VStack>
+          </TabPanel>
+        </TabPanels>
+      </Tabs>
+    </Box>
+  );
+};
+
+// ------------------------------------------------------------
+// 8. ASOSIY DASHBOARD
+// ------------------------------------------------------------
+const Reports: React.FC = () => {
+  const [selectedRegion, setSelectedRegion] = useState<RegionData | null>(null);
+  const [activeMetric, setActiveMetric] = useState<MetricConfig>(metrics[0]);
+  const { isOpen, onOpen, onClose } = useDisclosure();
+
+  const handleRegionClick = (region: RegionData) => {
+    setSelectedRegion(region);
+    onOpen();
+  };
+
+  const chartData = useMemo(() => {
+    return regionsData.map(r => ({
+      name: r.name,
+      value: r[activeMetric.dataKey] as number,
+    })).sort((a, b) => b.value - a.value);
+  }, [activeMetric]);
+
+  const maxValue = Math.max(...chartData.map(d => d.value));
+  const minValue = Math.min(...chartData.map(d => d.value));
+  const avgValue = chartData.reduce((s, d) => s + d.value, 0) / chartData.length;
+  const maxRegion = chartData[0]?.name || "-";
+  const minRegion = chartData[chartData.length - 1]?.name || "-";
 
   return (
     <Box minH="100vh">
-      <Flex direction="column" gap={6}>
+      <Grid templateColumns={{ base: "1fr", lg: "260px 1fr" }} gap={6}>
+        {/* Chap panel - vertikal menyu */}
+        <Box bg="white" borderRadius="xl" border="1px solid" borderColor="gray.200" p={4} height="fit-content">
+          <Heading size="sm" mb={4} display="flex" alignItems="center" gap={2}>
+            <List size={18} /> Ko'rsatkichlar
+          </Heading>
+          <VStack align="stretch" spacing={2}>
+            {metrics.map(metric => {
+              const IconComp = metric.icon;
+              const isActive = activeMetric.id === metric.id;
+              return (
+                <Button
+                  key={metric.id}
+                  leftIcon={<IconComp size={18} />}
+                  variant={isActive ? "solid" : "ghost"}
+                  colorScheme={isActive ? "blue" : "gray"}
+                  justifyContent="flex-start"
+                  onClick={() => setActiveMetric(metric)}
+                  size="sm"
+                  fontWeight={isActive ? "semibold" : "normal"}
+                  height="auto"
+                  py={2}
+                >
+                  {metric.label}
+                </Button>
+              );
+            })}
+          </VStack>
+        </Box>
+
+        {/* O'ng panel - karta va grafiklar */}
         <Box>
-          <Heading as="h1" size="xl" mb={2} color="gray.800">Respublika Bo'yicha Umumiy Hisobot</Heading>
-          <Text fontSize="md" color="gray.600">
-            Moliya, byudjet, kambag'allikni qisqartirish va bandlikka oid barcha maqsadli ko'rsatkichlar tahlili paneli
+          <Heading as="h1" size="lg" mb={2} color="gray.800">O'zbekiston Respublikasi ijtimoiy-iqtisodiy hisoboti</Heading>
+          <Text fontSize="md" color="gray.600" mb={4}>
+            Chapdagi ko'rsatkichlardan birini tanlang. Xarita va grafik avtomatik yangilanadi. Hududni bosing – tumanlar darajasida batafsil ma'lumot.
           </Text>
-        </Box>
 
-        {/* 1. MOLIYA VA BYUDJET SECTION */}
-        <Box>
-          <Flex align="center" gap={3} mb={4}>
-            <Landmark color={brand600} size={28} />
-            <Heading size="lg" color="gray.800">Moliya va Byudjet</Heading>
+          <Flex justify="space-between" align="center" mb={3} flexWrap="wrap" gap={3}>
+            <Heading size="md" color="gray.700">{activeMetric.label} (hududlar bo'yicha)</Heading>
+            <HStack spacing={2}>
+              <Tooltip label="Excel formatida yuklab olish">
+                <IconButton
+                  aria-label="Excel"
+                  icon={<FileSpreadsheet size={18} />}
+                  colorScheme="green"
+                  variant="outline"
+                  onClick={() => exportToExcel(regionsData, activeMetric)}
+                  size="sm"
+                />
+              </Tooltip>
+              <Tooltip label="Word formatida yuklab olish">
+                <IconButton
+                  aria-label="Word"
+                  icon={<FileText size={18} />}
+                  colorScheme="blue"
+                  variant="outline"
+                  onClick={() => exportToWord(regionsData, activeMetric)}
+                  size="sm"
+                />
+              </Tooltip>
+            </HStack>
           </Flex>
-          <SimpleGrid columns={{ base: 1, md: 2, lg: 4 }} spacing={6}>
-            <Stat bg="white" p={5} borderRadius="xl" boxShadow="sm" border="1px solid" borderColor="gray.200" borderTop="4px solid" borderTopColor={brand600}>
-              <Flex align="center" gap={2} mb={2}>
-                <Wallet size={20} color={brand600} />
-                <StatLabel fontSize="md" color="gray.700">Davlat Byudjeti</StatLabel>
-              </Flex>
-              <StatNumber fontSize="3xl" color="gray.900">{budgetTotal} <Text as="span" fontSize="lg" color="gray.500">trln</Text></StatNumber>
-              <StatHelpText color="gray.600">Ajratilgan mablag'lar</StatHelpText>
-            </Stat>
 
-            <Stat bg="white" p={5} borderRadius="xl" boxShadow="sm" border="1px solid" borderColor="gray.200" borderTop="4px solid" borderTopColor={green500}>
-              <Flex align="center" gap={2} mb={2}>
-                <Banknote size={20} color={green500} />
-                <StatLabel fontSize="md" color="gray.700">Jamg'arma</StatLabel>
-              </Flex>
-              <StatNumber fontSize="3xl" color="gray.900">{fundTotal} <Text as="span" fontSize="lg" color="gray.500">trln</Text></StatNumber>
-              <StatHelpText color="gray.600">Jamg'ariladigan mablag'</StatHelpText>
-            </Stat>
-
-            <Stat bg="white" p={5} borderRadius="xl" boxShadow="sm" border="1px solid" borderColor="gray.200" borderTop="4px solid" borderTopColor={yellow500}>
-              <Flex align="center" gap={2} mb={2}>
-                <Building size={20} color={yellow500} />
-                <StatLabel fontSize="md" color="gray.700">Bank Kreditlari</StatLabel>
-              </Flex>
-              <StatNumber fontSize="3xl" color="gray.900">{loansTotal} <Text as="span" fontSize="lg" color="gray.500">trln</Text></StatNumber>
-              <StatHelpText color="gray.600">Ajratiladigan kreditlar</StatHelpText>
-            </Stat>
-
-            <Stat bg="white" p={5} borderRadius="xl" boxShadow="sm" border="1px solid" borderColor="gray.200" borderTop="4px solid" borderTopColor={purple500}>
-              <Flex align="center" gap={2} mb={2}>
-                <Globe size={20} color={purple500} />
-                <StatLabel fontSize="md" color="gray.700">Tashqi Moliya Manbalari</StatLabel>
-              </Flex>
-              <StatNumber fontSize="3xl" color="gray.900">{externalTotal} <Text as="span" fontSize="lg" color="gray.500">mlrd $</Text></StatNumber>
-              <StatHelpText color="gray.600">Xalqaro moliya instituti</StatHelpText>
-            </Stat>
-          </SimpleGrid>
-        </Box>
-
-        <Divider borderColor="gray.200" />
-
-        {/* 2. KAMBAG'ALLIK DARAJASI VA OILALAR SECTION */}
-        <Box>
-          <Flex align="center" gap={3} mb={4}>
-            <Users color={red500} size={28} />
-            <Heading size="lg" color="gray.800">Kambag'allik va Ijtimoiy Himoya</Heading>
+          <Flex justify="center" gap={6} mb={4}>
+            <HStack spacing={2}>
+              <Box w="30px" h="16px" bg={getColorByValue(0, 0, 100)} borderRadius="md" />
+              <Text fontSize="xs">Past</Text>
+              <Box w="30px" h="16px" bg={getColorByValue(50, 0, 100)} borderRadius="md" />
+              <Text fontSize="xs">O'rta</Text>
+              <Box w="30px" h="16px" bg={getColorByValue(100, 0, 100)} borderRadius="md" />
+              <Text fontSize="xs">Yuqori</Text>
+            </HStack>
           </Flex>
-          <SimpleGrid columns={{ base: 1, md: 2, lg: 4 }} spacing={6}>
-            <Stat bg="white" p={5} borderRadius="xl" boxShadow="sm" border="1px solid" borderColor="gray.200" borderTop="4px solid" borderTopColor={red500}>
-              <Flex align="center" gap={2} mb={2}>
-                <AlertTriangle size={20} color={red500} />
-                <StatLabel fontSize="md" color="gray.700">O'rtacha Kambag'allik</StatLabel>
-              </Flex>
-              <StatNumber fontSize="3xl" color="gray.900">{povertyAvg}%</StatNumber>
-              <StatHelpText color="gray.600">Respublika bo'yicha</StatHelpText>
-            </Stat>
 
-            <Stat bg="white" p={5} borderRadius="xl" boxShadow="sm" border="1px solid" borderColor="gray.200" borderTop="4px solid" borderTopColor={brand600}>
-              <Flex align="center" gap={2} mb={2}>
-                <Home size={20} color={brand600} />
-                <StatLabel fontSize="md" color="gray.700">Kambag'al Oilalar</StatLabel>
-              </Flex>
-              <StatNumber fontSize="3xl" color="gray.900">{poorFamilies.toLocaleString()}</StatNumber>
-              <StatHelpText color="gray.600">Oila soni</StatHelpText>
-            </Stat>
+          <MapWithTooltip dataKey={activeMetric.dataKey} onRegionClick={handleRegionClick} />
 
-            <Stat bg="white" p={5} borderRadius="xl" boxShadow="sm" border="1px solid" borderColor="gray.200" borderTop="4px solid" borderTopColor={yellow500}>
-              <Flex align="center" gap={2} mb={2}>
-                <Flame size={20} color={yellow500} />
-                <StatLabel fontSize="md" color="gray.700">Xavf Ostidagi Oilalar</StatLabel>
-              </Flex>
-              <StatNumber fontSize="3xl" color="gray.900">{poorRiskFamilies.toLocaleString()}</StatNumber>
-              <StatHelpText color="gray.600">Yordamga muhtoj (II bo'lim)</StatHelpText>
-            </Stat>
+          {/* Uchta keng kartochka */}
 
-            <Stat bg="white" p={5} borderRadius="xl" boxShadow="sm" border="1px solid" borderColor="gray.200" borderTop="4px solid" borderTopColor={green500}>
-              <Flex align="center" gap={2} mb={2}>
-                <CheckCircle size={20} color={green500} />
-                <StatLabel fontSize="md" color="gray.700">2026-yil Qamrov Maqsadi</StatLabel>
-              </Flex>
-              <StatNumber fontSize="3xl" color="gray.900">{poorServicesTarget.toLocaleString()}</StatNumber>
-              <StatHelpText color="gray.600">Oilalarni qamrab olish rejasi</StatHelpText>
-            </Stat>
-          </SimpleGrid>
+
+          {/* Keng grafik */}
         </Box>
-
-        <Divider borderColor="gray.200" />
-
-        {/* 3. BANDLIK VA ISHSIZLIK SECTION */}
-        <Box>
-          <Flex align="center" gap={3} mb={4}>
-            <Briefcase color={teal500} size={28} />
-            <Heading size="lg" color="gray.800">Bandlik va Ishsizlik</Heading>
+      </Grid>
+      <SimpleGrid columns={{ base: 1, md: 3 }} spacing={4} mt={6} width="100%">
+        <Stat bg="white" p={4} borderRadius="xl" boxShadow="md" borderTop="4px solid" borderTopColor="green.500">
+          <Flex align="center" gap={2} mb={2}>
+            <TrendingUp size={20} color="#38A169" />
+            <StatLabel fontSize="md">Eng yuqori ko'rsatkich</StatLabel>
           </Flex>
-          <SimpleGrid columns={{ base: 1, md: 3 }} spacing={6}>
-            <Stat bg="white" p={5} borderRadius="xl" boxShadow="sm" border="1px solid" borderColor="gray.200" borderTop="4px solid" borderTopColor={red500}>
-              <Flex align="center" gap={2} mb={2}>
-                <BadgePercent size={20} color={red500} />
-                <StatLabel fontSize="md" color="gray.700">O'rtacha Ishsizlik</StatLabel>
-              </Flex>
-              <StatNumber fontSize="3xl" color="gray.900">{unemploymentAvg}%</StatNumber>
-              <StatHelpText color="gray.600">Respublika miqyosida o'rtacha</StatHelpText>
-            </Stat>
+          <StatNumber fontSize="2xl">{maxRegion}</StatNumber>
+          <StatHelpText>{maxValue.toLocaleString()} {activeMetric.unit}</StatHelpText>
+        </Stat>
+        <Stat bg="white" p={4} borderRadius="xl" boxShadow="md" borderTop="4px solid" borderTopColor="red.500">
+          <Flex align="center" gap={2} mb={2}>
+            <TrendingDown size={20} color="#E53E3E" />
+            <StatLabel fontSize="md">Eng past ko'rsatkich</StatLabel>
+          </Flex>
+          <StatNumber fontSize="2xl">{minRegion}</StatNumber>
+          <StatHelpText>{minValue.toLocaleString()} {activeMetric.unit}</StatHelpText>
+        </Stat>
+        <Stat bg="white" p={4} borderRadius="xl" boxShadow="md" borderTop="4px solid" borderTopColor="blue.500">
+          <Flex align="center" gap={2} mb={2}>
+            <Minus size={20} color="#3182CE" />
+            <StatLabel fontSize="md">O'rtacha ko'rsatkich</StatLabel>
+          </Flex>
+          <StatNumber fontSize="2xl">{avgValue.toFixed(1)}</StatNumber>
+          <StatHelpText>{activeMetric.unit}</StatHelpText>
+        </Stat>
+      </SimpleGrid>
+      <Box bg="white" p={4} borderRadius="xl" border="1px solid" borderColor="gray.200" mt={6} width="100%">
+        <Heading size="sm" mb={4}>Hududlar bo'yicha taqqoslama gistogramma</Heading>
+        <ResponsiveContainer width="100%" height={500}>
+          <BarChart data={chartData} layout="vertical" margin={{ left: 100, right: 30 }}>
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis type="number" tick={{ fill: "#4a5568" }} />
+            <YAxis type="category" dataKey="name" width={130} tick={{ fontSize: 11 }} />
+            <RechartsTooltip formatter={(v: number) => `${v.toLocaleString()} ${activeMetric.unit}`} />
+            <Bar dataKey="value" radius={[0, 8, 8, 0]}>
+              {chartData.map((entry, index) => (
+                <Cell key={index} fill={getColorByValue(entry.value, 0, maxValue)} />
+              ))}
+            </Bar>
+          </BarChart>
+        </ResponsiveContainer>
+      </Box>
 
-            <Stat bg="white" p={5} borderRadius="xl" boxShadow="sm" border="1px solid" borderColor="gray.200" borderTop="4px solid" borderTopColor={yellow500}>
-              <Flex align="center" gap={2} mb={2}>
-                <ShieldCheck size={20} color={yellow500} />
-                <StatLabel fontSize="md" color="gray.700">Legallashtiriladigan Ish</StatLabel>
-              </Flex>
-              <StatNumber fontSize="3xl" color="gray.900">{(legalJobsTarget / 1000000).toFixed(1)} <Text as="span" fontSize="lg" color="gray.500">mln</Text></StatNumber>
-              <StatHelpText color="gray.600">Noqonuniy faoliyatni legal qilish</StatHelpText>
-            </Stat>
-
-            <Stat bg="white" p={5} borderRadius="xl" boxShadow="sm" border="1px solid" borderColor="gray.200" borderTop="4px solid" borderTopColor={green500}>
-              <Flex align="center" gap={2} mb={2}>
-                <TrendingDown size={20} color={green500} />
-                <StatLabel fontSize="md" color="gray.700">Doimiy Ishga Joylashtirish</StatLabel>
-              </Flex>
-              <StatNumber fontSize="3xl" color="gray.900">{(jobPlacementTarget / 1000000).toFixed(2)} <Text as="span" fontSize="lg" color="gray.500">mln</Text></StatNumber>
-              <StatHelpText color="gray.600">2026-yil uchun asosiy maqsad</StatHelpText>
-            </Stat>
-          </SimpleGrid>
-        </Box>
-
-        {/* 4. VILOYATLAR KESIMIDA GRAFIK */}
-        <Box bg="white" p={6} borderRadius="xl" boxShadow="sm" border="1px solid" borderColor="gray.200" mt={4}>
-          <Heading size="md" mb={6} textAlign="center" color="gray.800">Hududlar bo'yicha Kambag'allik va Ishsizlik Darajasi (%)</Heading>
-          <ResponsiveContainer width="100%" height={450}>
-            <BarChart data={combinedChartData} margin={{ top: 20, right: 30, left: 0, bottom: 65 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-              <XAxis 
-                dataKey="name" 
-                tick={{ fill: '#4a5568', fontSize: 11 }} 
-                angle={-45} 
-                textAnchor="end" 
-                height={80} 
-              />
-              <YAxis tick={{ fill: '#4a5568' }} domain={[0, 6]} />
-              <Tooltip 
-                cursor={{ fill: 'rgba(226, 232, 240, 0.5)' }} 
-                contentStyle={{ 
-                  backgroundColor: 'white', 
-                  border: '1px solid #e2e8f0', 
-                  borderRadius: '8px',
-                  color: '#1a202c'
-                }} 
-              />
-              <Legend wrapperStyle={{ paddingTop: "20px" }} />
-              <Bar dataKey="Kambagallik" fill={brand600} radius={[4, 4, 0, 0]} name="Kambag'allik darajasi (%)" />
-              <Bar dataKey="Ishsizlik" fill={teal500} radius={[4, 4, 0, 0]} name="Ishsizlik darajasi (%)" />
-            </BarChart>
-          </ResponsiveContainer>
-        </Box>
-      </Flex>
+      {/* Drawer - viloyat tahlili */}
+      <Drawer isOpen={isOpen} onClose={onClose} size="lg" placement="right">
+        <DrawerOverlay />
+        <DrawerContent>
+          <DrawerCloseButton />
+          <DrawerHeader borderBottomWidth="1px">Viloyat tahlili</DrawerHeader>
+          <DrawerBody>
+            {selectedRegion && (
+              <RegionDetail region={selectedRegion} activeMetric={activeMetric} onClose={onClose} />
+            )}
+          </DrawerBody>
+        </DrawerContent>
+      </Drawer>
     </Box>
   );
 };
