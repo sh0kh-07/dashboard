@@ -1,4 +1,5 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Box,
   Text,
@@ -11,6 +12,7 @@ import {
   StatHelpText,
   Heading,
   Flex,
+  IconButton,
 } from "@chakra-ui/react";
 import {
   BarChart,
@@ -30,28 +32,36 @@ import {
   Flag,
   Shield,
   PlusCircle,
+  ArrowRight,
 } from "lucide-react";
 
 const BudgetPage2 = () => {
-  // 7 карточек – единый источник данных
+  const navigate = useNavigate();
+
+  // 7 карточек – порядок изменён: mahallalar первый, Red Flag последний
   const cardsData = [
-    {
-      id: 1,
-      title: "Og‘ir toifadagi tumanlar",
-      value: 2.7,
-      unit: "trln so‘m",
-      icon: MapPin,
-      description: "Qashshoqlik darajasi yuqori tumanlar",
-      forChart: true,
-    },
     {
       id: 2,
       title: "Og‘ir toifadagi mahallalar",
       value: 1.7,
       unit: "trln so‘m",
       icon: Home,
+      iconColor: "#38A169",
       description: "Ijtimoiy-iqtisodiy rivojlanishi sust mahallalar",
       forChart: true,
+      clickable: true,
+      navigateTo: "/budget-detail",
+    },
+    {
+      id: 1,
+      title: "Og‘ir toifadagi tumanlar",
+      value: 2.7,
+      unit: "trln so‘m",
+      icon: MapPin,
+      iconColor: "#DD6B20",
+      description: "Qashshoqlik darajasi yuqori tumanlar",
+      forChart: true,
+      clickable: false,
     },
     {
       id: 3,
@@ -59,8 +69,10 @@ const BudgetPage2 = () => {
       value: 5.0,
       unit: "trln so‘m",
       icon: Briefcase,
+      iconColor: "#3182CE",
       description: "Aholiga ko‘rsatilgan ijtimoiy xizmatlar",
       forChart: true,
+      clickable: false,
     },
     {
       id: 4,
@@ -68,17 +80,10 @@ const BudgetPage2 = () => {
       value: 8.5,
       unit: "trln so‘m",
       icon: Heart,
+      iconColor: "#D53F8C",
       description: "Tibbiy xizmatlar va dori-darmonlar",
       forChart: true,
-    },
-    {
-      id: 5,
-      title: "Red Flag (qizil bayroq)",
-      value: 12,
-      unit: "",
-      icon: Flag,
-      description: "Diqqat talab qiladigan hududlar soni",
-      forChart: false, // не включаем в график, т.к. единица измерения не trln
+      clickable: false,
     },
     {
       id: 6,
@@ -86,8 +91,10 @@ const BudgetPage2 = () => {
       value: 2.0,
       unit: "trln so‘m",
       icon: Shield,
+      iconColor: "#805AD5",
       description: "Barqaror rivojlangan hududlar",
       forChart: true,
+      clickable: false,
     },
     {
       id: 7,
@@ -95,12 +102,25 @@ const BudgetPage2 = () => {
       value: 1.8,
       unit: "trln so‘m",
       icon: PlusCircle,
+      iconColor: "#00A3C4",
       description: "Zaruratga ko‘ra ajratilgan qo‘shimcha mablag‘",
       forChart: true,
+      clickable: false,
+    },
+    {
+      id: 5,
+      title: "Aniqlangan kamchilik (qizil bayroq)",
+      value: 12,
+      unit: "",
+      icon: Flag,
+      iconColor: "#F56565",
+      description: "Diqqat talab qiladigan hududlar soni",
+      forChart: false,
+      clickable: false,
     },
   ];
 
-  // Формируем данные для графика только из карточек, у которых forChart = true
+  // Данные для графика (только финансовые)
   const chartData = cardsData
     .filter((card) => card.forChart)
     .map((card) => ({
@@ -109,16 +129,18 @@ const BudgetPage2 = () => {
       value: card.value,
     }));
 
-  // Нейтральные цвета для графика (серые оттенки)
   const barColors = ["#718096", "#A0AEC0", "#CBD5E0", "#4A5568", "#2D3748", "#718096"];
+
+  const handleCardClick = (card: any) => {
+    if (card.clickable && card.navigateTo) {
+      navigate(card.navigateTo);
+    }
+  };
 
   return (
     <Box>
       <Flex alignItems="start" justifyContent="space-between" mb={4}>
-        <Heading as="h1" size="lg" fontWeight="bold" color="gray.800">
-          Ijtimoiy-iqtisodiy ko‘rsatkichlar
-        </Heading>
-        <Box textAlign="right">
+        <Box textAlign="left">
           <Text fontSize="xs" fontWeight="medium" color="gray.600">
             Jami mablag‘lar
           </Text>
@@ -128,10 +150,10 @@ const BudgetPage2 = () => {
         </Box>
       </Flex>
 
-      {/* 7 карточек – компактно, 3–4 колонки */}
-      <SimpleGrid columns={{ base: 1, sm: 2, md: 3, lg: 4 }} spacing={2} mb={6}>
+      <SimpleGrid columns={{ base: 1, sm: 2, md: 3, lg: 4 }} spacing={4} mb={6}>
         {cardsData.map((card) => {
           const Icon = card.icon;
+          const isClickable = card.clickable;
           return (
             <Card
               key={card.id}
@@ -141,12 +163,23 @@ const BudgetPage2 = () => {
               borderRadius="lg"
               transition="0.2s"
               bg="white"
-              _hover={{ boxShadow: "sm", transform: "translateY(-1px)" }}
+              cursor={isClickable ? "pointer" : "default"}
+              _hover={
+                isClickable
+                  ? {
+                    boxShadow: "md",
+                    transform: "translateY(-2px)",
+                    borderColor: card.iconColor,
+                  }
+                  : { boxShadow: "sm", transform: "translateY(-1px)" }
+              }
+              onClick={() => handleCardClick(card)}
+              position="relative"
             >
               <CardBody py={3} px={4}>
                 <Stat>
                   <Flex align="center" gap={2} mb={1}>
-                    <Icon size={16} color="gray.500" />
+                    <Icon size={18} color={card.iconColor} strokeWidth={1.5} />
                     <StatLabel fontSize="sm" fontWeight="bold" color="gray.700">
                       {card.title}
                     </StatLabel>
@@ -158,13 +191,18 @@ const BudgetPage2 = () => {
                     {card.description}
                   </StatHelpText>
                 </Stat>
+                {isClickable && (
+                  <Flex justify="flex-end" mt={2}>
+                    <ArrowRight size={16} color={card.iconColor} />
+                  </Flex>
+                )}
               </CardBody>
             </Card>
           );
         })}
       </SimpleGrid>
 
-      {/* График – данные из тех же карточек (только trln so‘m) */}
+      {/* График */}
       <Box mt={4}>
         <Text fontSize="md" fontWeight="bold" mb={1} color="gray.800">
           Mablag‘larning yo‘nalishlar bo‘yicha taqsimoti

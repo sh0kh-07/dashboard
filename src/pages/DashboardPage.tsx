@@ -261,15 +261,15 @@ const DashboardPage = () => {
                 <HStack spacing={3}>
                   <HStack spacing={1}>
                     <Box w="20px" h="12px" bg="#48BB78" borderRadius="sm" />
-                    <Text fontSize="xs">Kam qashshoqlik</Text>
+                    <Text fontSize="xs">Kam kambag'allik</Text>
                   </HStack>
                   <HStack spacing={1}>
                     <Box w="20px" h="12px" bg="#ECC94B" borderRadius="sm" />
-                    <Text fontSize="xs">O‘rtacha</Text>
+                    <Text fontSize="xs">O‘rtacha kambag'allik</Text>
                   </HStack>
                   <HStack spacing={1}>
                     <Box w="20px" h="12px" bg="#F56565" borderRadius="sm" />
-                    <Text fontSize="xs">Yuqori qashshoqlik</Text>
+                    <Text fontSize="xs">Yuqori kambag'alik</Text>
                   </HStack>
                 </HStack>
               </Flex>
@@ -397,7 +397,7 @@ const DashboardPage = () => {
         <Box bg="white" p={'5px'} borderRadius="2xl" boxShadow="sm" border="1px solid" borderColor="red.100">
           <Flex align="center" gap={2} mb={3}>
             <ShieldAlert color="red.500" size={20} />
-            <Heading size="sm" color="red.700">Shubhali kontraktlar (Red Flag) – 7 ta yoʻnalish boʻyicha</Heading>
+            <Heading size="sm" color="red.700">Aniqlangan kamchilik (Red Flag) – 7 ta yoʻnalish boʻyicha</Heading>
           </Flex>
           <VStack spacing={3} align="stretch">
             {suspiciousContracts.map((contract, idx) => (

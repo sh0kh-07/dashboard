@@ -35,7 +35,7 @@ import {
 } from "recharts";
 
 // --- Данные из MainQarshi (реальные суммы для Qarshi shahri) ---
-const qarshiBudgetTotal = 792.8; // млрд сум (Davlat byudjeti)
+const qarshiBudgetTotal = 35.0; // млрд сум (Davlat byudjeti) – ИСПРАВЛЕНО
 
 // Список махаллей (полный, как был)
 const mahallaNames = [
@@ -133,9 +133,6 @@ const KashkadaryaMahalla = () => {
             <Heading as="h1" size="xl" fontWeight="bold" color="gray.800">
               Qarshi shahri mahallalari
             </Heading>
-            <Text fontSize="md" color="brand.300" mt={1}>
-              Viloyat markazi, yirik infratuzilma loyihalari
-            </Text>
           </Box>
           <Box textAlign="right">
             <Text fontSize="lg" fontWeight="medium" color="gray.600">
@@ -146,11 +143,6 @@ const KashkadaryaMahalla = () => {
             </Text>
           </Box>
         </Flex>
-
-        <Text fontSize="md" color="gray.600" mb={8}>
-          Mahallalar infratuzilmasini rivojlantirish dasturi doirasida ajratilgan mablag‘lar.
-        </Text>
-
         {/* Фильтры: поиск и статус */}
         <Flex direction={{ base: "column", md: "row" }} gap={4} mb={6}>
           <InputGroup maxW="400px">
