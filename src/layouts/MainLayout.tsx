@@ -13,7 +13,8 @@ import {
   ChartColumnBig,
   LogOut,
   User,
-  MonitorCloud
+  MonitorCloud,
+  Home
 } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -47,15 +48,37 @@ type MenuItem = SimpleMenuItem | AccordionMenuItem;
 
 const menuConfig: MenuItem[] = [
   { type: 'item', label: 'Bosh sahifa', icon: LayoutDashboard, path: '/' },
-  // { type: 'item', label: 'Xisobotlar', icon: ChartColumnBig, path: '/reports' },
-  // { type: 'item', label: 'Ajratilgan mablag`lar', icon: BadgeDollarSign, path: '/budget' },
-  // { type: 'item', label: 'Kambagʻalik darajasi', icon: Users, path: '/poor-level' },
-  // { type: 'item', label: 'Bandlik darajasi', icon: BriefcaseBusiness, path: '/job-placement' },
-  // { type: 'item', label: 'Ogʻir toifadagi hududlar', icon: MapPin, path: '/regions' },
-  // { type: 'item', label: 'Ko‘rsatilgan xizmatlar ', icon: MonitorCloud, path: '/mahalla' },
 ];
 
-// Route configuration for page titles and breadcrumbs
+// ------------------------------
+// ДАННЫЕ ДЛЯ АГРЕГИРОВАННЫХ ПОКАЗАТЕЛЕЙ (копия из DashboardPage)
+// ------------------------------
+const regionKeys = [
+  "Tashkent", "Toshkent viloyati", "Samarkand", "Bukhara", "Qashqadaryo",
+  "Fergana", "Andijan", "Namangan", "Surxondaryo", "Jizzakh", "Sirdaryo",
+  "Navoiy", "Xorazm", "Karakalpakstan"
+];
+
+const populationBase = {
+  "Tashkent": 2600000, "Toshkent viloyati": 2900000, "Samarkand": 3900000, "Bukhara": 1900000,
+  "Qashqadaryo": 3300000, "Fergana": 3800000, "Andijan": 3300000, "Namangan": 2800000,
+  "Surxondaryo": 2700000, "Jizzakh": 1400000, "Sirdaryo": 880000, "Navoiy": 1000000,
+  "Xorazm": 1900000, "Karakalpakstan": 1900000
+};
+
+const avgFamilySize = 4.5;
+
+const totalPopulation = Object.values(populationBase).reduce((a, b) => a + b, 0);
+const totalFamilies = Math.round(totalPopulation / avgFamilySize);
+
+const formatNumber = (num: number): string => {
+  if (isNaN(num) || num === undefined || num === null) return "0";
+  return new Intl.NumberFormat('ru-RU').format(Math.round(num));
+};
+
+// ------------------------------
+// ОСТАЛЬНАЯ ЛОГИКА (маршруты, часы)
+// ------------------------------
 const routeConfig: Record<string, { title: string; breadcrumbs: string[] }> = {
   '/': { title: 'Ijtimoiy himoya monitoringi', breadcrumbs: ['Asosiy'] },
   '/reports': { title: 'Hisobotlar', breadcrumbs: ['Hisobotlar'] },
@@ -70,14 +93,10 @@ const routeConfig: Record<string, { title: string; breadcrumbs: string[] }> = {
   '/contract/budget-1': { title: 'Kontrakt detali', breadcrumbs: ['Budjet', 'Qashqadaryo', 'Qarshi', 'Batosh', 'Kontrakt'] },
 };
 
-// Helper to get page title from path
 const getPageTitle = (pathname: string): string => {
-  // Exact match
   if (routeConfig[pathname]) return routeConfig[pathname].title;
-  // Try to find a parent route that matches the start
   const matchedKey = Object.keys(routeConfig).find(key => pathname.startsWith(key) && key !== '/');
   if (matchedKey) return routeConfig[matchedKey].title;
-  // Fallback: format the last segment
   const lastSegment = pathname.split('/').filter(Boolean).pop();
   if (lastSegment) {
     return lastSegment.charAt(0).toUpperCase() + lastSegment.slice(1).replace(/-/g, ' ');
@@ -85,7 +104,6 @@ const getPageTitle = (pathname: string): string => {
   return 'Dashboard';
 };
 
-// Format Uzbek date and time
 const getUzbekDateTime = (): { date: string; time: string } => {
   const now = new Date();
   const day = now.getDate();
@@ -110,16 +128,16 @@ const MainLayout = ({ children }: MainLayoutProps) => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  // Update clock every minute (or every second if you prefer, but minute is enough)
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentDateTime(getUzbekDateTime());
-    }, 60000); // update every minute
+    }, 60000);
     return () => clearInterval(interval);
   }, []);
 
   const handleBack = () => navigate(-1);
   const showBackButton = location.pathname !== '/';
+  const isHomePage = location.pathname === '/';
 
   const isActivePath = (pathname: string, to: string) => {
     if (to === '/') return pathname === '/';
@@ -187,21 +205,16 @@ const MainLayout = ({ children }: MainLayoutProps) => {
         display={{ base: 'none', lg: 'block' }}
       >
         <Flex direction="column" h="full">
-          {/* Logo */}
           <Flex px={4} py={6} alignItems={'center'} justifyContent={'center'}>
             <HStack spacing={3}>
               <img className='w-[70px]' src={Logo} alt="Logo" />
             </HStack>
           </Flex>
-
-          {/* Scrollable menu */}
           <Box flex="1" overflowY="auto" px={4}>
             <VStack w="full" spacing={2} align="stretch">
               {menuConfig.map((item, idx) => renderMenuItem(item, idx))}
             </VStack>
           </Box>
-
-          {/* Help block - light theme */}
           <Box px={4} py={6} mt="auto">
             <Box bg="gray.50" p={4} borderRadius="xl" borderWidth="1px" borderColor="gray.200">
               <Text fontSize="xs" color="gray.500" mb={2}>Yordam kerakmi?</Text>
@@ -223,7 +236,10 @@ const MainLayout = ({ children }: MainLayoutProps) => {
           px={6}
           py={4}
           minH="72px"
+          wrap="wrap"
+          gap={3}
         >
+          {/* Левая часть: кнопки и заголовок */}
           <HStack spacing={4}>
             <IconButton
               aria-label="Toggle Sidebar"
@@ -247,14 +263,41 @@ const MainLayout = ({ children }: MainLayoutProps) => {
                 Ortga
               </Button>
             )}
-            {/* Page title */}
             <Text fontSize="lg" fontWeight="semibold" color="gray.800">
               {pageTitle}
             </Text>
           </HStack>
 
-          <HStack spacing={4}>
-            {/* Date and Time */}
+          {/* Правая часть: дата/время + три показателя (только на главной) */}
+          <HStack spacing={6} wrap="wrap">
+            {/* Три показателя: Jami aholi, Jami oila, Jami honodon (только на главной) */}
+            {isHomePage && (
+              <HStack spacing={4} divider={<Box w="1px" h="30px" bg="gray.200" />}>
+                <HStack spacing={2}>
+                  <Users size={18} color="#3182CE" />
+                  <VStack align="start" spacing={0}>
+                    <Text fontSize="xs" color="gray.500">Jami aholi</Text>
+                    <Text fontSize="md" fontWeight="bold" color="gray.800">{formatNumber(totalPopulation)}</Text>
+                  </VStack>
+                </HStack>
+                <HStack spacing={2}>
+                  <Home size={18} color="#38B2AC" />
+                  <VStack align="start" spacing={0}>
+                    <Text fontSize="xs" color="gray.500">Jami oila</Text>
+                    <Text fontSize="md" fontWeight="bold" color="gray.800">{formatNumber(totalFamilies)}</Text>
+                  </VStack>
+                </HStack>
+                <HStack spacing={2}>
+                  <Home size={18} color="#805AD5" />
+                  <VStack align="start" spacing={0}>
+                    <Text fontSize="xs" color="gray.500">Jami honodon</Text>
+                    <Text fontSize="md" fontWeight="bold" color="gray.800">{formatNumber(totalFamilies)}</Text>
+                  </VStack>
+                </HStack>
+              </HStack>
+            )}
+
+            {/* Дата и время */}
             <HStack spacing={1}>
               <Text fontSize="sm" color="gray.500" fontWeight="medium">
                 {currentDateTime.date}
@@ -264,6 +307,7 @@ const MainLayout = ({ children }: MainLayoutProps) => {
                 {currentDateTime.time}
               </Text>
             </HStack>
+
             <IconButton
               aria-label="Notifications"
               icon={<Bell size={18} />}
@@ -319,7 +363,7 @@ const MainLayout = ({ children }: MainLayoutProps) => {
   );
 };
 
-// AccordionItem component (unchanged, but kept for completeness)
+// AccordionItem component (unchanged)
 interface AccordionItemProps {
   icon: React.ElementType;
   label: string;

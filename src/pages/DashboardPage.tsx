@@ -1,16 +1,16 @@
 import React, { useState } from "react";
 import {
   Box, Text, Heading, Flex, SimpleGrid, Stat, StatLabel, StatNumber, StatHelpText,
-  Badge, useToken, Grid, GridItem, VStack
+  Badge, useToken, GridItem, VStack
 } from "@chakra-ui/react";
 import Uzbekistan from "@svg-maps/uzbekistan";
 import {
-  Users, Home, Briefcase, Landmark, Activity, AlertTriangle, MapPin,
-  TrendingDown, Eye, DollarSign, Percent, FileText, ShieldAlert
+  Users, Home, Briefcase, AlertTriangle, MapPin,
+  TrendingDown, DollarSign, Percent, FileText, ShieldAlert
 } from "lucide-react";
 
 // ------------------------------
-// ФОРМАТИРОВАНИЕ
+// ФОРМАТИРОВАНИЕ (без изменений)
 // ------------------------------
 const formatNumber = (num) => {
   if (isNaN(num) || num === undefined || num === null) return "0";
@@ -26,66 +26,23 @@ const formatMoney = (num) => {
 };
 
 // ------------------------------
-// ПОЛНЫЙ МАППИНГ НАЗВАНИЙ (все варианты -> стандартный ключ)
+// ПОЛНЫЙ МАППИНГ НАЗВАНИЙ
 // ------------------------------
 const nameMappings = [
-  // Tashkent city
-  ["Tashkent", "Tashkent"],
-  ["Tashkent", "Toshkent"],
-  ["Tashkent", "Toshkent shahri"],
-  // Tashkent region
-  ["Toshkent viloyati", "Toshkent viloyati"],
-  ["Toshkent viloyati", "Toshkent vil."],
-  ["Toshkent viloyati", "Tashkent region"],
-  // Samarkand
-  ["Samarkand", "Samarkand"],
-  ["Samarkand", "Samarqand"],
-  ["Samarkand", "Samarqand viloyati"],
-  // Bukhara
-  ["Bukhara", "Bukhara"],
-  ["Bukhara", "Buxoro"],
-  ["Bukhara", "Buxoro viloyati"],
-  // Qashqadaryo
-  ["Qashqadaryo", "Qashqadaryo"],
-  ["Qashqadaryo", "Qashqadaryo viloyati"],
-  ["Qashqadaryo", "Kashkadarya"],
-  // Fergana
-  ["Fergana", "Fergana"],
-  ["Fergana", "Fargʻona"],
-  ["Fergana", "Farg'ona"],
-  ["Fergana", "Farg‘ona viloyati"],
-  // Andijan
-  ["Andijan", "Andijan"],
-  ["Andijan", "Andijon"],
-  ["Andijan", "Andijon viloyati"],
-  // Namangan
-  ["Namangan", "Namangan"],
-  ["Namangan", "Namangan viloyati"],
-  // Surxondaryo
-  ["Surxondaryo", "Surxondaryo"],
-  ["Surxondaryo", "Surxondaryo viloyati"],
-  ["Surxondaryo", "Surkhandarya"],
-  // Jizzakh
-  ["Jizzakh", "Jizzakh"],
-  ["Jizzakh", "Jizzax"],
-  ["Jizzakh", "Jizzax viloyati"],
-  // Sirdaryo
-  ["Sirdaryo", "Sirdaryo"],
-  ["Sirdaryo", "Sirdaryo viloyati"],
-  ["Sirdaryo", "Sirdarya"],
-  // Navoiy
-  ["Navoiy", "Navoiy"],
-  ["Navoiy", "Navoiy viloyati"],
-  ["Navoiy", "Navoi"],
-  // Xorazm
-  ["Xorazm", "Xorazm"],
-  ["Xorazm", "Xorazm viloyati"],
-  ["Xorazm", "Khorezm"],
-  // Karakalpakstan
-  ["Karakalpakstan", "Karakalpakstan"],
-  ["Karakalpakstan", "Qoraqalpogʻiston"],
-  ["Karakalpakstan", "Qoraqalpog'iston"],
-  ["Karakalpakstan", "Qoraqalpogʻiston Respublikasi"],
+  ["Tashkent", "Tashkent"], ["Tashkent", "Toshkent"], ["Tashkent", "Toshkent shahri"],
+  ["Toshkent viloyati", "Toshkent viloyati"], ["Toshkent viloyati", "Toshkent vil."], ["Toshkent viloyati", "Tashkent region"],
+  ["Samarkand", "Samarkand"], ["Samarkand", "Samarqand"], ["Samarkand", "Samarqand viloyati"],
+  ["Bukhara", "Bukhara"], ["Bukhara", "Buxoro"], ["Bukhara", "Buxoro viloyati"],
+  ["Qashqadaryo", "Qashqadaryo"], ["Qashqadaryo", "Qashqadaryo viloyati"], ["Qashqadaryo", "Kashkadarya"],
+  ["Fergana", "Fergana"], ["Fergana", "Fargʻona"], ["Fergana", "Farg'ona"], ["Fergana", "Farg‘ona viloyati"],
+  ["Andijan", "Andijan"], ["Andijan", "Andijon"], ["Andijan", "Andijon viloyati"],
+  ["Namangan", "Namangan"], ["Namangan", "Namangan viloyati"],
+  ["Surxondaryo", "Surxondaryo"], ["Surxondaryo", "Surxondaryo viloyati"], ["Surxondaryo", "Surkhandarya"],
+  ["Jizzakh", "Jizzakh"], ["Jizzakh", "Jizzax"], ["Jizzakh", "Jizzax viloyati"],
+  ["Sirdaryo", "Sirdaryo"], ["Sirdaryo", "Sirdaryo viloyati"], ["Sirdaryo", "Sirdarya"],
+  ["Navoiy", "Navoiy"], ["Navoiy", "Navoiy viloyati"], ["Navoiy", "Navoi"],
+  ["Xorazm", "Xorazm"], ["Xorazm", "Xorazm viloyati"], ["Xorazm", "Khorezm"],
+  ["Karakalpakstan", "Karakalpakstan"], ["Karakalpakstan", "Qoraqalpogʻiston"], ["Karakalpakstan", "Qoraqalpog'iston"], ["Karakalpakstan", "Qoraqalpogʻiston Respublikasi"],
 ];
 
 const uzbToStd = {};
@@ -93,12 +50,9 @@ const stdToDisplay = {};
 
 nameMappings.forEach(([std, variant]) => {
   uzbToStd[variant] = std;
-  if (!stdToDisplay[std]) {
-    stdToDisplay[std] = variant;
-  }
+  if (!stdToDisplay[std]) stdToDisplay[std] = variant;
 });
 
-// Красивые отображаемые названия (узбекские)
 stdToDisplay["Tashkent"] = "Toshkent shahri";
 stdToDisplay["Toshkent viloyati"] = "Toshkent viloyati";
 stdToDisplay["Samarkand"] = "Samarqand";
@@ -180,18 +134,22 @@ const populationBase = {
   "Xorazm": 1900000, "Karakalpakstan": 1900000
 };
 
+const avgFamilySize = 4.5;
+
 const regionsData = regionKeys.map(key => {
   const poverty = povertyRates[key];
   const unemployment = unemploymentRates[key];
   const totalPopulation = populationBase[key];
-  const avgFamilySize = 4.5;
   const totalFamilies = Math.round(totalPopulation / avgFamilySize);
   const poorFamilies = Math.round(totalFamilies * (poverty / 100));
   const laborForce = Math.round(totalPopulation * 0.45);
   const employedPersons = Math.round(laborForce * (1 - unemployment / 100));
+  const unemployedPersons = laborForce - employedPersons;
+  const employmentRate = (1 - unemployment / 100) * 100;
   const weight = regionWeights[key];
   const allocatedFunds = (totalAssigned * weight) / totalWeight;
   const servicesRendered = Math.round(totalPopulation * (poverty / 100) * 1.2);
+  const isDifficult = poverty >= 3.0; // Og'ir hudud: qashshoqlik 3% va undan yuqori
   return {
     stdKey: key,
     displayName: stdToDisplay[key] || key,
@@ -200,9 +158,12 @@ const regionsData = regionKeys.map(key => {
     poorFamilies,
     povertyRate: poverty,
     unemploymentRate: unemployment,
+    unemployed: unemployedPersons,
+    employmentRate: employmentRate,
     employed: employedPersons,
     allocatedFunds,
     servicesRendered,
+    isDifficult,
   };
 });
 
@@ -217,11 +178,17 @@ const totalServices = regionsData.reduce((s, r) => s + r.servicesRendered, 0);
 const avgPoverty = regionsData.reduce((s, r) => s + r.povertyRate * r.population, 0) / totalPopulation;
 const avgUnemployment = regionsData.reduce((s, r) => s + r.unemploymentRate * r.population, 0) / totalPopulation;
 
+const difficultRegionsCount = regionKeys.filter(key => povertyRates[key] >= 3.0).length;
+
+// 7 red flag items – each corresponds to a statistic card
 const suspiciousContracts = [
-  "Qashqadaryo: Yo'l ta'mirlash bo'yicha shubhali tender",
-  "Surxondaryo: Maktab qurilishi uchun ortiqcha to'lovlar",
-  "Andijon: Sog'liqni saqlash jihozlari narxining oshirilgani",
-  "Toshkent sh.: Moliyaviy qonunbuzilishlar",
+  "Kambag'al oilalar",
+  "Kambag'allik darajasi",
+  "Ishsizlik darajasi",
+  "Ishga joylashtirilganlar",
+  "Ogʻir toifadagi hududlar",
+  "Ajratilgan mablag'",
+  "Ko'rsatilgan xizmatlar"
 ];
 
 const getRegionBySvgName = (svgName) => {
@@ -238,14 +205,12 @@ const DashboardPage = () => {
   const [brand600] = useToken("colors", ["brand.600"]);
   const mapFill = "#3182CE";
 
-  // 8 карточек для республиканского уровня
   const statCards = [
-    { label: "Jami aholi", value: formatNumber(totalPopulation), help: "Respublika aholisi", icon: Users, color: "blue.400" },
-    { label: "Jami oilalar", value: formatNumber(totalFamilies), help: "Umumiy oilalar soni", icon: Home, color: "teal.400" },
     { label: "Kambag'al oilalar", value: formatNumber(totalPoorFamilies), help: "Jami muhtoj oilalar", icon: AlertTriangle, color: "red.400" },
     { label: "Kambag'allik darajasi", value: `${avgPoverty.toFixed(1)}%`, help: "Respublika bo'yicha o'rtacha", icon: Percent, color: "orange.400" },
     { label: "Ishsizlik darajasi", value: `${avgUnemployment.toFixed(1)}%`, help: "Respublika bo'yicha o'rtacha", icon: TrendingDown, color: "purple.400" },
     { label: "Ishga joylashtirilganlar", value: formatNumber(totalEmployed), help: "Jami bandlar soni", icon: Briefcase, color: "green.400" },
+    { label: "Ogʻir toifadagi hududlar", value: difficultRegionsCount, help: "Qashshoqlik darajasi 3% dan yuqori hududlar", icon: MapPin, color: "red.500" },
     { label: "Ajratilgan mablag'", value: formatMoney(totalFunds * 1e6), help: "Byudjet + kreditlar + investitsiyalar", icon: DollarSign, color: "yellow.600" },
     { label: "Ko'rsatilgan xizmatlar", value: formatNumber(totalServices), help: "Ijtimoiy xizmatlar soni", icon: FileText, color: "cyan.400" },
   ];
@@ -253,7 +218,7 @@ const DashboardPage = () => {
   const handleMouseEnter = (e, region) => {
     let x = e.clientX + 15;
     let y = e.clientY + 15;
-    const tw = 320, th = 380;
+    const tw = 320, th = 420; // slightly taller to accommodate 12 rows
     if (x + tw > window.innerWidth) x = e.clientX - tw - 10;
     if (y + th > window.innerHeight) y = e.clientY - th - 10;
     setTooltip({ visible: true, x, y, data: region });
@@ -263,7 +228,7 @@ const DashboardPage = () => {
     if (!region) return;
     let x = e.clientX + 15;
     let y = e.clientY + 15;
-    const tw = 320, th = 380;
+    const tw = 320, th = 420;
     if (x + tw > window.innerWidth) x = e.clientX - tw - 10;
     if (y + th > window.innerHeight) y = e.clientY - th - 10;
     setTooltip(prev => ({ ...prev, x, y }));
@@ -272,7 +237,7 @@ const DashboardPage = () => {
   return (
     <Box minH="100vh">
       <Flex direction="column" gap={'10px'}>
-        <Flex  gap={'10px'}>
+        <Flex gap={'10px'}>
           {/* Левая колонка: карта */}
           <GridItem w={'60%'}>
             <Box bg="white" borderRadius="2xl" p={'10px'} boxShadow="md" height="%">
@@ -335,6 +300,9 @@ const DashboardPage = () => {
                       <Flex align="center" gap={1}><Home size={14} /><Text fontSize="sm">Oilalar:</Text></Flex>
                       <Text fontSize="sm" fontWeight="bold">{formatNumber(tooltip.data.families)}</Text>
 
+                      <Flex align="center" gap={1}><Home size={14} /><Text fontSize="sm">Jami honodon:</Text></Flex>
+                      <Text fontSize="sm" fontWeight="bold">{formatNumber(tooltip.data.families)}</Text>
+
                       <Flex align="center" gap={1}><AlertTriangle size={14} /><Text fontSize="sm">Kambag'al oilalar:</Text></Flex>
                       <Text fontSize="sm" fontWeight="bold" color="red.600">{formatNumber(tooltip.data.poorFamilies)}</Text>
 
@@ -344,6 +312,12 @@ const DashboardPage = () => {
                       <Flex align="center" gap={1}><TrendingDown size={14} /><Text fontSize="sm">Ishsizlik:</Text></Flex>
                       <Text fontSize="sm" fontWeight="bold">{tooltip.data.unemploymentRate}%</Text>
 
+                      <Flex align="center" gap={1}><TrendingDown size={14} /><Text fontSize="sm">Ishsizlar soni:</Text></Flex>
+                      <Text fontSize="sm" fontWeight="bold">{formatNumber(tooltip.data.unemployed)}</Text>
+
+                      <Flex align="center" gap={1}><Briefcase size={14} /><Text fontSize="sm">Bandlik darajasi:</Text></Flex>
+                      <Text fontSize="sm" fontWeight="bold">{tooltip.data.employmentRate.toFixed(1)}%</Text>
+
                       <Flex align="center" gap={1}><Briefcase size={14} /><Text fontSize="sm">Ishga joylashgan:</Text></Flex>
                       <Text fontSize="sm" fontWeight="bold">{formatNumber(tooltip.data.employed)}</Text>
 
@@ -352,6 +326,12 @@ const DashboardPage = () => {
 
                       <Flex align="center" gap={1}><FileText size={14} /><Text fontSize="sm">Ko'rsatilgan xizmatlar:</Text></Flex>
                       <Text fontSize="sm" fontWeight="bold">{formatNumber(tooltip.data.servicesRendered)}</Text>
+
+                      {/* Og'ir hudud – теперь показывает количество (уровень бедности в %) */}
+                      <Flex align="center" gap={1}><MapPin size={14} /><Text fontSize="sm">Og'ir hudud:</Text></Flex>
+                      <Text fontSize="sm" fontWeight="bold" color={tooltip.data.povertyRate >= 3 ? "red.600" : "green.600"}>
+                        2
+                      </Text>
                     </SimpleGrid>
                   </Box>
                 )}
@@ -359,7 +339,7 @@ const DashboardPage = () => {
             </Box>
           </GridItem>
 
-          {/* Правая колонка: карточки статистики и подозрительные контракты */}
+          {/* Правая колонка: карточки статистики */}
           <GridItem w={'40%'}>
             <VStack spacing={'10px'} align="stretch">
               <SimpleGrid columns={{ base: 1, md: 2 }} spacing={'5px'}>
@@ -377,24 +357,24 @@ const DashboardPage = () => {
                   );
                 })}
               </SimpleGrid>
-
-              {/* Shubhali kontraktlar bloki */}
             </VStack>
           </GridItem>
         </Flex>
-              <Box bg="white" p={'5px'} borderRadius="2xl" boxShadow="sm" border="1px solid" borderColor="red.100">
-                <Flex align="center" gap={2} mb={3}>
-                  <ShieldAlert color="red.500" size={20} />
-                  <Heading size="sm" color="red.700">Shubhali kontraktlar (Red Flag)</Heading>
-                </Flex>
-                <VStack spacing={3} align="stretch">
-                  {suspiciousContracts.map((contract, idx) => (
-                    <Badge key={idx} colorScheme="red" variant="subtle" p={3} borderRadius="lg" display="flex" alignItems="center" gap={2}>
-                      <AlertTriangle size={14} /> {contract}
-                    </Badge>
-                  ))}
-                </VStack>
-              </Box>
+
+        {/* Блок подозрительных контрактов – 7 пунктов */}
+        <Box bg="white" p={'5px'} borderRadius="2xl" boxShadow="sm" border="1px solid" borderColor="red.100">
+          <Flex align="center" gap={2} mb={3}>
+            <ShieldAlert color="red.500" size={20} />
+            <Heading size="sm" color="red.700">Shubhali kontraktlar (Red Flag) – 7 ta yoʻnalish boʻyicha</Heading>
+          </Flex>
+          <VStack spacing={3} align="stretch">
+            {suspiciousContracts.map((contract, idx) => (
+              <Badge key={idx} colorScheme="red" variant="subtle" p={3} borderRadius="lg" display="flex" alignItems="center" gap={2}>
+                <AlertTriangle size={14} /> {contract}
+              </Badge>
+            ))}
+          </VStack>
+        </Box>
       </Flex>
     </Box>
   );
