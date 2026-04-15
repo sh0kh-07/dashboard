@@ -242,8 +242,8 @@ const DashboardPage = () => {
   const statCards = [
     { label: "Jami aholi", value: formatNumber(totalPopulation), help: "Respublika aholisi", icon: Users, color: "blue.400" },
     { label: "Jami oilalar", value: formatNumber(totalFamilies), help: "Umumiy oilalar soni", icon: Home, color: "teal.400" },
-    { label: "Qashshoq oilalar", value: formatNumber(totalPoorFamilies), help: "Jami muhtoj oilalar", icon: AlertTriangle, color: "red.400" },
-    { label: "Qashshoqlik darajasi", value: `${avgPoverty.toFixed(1)}%`, help: "Respublika bo'yicha o'rtacha", icon: Percent, color: "orange.400" },
+    { label: "Kambag'al oilalar", value: formatNumber(totalPoorFamilies), help: "Jami muhtoj oilalar", icon: AlertTriangle, color: "red.400" },
+    { label: "Kambag'allik darajasi", value: `${avgPoverty.toFixed(1)}%`, help: "Respublika bo'yicha o'rtacha", icon: Percent, color: "orange.400" },
     { label: "Ishsizlik darajasi", value: `${avgUnemployment.toFixed(1)}%`, help: "Respublika bo'yicha o'rtacha", icon: TrendingDown, color: "purple.400" },
     { label: "Ishga joylashtirilganlar", value: formatNumber(totalEmployed), help: "Jami bandlar soni", icon: Briefcase, color: "green.400" },
     { label: "Ajratilgan mablag'", value: formatMoney(totalFunds * 1e6), help: "Byudjet + kreditlar + investitsiyalar", icon: DollarSign, color: "yellow.600" },
@@ -335,10 +335,10 @@ const DashboardPage = () => {
                       <Flex align="center" gap={1}><Home size={14} /><Text fontSize="sm">Oilalar:</Text></Flex>
                       <Text fontSize="sm" fontWeight="bold">{formatNumber(tooltip.data.families)}</Text>
 
-                      <Flex align="center" gap={1}><AlertTriangle size={14} /><Text fontSize="sm">Qashshoq oilalar:</Text></Flex>
+                      <Flex align="center" gap={1}><AlertTriangle size={14} /><Text fontSize="sm">Kambag'al oilalar:</Text></Flex>
                       <Text fontSize="sm" fontWeight="bold" color="red.600">{formatNumber(tooltip.data.poorFamilies)}</Text>
 
-                      <Flex align="center" gap={1}><Percent size={14} /><Text fontSize="sm">Qashshoqlik:</Text></Flex>
+                      <Flex align="center" gap={1}><Percent size={14} /><Text fontSize="sm">Kambag'allik:</Text></Flex>
                       <Text fontSize="sm" fontWeight="bold">{tooltip.data.povertyRate}%</Text>
 
                       <Flex align="center" gap={1}><TrendingDown size={14} /><Text fontSize="sm">Ishsizlik:</Text></Flex>
