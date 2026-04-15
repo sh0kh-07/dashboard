@@ -588,6 +588,8 @@ const Reports: React.FC = () => {
           <MapWithTooltip activeMetric={activeMetric} onRegionClick={handleRegionClick} />
 
           {/* Горизонтальная гистограмма */}
+        </Box>
+      </Grid>
           <Box bg="white" p={4} borderRadius="xl" border="1px solid" borderColor="gray.200" mt={6} width="100%">
             <Heading size="sm" mb={4}>Hududlar bo'yicha taqqoslama gistogramma</Heading>
             <ResponsiveContainer width="100%" height={500}>
@@ -605,8 +607,6 @@ const Reports: React.FC = () => {
               </BarChart>
             </ResponsiveContainer>
           </Box>
-        </Box>
-      </Grid>
 
       {/* Drawer - viloyat tahlili */}
       <Drawer isOpen={isOpen} onClose={onClose} size="lg" placement="right">

@@ -224,7 +224,7 @@ const DashboardPage = () => {
     { label: "Kambag'allik darajasi", value: `${avgPoverty.toFixed(1)}%`, help: "Respublika bo'yicha o'rtacha", icon: Percent, color: "orange.400" },
     { label: "Ishsizlik darajasi", value: `${avgUnemployment.toFixed(1)}%`, help: "Respublika bo'yicha o'rtacha", icon: TrendingDown, color: "purple.400" },
     { label: "Ishga joylashtirilganlar", value: formatNumber(totalEmployed), help: "Jami bandlar soni", icon: Briefcase, color: "green.400" },
-    { label: "Ogʻir toifadagi hududlar", value: difficultRegionsCount, help: "Qashshoqlik darajasi 3% dan yuqori hududlar", icon: MapPin, color: "red.500" },
+    { label: "Ogʻir toifadagi hududlar", value: difficultRegionsCount, help: "Ogʻir toifadagi hududlar", icon: MapPin, color: "red.500" },
     { label: "Ajratilgan mablag'", value: formatMoney(totalFunds * 1e6), help: "Byudjet + kreditlar + investitsiyalar", icon: DollarSign, color: "yellow.600" },
     { label: "Ko'rsatilgan xizmatlar", value: formatNumber(totalServices), help: "Ijtimoiy xizmatlar soni", icon: FileText, color: "cyan.400" },
   ];

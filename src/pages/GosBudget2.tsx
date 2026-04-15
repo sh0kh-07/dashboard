@@ -10,12 +10,8 @@ import {
   StatNumber,
   StatHelpText,
   Heading,
-  useToken,
   Flex,
-  IconButton,
 } from "@chakra-ui/react";
-import { useNavigate } from "react-router-dom";
-import { ArrowRight, Lock } from "lucide-react";
 import {
   BarChart,
   Bar,
@@ -23,206 +19,176 @@ import {
   YAxis,
   Tooltip,
   ResponsiveContainer,
-  Cell,
   CartesianGrid,
+  Cell,
 } from "recharts";
+import {
+  MapPin,
+  Home,
+  Briefcase,
+  Heart,
+  Flag,
+  Shield,
+  PlusCircle,
+} from "lucide-react";
 
 const BudgetPage2 = () => {
-  const navigate = useNavigate();
-  const [brand600] = useToken("colors", ["brand.600"]);
-
-  const totalBudget = 26.8;
-
-  const budgetItems = [
+  // 7 карточек – единый источник данных
+  const cardsData = [
     {
       id: 1,
-      title: "Mahallalar infratuzilmasini rivojlantirish loyihalari",
-      subtitle: "Respublika budjeti mablag‘lari",
-      amount: 20.0,
+      title: "Og‘ir toifadagi tumanlar",
+      value: 2.7,
       unit: "trln so‘m",
-      description:
-        "Mahallalar infratuzilmasini rivojlantirishga qaratilgan loyihalarni amalga oshirish",
+      icon: MapPin,
+      description: "Qashshoqlik darajasi yuqori tumanlar",
+      forChart: true,
     },
     {
       id: 2,
-      title: "Og‘ir tuman va mahallalarda tadbirkorlik infratuzilmasini yaratish",
-      subtitle: "Qo‘shimcha budjet mablag‘lari",
-      amount: 3.7,
+      title: "Og‘ir toifadagi mahallalar",
+      value: 1.7,
       unit: "trln so‘m",
-      description:
-        "37 ta 'og‘ir' tuman va 903 ta 'og‘ir' mahallalarda tadbirkorlik infratuzilmasini yaratish",
+      icon: Home,
+      description: "Ijtimoiy-iqtisodiy rivojlanishi sust mahallalar",
+      forChart: true,
     },
     {
       id: 3,
-      title: "Mahallalar infratuzilmasini yaxshilash",
-      subtitle: "Tadbirkorlik uchun shart-sharoitlar",
-      amount: 1.8,
+      title: "Ko‘rsatilgan xizmatlar uchun",
+      value: 5.0,
       unit: "trln so‘m",
-      description:
-        "Mahallalar infratuzilmasini yaxshilash orqali tadbirkorlik faoliyati uchun shart-sharoitlarni yaratish",
+      icon: Briefcase,
+      description: "Aholiga ko‘rsatilgan ijtimoiy xizmatlar",
+      forChart: true,
     },
     {
       id: 4,
-      title: "Eng yaxshi natija ko‘rsatgan 100 ta 'og‘ir' mahallaga qo‘shimcha",
-      subtitle: "Rag‘batlantirish fondi",
-      amount: 0.1,
-      unit: "trln so‘m (100 mlrd)",
-      description:
-        "Aholi daromadini oshirish va qambag‘allikni qisqartirish bo‘yicha eng yaxshi natija ko‘rsatgan 100 ta 'og‘ir' mahallaga qo‘shimcha 1 mlrd so‘mdan",
+      title: "Sog‘liqni saqlash uchun",
+      value: 8.5,
+      unit: "trln so‘m",
+      icon: Heart,
+      description: "Tibbiy xizmatlar va dori-darmonlar",
+      forChart: true,
     },
     {
       id: 5,
-      title: "Talabalar loyihalari uchun grantlar",
-      subtitle: "Master reja ishlab chiqish",
-      amount: 0.0001,
-      unit: "trln so‘m (100 mln)",
-      description:
-        "Oliy ta'lim muassasalari talabalariga tanlov asosida 'og‘ir' mahallalar 'master rejasi'ni ishlab chiqish bo‘yicha eng yaxshi loyihalar uchun",
+      title: "Red Flag (qizil bayroq)",
+      value: 12,
+      unit: "",
+      icon: Flag,
+      description: "Diqqat talab qiladigan hududlar soni",
+      forChart: false, // не включаем в график, т.к. единица измерения не trln
     },
     {
       id: 6,
-      title: "Kredit foiz stavkasining bir qismiga kompensatsiya",
-      subtitle: "Tadbirkorlikni rivojlantirish kompaniyasi",
-      amount: 1.2,
+      title: "Kambag‘allik va ishsizlikdan xoli hudud",
+      value: 2.0,
       unit: "trln so‘m",
-      description:
-        "Kredit foiz stavkasining bir qismiga kompensatsiya taqdim etish uchun 'Tadbirkorlikni rivojlantirish kompaniyasi'ga",
+      icon: Shield,
+      description: "Barqaror rivojlangan hududlar",
+      forChart: true,
+    },
+    {
+      id: 7,
+      title: "Qo‘shimcha mablag‘",
+      value: 1.8,
+      unit: "trln so‘m",
+      icon: PlusCircle,
+      description: "Zaruratga ko‘ra ajratilgan qo‘shimcha mablag‘",
+      forChart: true,
     },
   ];
 
-  const chartData = budgetItems.map((item) => ({
-    name: item.title.length > 20 ? item.title.substring(0, 20) + "..." : item.title,
-    fullName: item.title,
-    value: item.amount,
-  }));
+  // Формируем данные для графика только из карточек, у которых forChart = true
+  const chartData = cardsData
+    .filter((card) => card.forChart)
+    .map((card) => ({
+      name: card.title.length > 18 ? card.title.substring(0, 18) + "..." : card.title,
+      fullName: card.title,
+      value: card.value,
+    }));
 
-  const barColors = [
-    brand600,
-    "#3182CE",
-    "#DD6B20",
-    "#38A169",
-    "#D53F8C",
-    "#805AD5",
-  ];
-
-  const handleCardClick = (id: number) => {
-    if (id === 1) {
-      navigate("/budget-detail");
-    }
-  };
+  // Нейтральные цвета для графика (серые оттенки)
+  const barColors = ["#718096", "#A0AEC0", "#CBD5E0", "#4A5568", "#2D3748", "#718096"];
 
   return (
     <Box>
-      <Flex alignItems="start" justifyContent="space-between" mb={8}>
-        <Heading as="h1" size="xl" fontWeight="bold" color="gray.800">
-          Davlat budjeti
+      <Flex alignItems="start" justifyContent="space-between" mb={4}>
+        <Heading as="h1" size="lg" fontWeight="bold" color="gray.800">
+          Ijtimoiy-iqtisodiy ko‘rsatkichlar
         </Heading>
-        <Box>
-          <Text fontSize="lg" fontWeight="medium" color="gray.600">
-            Umumiy budjet hajmi
+        <Box textAlign="right">
+          <Text fontSize="xs" fontWeight="medium" color="gray.600">
+            Jami mablag‘lar
           </Text>
-          <Text fontSize="2xl" fontWeight="extrabold" color={brand600}>
-            {totalBudget} trln so‘m
+          <Text fontSize="2xl" fontWeight="extrabold" color="gray.700">
+            26.8 trln so‘m
           </Text>
         </Box>
       </Flex>
 
-      <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={6} mb={12}>
-        {budgetItems.map((item) => {
-          const isClickable = item.id === 1;
+      {/* 7 карточек – компактно, 3–4 колонки */}
+      <SimpleGrid columns={{ base: 1, sm: 2, md: 3, lg: 4 }} spacing={2} mb={6}>
+        {cardsData.map((card) => {
+          const Icon = card.icon;
           return (
             <Card
-              key={item.id}
+              key={card.id}
               variant="outline"
               border="1px solid"
               borderColor="gray.200"
-              borderRadius="xl"
+              borderRadius="lg"
               transition="0.2s"
               bg="white"
-              cursor={isClickable ? "pointer" : "default"}
-              _hover={
-                isClickable
-                  ? {
-                    boxShadow: "lg",
-                    transform: "translateY(-4px)",
-                    borderColor: brand600,
-                  }
-                  : {}
-              }
-              onClick={() => handleCardClick(item.id)}
-              position="relative"
+              _hover={{ boxShadow: "sm", transform: "translateY(-1px)" }}
             >
-              <CardBody>
+              <CardBody py={3} px={4}>
                 <Stat>
-                  <StatLabel fontSize="lg" fontWeight="bold" color="gray.800">
-                    {item.title}
-                  </StatLabel>
-                  <StatHelpText fontSize="sm" color="gray.600" mb={2}>
-                    {item.subtitle}
-                  </StatHelpText>
-                  <StatNumber fontSize="2xl" fontWeight="black" color={brand600} mt={2}>
-                    {item.amount} {item.unit}
+                  <Flex align="center" gap={2} mb={1}>
+                    <Icon size={16} color="gray.500" />
+                    <StatLabel fontSize="sm" fontWeight="bold" color="gray.700">
+                      {card.title}
+                    </StatLabel>
+                  </Flex>
+                  <StatNumber fontSize="xl" fontWeight="bold" color="gray.800">
+                    {card.value.toLocaleString()} {card.unit}
                   </StatNumber>
-                  <StatHelpText fontSize="xs" color="gray.600" mt={2}>
-                    {item.description}
+                  <StatHelpText fontSize="xs" color="gray.500" mt={1}>
+                    {card.description}
                   </StatHelpText>
                 </Stat>
-                <Flex justify="flex-end" mt={3}>
-                  {isClickable ? (
-                    <IconButton
-                      aria-label="Batafsil"
-                      icon={<ArrowRight size={18} />}
-                      size="sm"
-                      variant="ghost"
-                      color={brand600}
-                      _hover={{ bg: "gray.100", color: brand600 }}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleCardClick(item.id);
-                      }}
-                    />
-                  ) : (
-                    <IconButton
-                      aria-label="Yopiq"
-                      icon={<Lock size={18} />}
-                      size="sm"
-                      variant="ghost"
-                      color="gray.400"
-                      isDisabled
-                      _hover={{}}
-                    />
-                  )}
-                </Flex>
               </CardBody>
             </Card>
           );
         })}
       </SimpleGrid>
 
-      <Box mt={10}>
-        <Text fontSize="2xl" fontWeight="bold" mb={2} color="gray.800">
-          Budjet mablag‘larining yo‘nalishlar bo‘yicha taqsimoti
+      {/* График – данные из тех же карточек (только trln so‘m) */}
+      <Box mt={4}>
+        <Text fontSize="md" fontWeight="bold" mb={1} color="gray.800">
+          Mablag‘larning yo‘nalishlar bo‘yicha taqsimoti
         </Text>
-        <Text fontSize="sm" color="gray.600" mb={6}>
+        <Text fontSize="xs" color="gray.600" mb={2}>
           (trln so‘mda)
         </Text>
-        <ResponsiveContainer width="100%" height={500}>
+        <ResponsiveContainer width="100%" height={280}>
           <BarChart
             data={chartData}
-            margin={{ top: 20, right: 30, left: 20, bottom: 120 }}
+            margin={{ top: 10, right: 20, left: 0, bottom: 60 }}
           >
             <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
             <XAxis
               dataKey="name"
-              angle={-45}
+              angle={-35}
               textAnchor="end"
               interval={0}
-              height={100}
-              tick={{ fontSize: 12, fill: "#4a5568" }}
+              height={70}
+              tick={{ fontSize: 10, fill: "#4a5568" }}
             />
             <YAxis
-              label={{ value: "trln so‘m", angle: -90, position: "insideLeft", fill: "#4a5568" }}
-              tick={{ fill: "#4a5568" }}
+              label={{ value: "trln so‘m", angle: -90, position: "insideLeft", fontSize: 10, fill: "#4a5568" }}
+              tick={{ fontSize: 10, fill: "#4a5568" }}
             />
             <Tooltip
               formatter={(value: number) => [`${value} trln so‘m`, "Miqdori"]}
@@ -230,25 +196,15 @@ const BudgetPage2 = () => {
                 const original = chartData.find((d) => d.name === label);
                 return original ? original.fullName : label;
               }}
-              contentStyle={{
-                backgroundColor: "#ffffff",
-                borderRadius: "8px",
-                border: "1px solid #e2e8f0",
-                color: "#1a202c",
-              }}
-              itemStyle={{ color: "#1a202c" }}
+              contentStyle={{ backgroundColor: "#fff", borderRadius: "8px", border: "1px solid #e2e8f0" }}
             />
-            <Bar dataKey="value" radius={[8, 8, 0, 0]}>
-              {chartData.map((entry, index) => (
+            <Bar dataKey="value" radius={[4, 4, 0, 0]}>
+              {chartData.map((_, index) => (
                 <Cell key={`cell-${index}`} fill={barColors[index % barColors.length]} />
               ))}
             </Bar>
           </BarChart>
         </ResponsiveContainer>
-        <Text fontSize="sm" color="gray.600" textAlign="left" mt={4}>
-          Eslatma: 4- va 5-yo‘nalishlar kichik summasi tufayli grafikda deyarli ko‘rinmaydi,
-          ammo ular muhim ijtimoiy ahamiyatga ega.
-        </Text>
       </Box>
     </Box>
   );
