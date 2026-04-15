@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import {
   Box, Text, Heading, Flex, SimpleGrid, Stat, StatLabel, StatNumber, StatHelpText,
-  Tabs, TabList, TabPanels, Tab, TabPanel, Badge, useToken
+  Badge, useToken, Grid, GridItem, VStack
 } from "@chakra-ui/react";
 import Uzbekistan from "@svg-maps/uzbekistan";
 import {
@@ -115,7 +115,6 @@ stdToDisplay["Xorazm"] = "Xorazm";
 stdToDisplay["Karakalpakstan"] = "Qoraqalpog'iston";
 
 const normalizeName = (n) => {
-  // Если название уже на английском и не содержит узбекских суффиксов, не трогаем
   const uzbSuffixes = ['viloyati', 'shahri', 'vil.', 'Respublikasi'];
   let normalized = n;
   for (const suffix of uzbSuffixes) {
@@ -131,7 +130,6 @@ const getStdKeyFromSvgName = (svgName) => {
   const norm = normalizeName(svgName);
   if (uzbToStd[norm]) return uzbToStd[norm];
   if (norm === "Aral Sea") return null;
-  // Если не нашли, возможно, это уже стандартный ключ
   if (regionKeys.includes(norm)) return norm;
   return null;
 };
@@ -220,10 +218,10 @@ const avgPoverty = regionsData.reduce((s, r) => s + r.povertyRate * r.population
 const avgUnemployment = regionsData.reduce((s, r) => s + r.unemploymentRate * r.population, 0) / totalPopulation;
 
 const suspiciousContracts = [
-  "Qashqadaryo: Yo'l ta'mirlash bo'yicha shubhali tender - 'Yoldi Asfalt Qilish' MCHJ 2.3 mlrd so'm",
-  "Surxondaryo: Maktab qurilishi uchun ortiqcha to'lovlar (1.1 mlrd so'm)",
-  "Andijon: Sog'liqni saqlash jihozlari narxining asossiz oshirilgani",
-  "Toshkent sh.: 'Toza Shahar' loyihasida moliyaviy qonunbuzilishlar",
+  "Qashqadaryo: Yo'l ta'mirlash bo'yicha shubhali tender",
+  "Surxondaryo: Maktab qurilishi uchun ortiqcha to'lovlar",
+  "Andijon: Sog'liqni saqlash jihozlari narxining oshirilgani",
+  "Toshkent sh.: Moliyaviy qonunbuzilishlar",
 ];
 
 const getRegionBySvgName = (svgName) => {
@@ -240,7 +238,7 @@ const DashboardPage = () => {
   const [brand600] = useToken("colors", ["brand.600"]);
   const mapFill = "#3182CE";
 
-  // 8 карточек для республиканского уровня (как в тултипе региона)
+  // 8 карточек для республиканского уровня
   const statCards = [
     { label: "Jami aholi", value: formatNumber(totalPopulation), help: "Respublika aholisi", icon: Users, color: "blue.400" },
     { label: "Jami oilalar", value: formatNumber(totalFamilies), help: "Umumiy oilalar soni", icon: Home, color: "teal.400" },
@@ -273,146 +271,130 @@ const DashboardPage = () => {
 
   return (
     <Box minH="100vh">
-      <Flex direction="column" gap={6}>
-        <Box>
-          <Heading as="h1" size="2xl" mb={2} color="gray.800">Ijtimoiy himoya monitoringi</Heading>
-          <Text fontSize="lg" color="gray.500">Qashshoqlik, bandlik va ijtimoiy xizmatlar integratsiyasi</Text>
-        </Box>
+      <Flex direction="column" gap={'10px'}>
+        <Flex  gap={'10px'}>
+          {/* Левая колонка: карта */}
+          <GridItem w={'60%'}>
+            <Box bg="white" borderRadius="2xl" p={'10px'} boxShadow="md" height="%">
+              <Flex align="center" gap={2} mb={4}>
+                <Heading size="12px">O'zbekiston xaritasi — hududlar ma'lumotlari</Heading>
+              </Flex>
+              <Box position="relative" display="flex" justifyContent="center">
+                <svg viewBox={Uzbekistan.viewBox} width="100%" style={{ maxHeight: "550px" }}>
+                  {Uzbekistan.locations.map((loc) => {
+                    const region = getRegionBySvgName(loc.name);
+                    return (
+                      <path
+                        key={loc.id}
+                        d={loc.path}
+                        fill={region ? mapFill : "#CBD5E0"}
+                        fillOpacity={region ? 0.85 : 0.2}
+                        stroke="#FFFFFF"
+                        strokeWidth={1.5}
+                        cursor={region ? "pointer" : "default"}
+                        onMouseEnter={(e) => region && handleMouseEnter(e, region)}
+                        onMouseMove={(e) => region && handleMouseMove(e, region)}
+                        onMouseLeave={() => setTooltip({ visible: false, x: 0, y: 0, data: null })}
+                        style={{ transition: "all 0.2s ease" }}
+                        onMouseOver={(e) => {
+                          e.currentTarget.style.fillOpacity = "1";
+                          e.currentTarget.style.stroke = "#2C5282";
+                          e.currentTarget.style.strokeWidth = "3";
+                        }}
+                        onMouseOut={(e) => {
+                          e.currentTarget.style.fillOpacity = region ? "0.85" : "0.2";
+                          e.currentTarget.style.stroke = "#FFFFFF";
+                          e.currentTarget.style.strokeWidth = "1.5";
+                        }}
+                      />
+                    );
+                  })}
+                </svg>
+                {tooltip.visible && tooltip.data && (
+                  <Box
+                    position="fixed"
+                    top={tooltip.y}
+                    left={tooltip.x}
+                    bg="white"
+                    p={4}
+                    borderRadius="xl"
+                    boxShadow="2xl"
+                    zIndex={1000}
+                    border="1px solid"
+                    borderColor="gray.200"
+                    minW="280px"
+                    maxW="320px"
+                  >
+                    <Text fontWeight="extrabold" fontSize="lg" mb={2} color="brand.600">
+                      {tooltip.data.displayName}
+                    </Text>
+                    <SimpleGrid columns={2} spacingX={3} spacingY={2} mb={2}>
+                      <Flex align="center" gap={1}><Users size={14} /><Text fontSize="sm">Aholi:</Text></Flex>
+                      <Text fontSize="sm" fontWeight="bold">{formatNumber(tooltip.data.population)}</Text>
 
-        <Tabs variant="soft-rounded" colorScheme="blue" isLazy>
-          <TabList bg="white" borderRadius="full" p={2} mb={4} maxW="max-content" boxShadow="sm">
-            <Tab fontWeight="bold" _selected={{ bg: "brand.50", color: "brand.600" }}>Asosiy ko'rsatkichlar</Tab>
-            <Tab fontWeight="bold" _selected={{ bg: "brand.50", color: "brand.600" }}>Hududiy tahlil (xarita)</Tab>
-          </TabList>
+                      <Flex align="center" gap={1}><Home size={14} /><Text fontSize="sm">Oilalar:</Text></Flex>
+                      <Text fontSize="sm" fontWeight="bold">{formatNumber(tooltip.data.families)}</Text>
 
-          <TabPanels>
-            {/* Первый таб: 8 карточек */}
-            <TabPanel p={0}>
-              <SimpleGrid columns={{ base: 1, sm: 2, md: 2, lg: 4 }} spacing={6}>
+                      <Flex align="center" gap={1}><AlertTriangle size={14} /><Text fontSize="sm">Qashshoq oilalar:</Text></Flex>
+                      <Text fontSize="sm" fontWeight="bold" color="red.600">{formatNumber(tooltip.data.poorFamilies)}</Text>
+
+                      <Flex align="center" gap={1}><Percent size={14} /><Text fontSize="sm">Qashshoqlik:</Text></Flex>
+                      <Text fontSize="sm" fontWeight="bold">{tooltip.data.povertyRate}%</Text>
+
+                      <Flex align="center" gap={1}><TrendingDown size={14} /><Text fontSize="sm">Ishsizlik:</Text></Flex>
+                      <Text fontSize="sm" fontWeight="bold">{tooltip.data.unemploymentRate}%</Text>
+
+                      <Flex align="center" gap={1}><Briefcase size={14} /><Text fontSize="sm">Ishga joylashgan:</Text></Flex>
+                      <Text fontSize="sm" fontWeight="bold">{formatNumber(tooltip.data.employed)}</Text>
+
+                      <Flex align="center" gap={1}><DollarSign size={14} /><Text fontSize="sm">Ajratilgan mablag':</Text></Flex>
+                      <Text fontSize="sm" fontWeight="bold">{formatMoney(tooltip.data.allocatedFunds * 1e6)}</Text>
+
+                      <Flex align="center" gap={1}><FileText size={14} /><Text fontSize="sm">Ko'rsatilgan xizmatlar:</Text></Flex>
+                      <Text fontSize="sm" fontWeight="bold">{formatNumber(tooltip.data.servicesRendered)}</Text>
+                    </SimpleGrid>
+                  </Box>
+                )}
+              </Box>
+            </Box>
+          </GridItem>
+
+          {/* Правая колонка: карточки статистики и подозрительные контракты */}
+          <GridItem w={'40%'}>
+            <VStack spacing={'10px'} align="stretch">
+              <SimpleGrid columns={{ base: 1, md: 2 }} spacing={'5px'}>
                 {statCards.map((card, idx) => {
                   const Icon = card.icon;
                   return (
-                    <Stat key={idx} bg="white" p={5} borderRadius="2xl" boxShadow="md" borderLeft="4px solid" borderColor={card.color}>
-                      <StatLabel display="flex" alignItems="center" gap={2} fontWeight="bold" fontSize="md">
-                        <Icon size={18} color={`var(--chakra-colors-${card.color})`} />
+                    <Stat key={idx} bg="white" p={'10px'} borderRadius="2xl" boxShadow="md" borderLeft="4px solid" borderColor={card.color}>
+                      <StatLabel display="flex" alignItems="center" gap={2} fontWeight="bold" fontSize="sm">
+                        <Icon size={16} color={`var(--chakra-colors-${card.color})`} />
                         {card.label}
                       </StatLabel>
-                      <StatNumber fontSize="2xl" my={2}>{card.value}</StatNumber>
-                      <StatHelpText>{card.help}</StatHelpText>
+                      <StatNumber fontSize="xl" my={1}>{card.value}</StatNumber>
+                      <StatHelpText fontSize="xs">{card.help}</StatHelpText>
                     </Stat>
                   );
                 })}
               </SimpleGrid>
 
               {/* Shubhali kontraktlar bloki */}
-              <Box mt={8} bg="white" p={4} borderRadius="2xl" boxShadow="sm" border="1px solid" borderColor="red.100">
+            </VStack>
+          </GridItem>
+        </Flex>
+              <Box bg="white" p={'5px'} borderRadius="2xl" boxShadow="sm" border="1px solid" borderColor="red.100">
                 <Flex align="center" gap={2} mb={3}>
                   <ShieldAlert color="red.500" size={20} />
                   <Heading size="sm" color="red.700">Shubhali kontraktlar (Red Flag)</Heading>
                 </Flex>
-                <SimpleGrid columns={{ base: 1, md: 1 }} spacing={3}>
+                <VStack spacing={3} align="stretch">
                   {suspiciousContracts.map((contract, idx) => (
                     <Badge key={idx} colorScheme="red" variant="subtle" p={3} borderRadius="lg" display="flex" alignItems="center" gap={2}>
                       <AlertTriangle size={14} /> {contract}
                     </Badge>
                   ))}
-                </SimpleGrid>
+                </VStack>
               </Box>
-            </TabPanel>
-
-            {/* Второй таб: карта */}
-            <TabPanel p={0}>
-              <Box bg="white" borderRadius="2xl" p={6} boxShadow="md">
-                <Flex align="center" gap={2} mb={4}>
-                  <MapPin color={brand600} size={24} />
-                  <Heading size="lg">O'zbekiston xaritasi — hududlar ma'lumotlari</Heading>
-                </Flex>
-                <Text fontSize="sm" color="gray.500" mb={6}>
-                  Viloyat nomi ustiga kursorni olib boring — barcha ko'rsatkichlar chiqadi.
-                </Text>
-
-                <Box position="relative" display="flex" justifyContent="center">
-                  <svg viewBox={Uzbekistan.viewBox} width="100%" style={{ maxHeight: "550px" }}>
-                    {Uzbekistan.locations.map((loc) => {
-                      const region = getRegionBySvgName(loc.name);
-                      return (
-                        <path
-                          key={loc.id}
-                          d={loc.path}
-                          fill={region ? mapFill : "#CBD5E0"}
-                          fillOpacity={region ? 0.85 : 0.2}
-                          stroke="#FFFFFF"
-                          strokeWidth={1.5}
-                          cursor={region ? "pointer" : "default"}
-                          onMouseEnter={(e) => region && handleMouseEnter(e, region)}
-                          onMouseMove={(e) => region && handleMouseMove(e, region)}
-                          onMouseLeave={() => setTooltip({ visible: false, x: 0, y: 0, data: null })}
-                          style={{ transition: "all 0.2s ease" }}
-                          onMouseOver={(e) => {
-                            e.currentTarget.style.fillOpacity = "1";
-                            e.currentTarget.style.stroke = "#2C5282";
-                            e.currentTarget.style.strokeWidth = "3";
-                          }}
-                          onMouseOut={(e) => {
-                            e.currentTarget.style.fillOpacity = region ? "0.85" : "0.2";
-                            e.currentTarget.style.stroke = "#FFFFFF";
-                            e.currentTarget.style.strokeWidth = "1.5";
-                          }}
-                        />
-                      );
-                    })}
-                  </svg>
-
-                  {tooltip.visible && tooltip.data && (
-                    <Box
-                      position="fixed"
-                      top={tooltip.y}
-                      left={tooltip.x}
-                      bg="white"
-                      p={4}
-                      borderRadius="xl"
-                      boxShadow="2xl"
-                      zIndex={1000}
-                      border="1px solid"
-                      borderColor="gray.200"
-                      minW="280px"
-                      maxW="320px"
-                    >
-                      <Text fontWeight="extrabold" fontSize="lg" mb={2} color="brand.600">
-                        {tooltip.data.displayName}
-                      </Text>
-                      <SimpleGrid columns={2} spacingX={3} spacingY={2} mb={2}>
-                        <Flex align="center" gap={1}><Users size={14} /><Text fontSize="sm">Aholi:</Text></Flex>
-                        <Text fontSize="sm" fontWeight="bold">{formatNumber(tooltip.data.population)}</Text>
-
-                        <Flex align="center" gap={1}><Home size={14} /><Text fontSize="sm">Oilalar:</Text></Flex>
-                        <Text fontSize="sm" fontWeight="bold">{formatNumber(tooltip.data.families)}</Text>
-
-                        <Flex align="center" gap={1}><AlertTriangle size={14} /><Text fontSize="sm">Qashshoq oilalar:</Text></Flex>
-                        <Text fontSize="sm" fontWeight="bold" color="red.600">{formatNumber(tooltip.data.poorFamilies)}</Text>
-
-                        <Flex align="center" gap={1}><Percent size={14} /><Text fontSize="sm">Qashshoqlik:</Text></Flex>
-                        <Text fontSize="sm" fontWeight="bold">{tooltip.data.povertyRate}%</Text>
-
-                        <Flex align="center" gap={1}><TrendingDown size={14} /><Text fontSize="sm">Ishsizlik:</Text></Flex>
-                        <Text fontSize="sm" fontWeight="bold">{tooltip.data.unemploymentRate}%</Text>
-
-                        <Flex align="center" gap={1}><Briefcase size={14} /><Text fontSize="sm">Ishga joylashgan:</Text></Flex>
-                        <Text fontSize="sm" fontWeight="bold">{formatNumber(tooltip.data.employed)}</Text>
-
-                        <Flex align="center" gap={1}><DollarSign size={14} /><Text fontSize="sm">Ajratilgan mablag':</Text></Flex>
-                        <Text fontSize="sm" fontWeight="bold">{formatMoney(tooltip.data.allocatedFunds * 1e6)}</Text>
-
-                        <Flex align="center" gap={1}><FileText size={14} /><Text fontSize="sm">Ko'rsatilgan xizmatlar:</Text></Flex>
-                        <Text fontSize="sm" fontWeight="bold">{formatNumber(tooltip.data.servicesRendered)}</Text>
-                      </SimpleGrid>
-                    </Box>
-                  )}
-                </Box>
-              </Box>
-            </TabPanel>
-          </TabPanels>
-        </Tabs>
       </Flex>
     </Box>
   );

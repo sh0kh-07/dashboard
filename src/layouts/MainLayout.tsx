@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box, Flex, HStack, Text, IconButton, Avatar, VStack,
   Button, Menu, MenuButton, MenuList, MenuItem, MenuDivider
@@ -47,107 +47,76 @@ type MenuItem = SimpleMenuItem | AccordionMenuItem;
 
 const menuConfig: MenuItem[] = [
   { type: 'item', label: 'Bosh sahifa', icon: LayoutDashboard, path: '/' },
-  { type: 'item', label: 'Xisobotlar', icon: ChartColumnBig, path: '/reports' },
-  { type: 'item', label: 'Ajratilgan mablag`lar', icon: BadgeDollarSign, path: '/budget' },
-  { type: 'item', label: 'Kambagʻalik darajasi', icon: Users, path: '/poor-level' },
-  { type: 'item', label: 'Bandlik darajasi', icon: BriefcaseBusiness, path: '/job-placement' },
-  { type: 'item', label: 'Ogʻir toifadagi hududlar', icon: MapPin, path: '/regions' },
-  { type: 'item', label: 'Ko‘rsatilgan xizmatlar ', icon: MonitorCloud, path: '/mahalla' },
- 
+  // { type: 'item', label: 'Xisobotlar', icon: ChartColumnBig, path: '/reports' },
+  // { type: 'item', label: 'Ajratilgan mablag`lar', icon: BadgeDollarSign, path: '/budget' },
+  // { type: 'item', label: 'Kambagʻalik darajasi', icon: Users, path: '/poor-level' },
+  // { type: 'item', label: 'Bandlik darajasi', icon: BriefcaseBusiness, path: '/job-placement' },
+  // { type: 'item', label: 'Ogʻir toifadagi hududlar', icon: MapPin, path: '/regions' },
+  // { type: 'item', label: 'Ko‘rsatilgan xizmatlar ', icon: MonitorCloud, path: '/mahalla' },
 ];
 
-// AccordionItem component adapted for light theme
-interface AccordionItemProps {
-  icon: React.ElementType;
-  label: string;
-  isOpen: boolean;
-  onToggle: () => void;
-  children: React.ReactNode;
-}
-
-const AccordionItem: React.FC<AccordionItemProps> = ({
-  icon: Icon,
-  label,
-  isOpen,
-  onToggle,
-  children,
-}) => {
-  return (
-    <Box w="full">
-      <Flex
-        align="center"
-        justify="space-between"
-        px={4}
-        py={2.5}
-        borderRadius="lg"
-        cursor="pointer"
-        color="gray.700"
-        _hover={{ bg: 'gray.100', color: 'gray.900' }}
-        onClick={onToggle}
-        transition="all 0.2s"
-      >
-        <HStack spacing={3}>
-          <Icon size={20} />
-          <Text fontSize="sm" fontWeight="medium">{label}</Text>
-        </HStack>
-        <IconButton
-          aria-label="Toggle"
-          icon={isOpen ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
-          size="xs"
-          variant="ghost"
-          color="currentColor"
-          _hover={{ bg: 'transparent' }}
-        />
-      </Flex>
-      <AnimatePresence initial={false}>
-        {isOpen && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.6, ease: [0.4, 0, 0.2, 1] }}
-            style={{ overflow: 'hidden' }}
-          >
-            <VStack pl={'20px'} mt={1} spacing={1} align="stretch">
-              {children}
-            </VStack>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </Box>
-  );
-};
-
-// Helper for breadcrumbs (unchanged)
+// Route configuration for page titles and breadcrumbs
 const routeConfig: Record<string, { title: string; breadcrumbs: string[] }> = {
-  '/': { title: 'Dashboard', breadcrumbs: ['Asosiy'] },
-  '/budget': { title: 'Davlat byudjeti', breadcrumbs: ['Budjet'] },
-  '/fund': { title: 'Jamgʻarma', breadcrumbs: ['Jamgʻarma'] },
-  '/loans': { title: 'Kreditlar', breadcrumbs: ['Kreditlar'] },
-  '/external': { title: 'Tashqi moliya manbalari', breadcrumbs: ['Tashqi moliya'] },
+  '/': { title: 'Ijtimoiy himoya monitoringi', breadcrumbs: ['Asosiy'] },
+  '/reports': { title: 'Hisobotlar', breadcrumbs: ['Hisobotlar'] },
+  '/budget': { title: 'Ajratilgan mablag`lar', breadcrumbs: ['Ajratilgan mablag`lar'] },
+  '/poor-level': { title: 'Kambagʻalik darajasi', breadcrumbs: ['Kambagʻalik darajasi'] },
+  '/job-placement': { title: 'Bandlik darajasi', breadcrumbs: ['Bandlik darajasi'] },
+  '/regions': { title: 'Ogʻir toifadagi hududlar', breadcrumbs: ['Ogʻir toifadagi hududlar'] },
+  '/mahalla': { title: 'Ko‘rsatilgan xizmatlar', breadcrumbs: ['Ko‘rsatilgan xizmatlar'] },
   '/kashkadarya': { title: 'Qashqadaryo viloyati', breadcrumbs: ['Budjet', 'Qashqadaryo'] },
   '/kashkadarya/qarshi-detail': { title: 'Qarshi shahri', breadcrumbs: ['Budjet', 'Qashqadaryo', 'Qarshi'] },
   '/kashkadarya/mahalla/batosh': { title: 'Batosh mahallasi', breadcrumbs: ['Budjet', 'Qashqadaryo', 'Qarshi', 'Batosh'] },
   '/contract/budget-1': { title: 'Kontrakt detali', breadcrumbs: ['Budjet', 'Qashqadaryo', 'Qarshi', 'Batosh', 'Kontrakt'] },
 };
 
-const getUzbekDate = (): string => {
-  const today = new Date();
-  const day = today.getDate();
-  const year = today.getFullYear();
+// Helper to get page title from path
+const getPageTitle = (pathname: string): string => {
+  // Exact match
+  if (routeConfig[pathname]) return routeConfig[pathname].title;
+  // Try to find a parent route that matches the start
+  const matchedKey = Object.keys(routeConfig).find(key => pathname.startsWith(key) && key !== '/');
+  if (matchedKey) return routeConfig[matchedKey].title;
+  // Fallback: format the last segment
+  const lastSegment = pathname.split('/').filter(Boolean).pop();
+  if (lastSegment) {
+    return lastSegment.charAt(0).toUpperCase() + lastSegment.slice(1).replace(/-/g, ' ');
+  }
+  return 'Dashboard';
+};
+
+// Format Uzbek date and time
+const getUzbekDateTime = (): { date: string; time: string } => {
+  const now = new Date();
+  const day = now.getDate();
+  const year = now.getFullYear();
   const months: Record<number, string> = {
     0: 'Yanvar', 1: 'Fevral', 2: 'Mart', 3: 'Aprel', 4: 'May', 5: 'Iyun',
     6: 'Iyul', 7: 'Avgust', 8: 'Sentabr', 9: 'Oktabr', 10: 'Noyabr', 11: 'Dekabr'
   };
-  const monthName = months[today.getMonth()];
-  return `${day} ${monthName} ${year}`;
+  const monthName = months[now.getMonth()];
+  const hours = now.getHours().toString().padStart(2, '0');
+  const minutes = now.getMinutes().toString().padStart(2, '0');
+  return {
+    date: `${day} ${monthName} ${year}`,
+    time: `${hours}:${minutes}`
+  };
 };
 
 const MainLayout = ({ children }: MainLayoutProps) => {
   const [isSidebarOpen, setSidebarOpen] = useState(true);
   const [openAccordions, setOpenAccordions] = useState<Record<string, boolean>>({});
+  const [currentDateTime, setCurrentDateTime] = useState(getUzbekDateTime());
   const location = useLocation();
   const navigate = useNavigate();
+
+  // Update clock every minute (or every second if you prefer, but minute is enough)
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentDateTime(getUzbekDateTime());
+    }, 60000); // update every minute
+    return () => clearInterval(interval);
+  }, []);
 
   const handleBack = () => navigate(-1);
   const showBackButton = location.pathname !== '/';
@@ -161,8 +130,8 @@ const MainLayout = ({ children }: MainLayoutProps) => {
     setOpenAccordions(prev => ({ ...prev, [label]: !prev[label] }));
   };
 
-  const uzbekDate = getUzbekDate();
   const adminName = "Хасанов Фозилжон";
+  const pageTitle = getPageTitle(location.pathname);
 
   const handleLogout = () => {
     localStorage.removeItem('isAuthenticated');
@@ -219,7 +188,7 @@ const MainLayout = ({ children }: MainLayoutProps) => {
       >
         <Flex direction="column" h="full">
           {/* Logo */}
-          <Flex px={4} py={6}  alignItems={'center'} justifyContent={'center'}>
+          <Flex px={4} py={6} alignItems={'center'} justifyContent={'center'}>
             <HStack spacing={3}>
               <img className='w-[70px]' src={Logo} alt="Logo" />
             </HStack>
@@ -278,12 +247,23 @@ const MainLayout = ({ children }: MainLayoutProps) => {
                 Ortga
               </Button>
             )}
+            {/* Page title */}
+            <Text fontSize="lg" fontWeight="semibold" color="gray.800">
+              {pageTitle}
+            </Text>
           </HStack>
 
           <HStack spacing={4}>
-            <Text fontSize="sm" color="gray.500" fontWeight="medium">
-              {uzbekDate}
-            </Text>
+            {/* Date and Time */}
+            <HStack spacing={1}>
+              <Text fontSize="sm" color="gray.500" fontWeight="medium">
+                {currentDateTime.date}
+              </Text>
+              <Text fontSize="sm" color="gray.400">|</Text>
+              <Text fontSize="sm" color="gray.500" fontWeight="medium">
+                {currentDateTime.time}
+              </Text>
+            </HStack>
             <IconButton
               aria-label="Notifications"
               icon={<Bell size={18} />}
@@ -321,7 +301,7 @@ const MainLayout = ({ children }: MainLayoutProps) => {
         </Flex>
 
         {/* Page content */}
-        <Box p={6} w="full" overflowY="auto" flex="1" bg="#ebedf0">
+        <Box p='10px' w="full" overflowY="auto" flex="1" bg="#ebedf0">
           <AnimatePresence mode="wait">
             <motion.div
               key={location.pathname}
@@ -336,6 +316,68 @@ const MainLayout = ({ children }: MainLayoutProps) => {
         </Box>
       </Flex>
     </Flex>
+  );
+};
+
+// AccordionItem component (unchanged, but kept for completeness)
+interface AccordionItemProps {
+  icon: React.ElementType;
+  label: string;
+  isOpen: boolean;
+  onToggle: () => void;
+  children: React.ReactNode;
+}
+
+const AccordionItem: React.FC<AccordionItemProps> = ({
+  icon: Icon,
+  label,
+  isOpen,
+  onToggle,
+  children,
+}) => {
+  return (
+    <Box w="full">
+      <Flex
+        align="center"
+        justify="space-between"
+        px={4}
+        py={2.5}
+        borderRadius="lg"
+        cursor="pointer"
+        color="gray.700"
+        _hover={{ bg: 'gray.100', color: 'gray.900' }}
+        onClick={onToggle}
+        transition="all 0.2s"
+      >
+        <HStack spacing={3}>
+          <Icon size={20} />
+          <Text fontSize="sm" fontWeight="medium">{label}</Text>
+        </HStack>
+        <IconButton
+          aria-label="Toggle"
+          icon={isOpen ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+          size="xs"
+          variant="ghost"
+          color="currentColor"
+          _hover={{ bg: 'transparent' }}
+        />
+      </Flex>
+      <AnimatePresence initial={false}>
+        {isOpen && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.6, ease: [0.4, 0, 0.2, 1] }}
+            style={{ overflow: 'hidden' }}
+          >
+            <VStack pl={'20px'} mt={1} spacing={1} align="stretch">
+              {children}
+            </VStack>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </Box>
   );
 };
 
