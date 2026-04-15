@@ -48,6 +48,7 @@ type MenuItem = SimpleMenuItem | AccordionMenuItem;
 
 const menuConfig: MenuItem[] = [
   { type: 'item', label: 'Bosh sahifa', icon: LayoutDashboard, path: '/' },
+  { type: 'item', label: 'Hisobotlar', icon: LayoutDashboard, path: '/reports' },
 ];
 
 // ------------------------------
