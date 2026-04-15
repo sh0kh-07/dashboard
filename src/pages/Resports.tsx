@@ -1,19 +1,19 @@
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo } from "react";
 import {
   Box, Heading, Text, Flex, SimpleGrid, Stat, StatLabel, StatNumber, StatHelpText,
-  Button, Table, Thead, Tbody, Tr, Th, Td, TableContainer, Badge, useToken,
-  VStack, HStack, Divider, Drawer, DrawerBody, DrawerHeader, DrawerOverlay,
+  Button, Table, Thead, Tbody, Tr, Th, Td, TableContainer,
+  VStack, HStack, Drawer, DrawerBody, DrawerHeader, DrawerOverlay,
   DrawerContent, DrawerCloseButton, useDisclosure, Tabs, TabList, TabPanels,
-  Tab, TabPanel, Grid, GridItem, IconButton, Tooltip, Alert, AlertIcon
+  Tab, TabPanel, Grid, GridItem, IconButton, Tooltip
 } from "@chakra-ui/react";
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip,
-  ResponsiveContainer, Legend, Cell, ComposedChart, Line
+  ResponsiveContainer, Cell
 } from "recharts";
 import {
-  Users, Home, Briefcase, AlertTriangle, CheckCircle, Building, Flame,
+  Users, Home, Briefcase, AlertTriangle, CheckCircle, Building,
   BadgePercent, DollarSign, ShieldCheck, Activity, ClipboardList, List,
-  FileSpreadsheet, FileText, Download, TrendingUp, TrendingDown, Minus
+  FileSpreadsheet, FileText
 } from "lucide-react";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
@@ -35,8 +35,10 @@ interface DistrictData {
   jobsPlaced: number;
   allocatedFunds: number;
   difficultZone: boolean;
+  difficultZonesCount: number;
   totalServices: number;
   shortcomings: string[];
+  shortcomingsCount: number;
 }
 
 interface RegionData {
@@ -75,7 +77,8 @@ const generateDistricts = (regionName: string, basePoverty: number, baseUnemploy
     let unemployment = Math.max(2, Math.min(7, baseUnemployment + variation * 0.5));
     let poorFamilies = Math.floor(d.families * (poverty / 100));
     let poorHouseholds = Math.floor(d.households * (poverty / 100));
-    let jobsPlaced = Math.floor(d.population * (unemployment / 100) * 0.4);
+    let population = d.pop || 0;
+    let jobsPlaced = Math.floor(population * (unemployment / 100) * 0.4);
     let allocatedFunds = poorFamilies * 1.2;
     let totalServices = poorFamilies * 3;
     let shortcomings = [];
@@ -86,7 +89,7 @@ const generateDistricts = (regionName: string, basePoverty: number, baseUnemploy
     return {
       id: `${regionName}-${idx}`,
       name: d.name,
-      totalPopulation: d.population,
+      totalPopulation: population,
       totalFamilies: d.families,
       poorFamilies,
       totalHouseholds: d.households,
@@ -96,8 +99,10 @@ const generateDistricts = (regionName: string, basePoverty: number, baseUnemploy
       jobsPlaced,
       allocatedFunds: parseFloat(allocatedFunds.toFixed(0)),
       difficultZone: poverty > 4.5,
+      difficultZonesCount: poverty > 4.5 ? 1 : 0,
       totalServices,
       shortcomings,
+      shortcomingsCount: shortcomings.length,
     };
   });
 };
@@ -120,7 +125,7 @@ const regionsData: RegionData[] = [
 ];
 
 // ------------------------------------------------------------
-// 3. KO'RSATKICHLAR (12 ta)
+// 3. KO'RSATKICHLAR (11 ta)
 // ------------------------------------------------------------
 interface MetricConfig {
   id: string;
@@ -132,30 +137,38 @@ interface MetricConfig {
 }
 
 const metrics: MetricConfig[] = [
-  { id: "population", label: "Jami aholi", dataKey: "totalPopulation", unit: "kishi", icon: Users, format: (v) => v.toLocaleString() },
-  { id: "families", label: "Jami oilalar", dataKey: "totalFamilies", unit: "oila", icon: Home, format: (v) => v.toLocaleString() },
-  { id: "poorFamilies", label: "Kambag'al oilalar", dataKey: "poorFamilies", unit: "oila", icon: AlertTriangle, format: (v) => v.toLocaleString() },
-  { id: "households", label: "Xonadonlar", dataKey: "totalHouseholds", unit: "xonadon", icon: Building, format: (v) => v.toLocaleString() },
-  { id: "poorHouseholds", label: "Kambag'al xonadonlar", dataKey: "poorHouseholds", unit: "xonadon", icon: Flame, format: (v) => v.toLocaleString() },
-  { id: "povertyRate", label: "Kambag'allik darajasi", dataKey: "povertyRate", unit: "%", icon: BadgePercent, format: (v) => `${v}%` },
-  { id: "unemploymentRate", label: "Ishsizlik darajasi", dataKey: "unemploymentRate", unit: "%", icon: Briefcase, format: (v) => `${v}%` },
-  { id: "jobsPlaced", label: "Ishga joylashtirilgan", dataKey: "jobsPlaced", unit: "kishi", icon: CheckCircle, format: (v) => v.toLocaleString() },
-  { id: "allocatedFunds", label: "Ajratilgan mablag'lar", dataKey: "allocatedFunds", unit: "mln so'm", icon: DollarSign, format: (v) => v.toLocaleString() },
-  { id: "difficultZones", label: "Og'ir hududlar", dataKey: "difficultZonesCount", unit: "ta", icon: ShieldCheck, format: (v) => v.toString() },
-  { id: "totalServices", label: "Ko'rsatilgan xizmatlar", dataKey: "totalServices", unit: "ta", icon: Activity, format: (v) => v.toLocaleString() },
-  { id: "shortcomings", label: "Kamchiliklar", dataKey: "shortcomingsCount", unit: "ta", icon: ClipboardList, format: (v) => v.toString() },
+  { id: "population", label: "Jami aholi", dataKey: "totalPopulation", unit: "kishi", icon: Users, format: (v) => (v ?? 0).toLocaleString() },
+  { id: "families", label: "Jami oilalar", dataKey: "totalFamilies", unit: "oila", icon: Home, format: (v) => (v ?? 0).toLocaleString() },
+  { id: "households", label: "Xonadonlar", dataKey: "totalHouseholds", unit: "xonadon", icon: Building, format: (v) => (v ?? 0).toLocaleString() },
+  { id: "poorFamilies", label: "Kambag'al oilalar", dataKey: "poorFamilies", unit: "oila", icon: AlertTriangle, format: (v) => (v ?? 0).toLocaleString() },
+  { id: "povertyRate", label: "Kambag'allik darajasi", dataKey: "povertyRate", unit: "%", icon: BadgePercent, format: (v) => `${v ?? 0}%` },
+  { id: "unemploymentRate", label: "Ishsizlik darajasi", dataKey: "unemploymentRate", unit: "%", icon: Briefcase, format: (v) => `${v ?? 0}%` },
+  { id: "jobsPlaced", label: "Ishga joylashtirilgan", dataKey: "jobsPlaced", unit: "kishi", icon: CheckCircle, format: (v) => (v ?? 0).toLocaleString() },
+  { id: "allocatedFunds", label: "Ajratilgan mablag'lar", dataKey: "allocatedFunds", unit: "mln so'm", icon: DollarSign, format: (v) => (v ?? 0).toLocaleString() },
+  { id: "difficultZones", label: "Og'ir hududlar", dataKey: "difficultZonesCount", unit: "ta", icon: ShieldCheck, format: (v) => (v ?? 0).toString() },
+  { id: "totalServices", label: "Ko'rsatilgan xizmatlar", dataKey: "totalServices", unit: "ta", icon: Activity, format: (v) => (v ?? 0).toLocaleString() },
+  { id: "shortcomings", label: "Kamchiliklar", dataKey: "shortcomingsCount", unit: "ta", icon: ClipboardList, format: (v) => (v ?? 0).toString() },
 ];
 
 // ------------------------------------------------------------
-// 4. XARITA MAPPING (TO'LIQ QO'LLAB-QUVVATLASH)
+// 4. QAT'IY 3 RANG: YASHIL, SARIQ, QIZIL
 // ------------------------------------------------------------
-// To'liq mapping: barcha location.name dan bizning region.name ga
+const getDiscreteColor = (value: number, minVal: number, maxVal: number): string => {
+  if (maxVal === minVal) return "#48BB78";
+  const range = maxVal - minVal;
+  const third = range / 3;
+  if (value < minVal + third) return "#48BB78";
+  if (value < minVal + 2 * third) return "#ECC94B";
+  return "#F56565";
+};
+
+// ------------------------------------------------------------
+// 5. XARITA MAPPING
+// ------------------------------------------------------------
 const mapNameToRegion = (svgName: string): RegionData | undefined => {
-  // To'g'ridan-to'g'ri moslik
   const directMatch = regionsData.find(r => r.nameEn === svgName);
   if (directMatch) return directMatch;
 
-  // Qo'shimcha variantlar
   const mapping: Record<string, string> = {
     "Karakalpakstan": "Qoraqalpog'iston",
     "Andijan": "Andijon",
@@ -171,7 +184,6 @@ const mapNameToRegion = (svgName: string): RegionData | undefined => {
     "Fergana": "Farg'ona",
     "Xorazm": "Xorazm",
     "Tashkent": "Toshkent shahri",
-    // Ba'zi variantlarda qo'shimcha probel yoki apostrof bo'lishi mumkin
     "Qoraqalpog‘iston": "Qoraqalpog'iston",
     "Andijon": "Andijon",
     "Buxoro": "Buxoro",
@@ -182,54 +194,35 @@ const mapNameToRegion = (svgName: string): RegionData | undefined => {
     "Toshkent": "Toshkent shahri",
   };
   const mappedName = mapping[svgName];
-  if (mappedName) {
-    return regionsData.find(r => r.name === mappedName);
-  }
+  if (mappedName) return regionsData.find(r => r.name === mappedName);
   return undefined;
 };
 
-// Rang sxemasi
-const getColorByValue = (value: number, minVal: number, maxVal: number): string => {
-  if (maxVal === minVal) return "#4299E1";
-  const ratio = (value - minVal) / (maxVal - minVal);
-  const r = Math.floor(56 + (229 - 56) * ratio);
-  const g = Math.floor(161 - (161 - 62) * ratio);
-  const b = Math.floor(105 - (105 - 62) * ratio);
-  return `rgb(${r}, ${g}, ${b})`;
-};
-
 // ------------------------------------------------------------
-// 5. XARITA KOMPONENTI
+// 6. XARITA KOMPONENTI (3 RANG)
 // ------------------------------------------------------------
 interface MapWithTooltipProps {
-  dataKey: keyof RegionData;
+  activeMetric: MetricConfig;
   onRegionClick: (region: RegionData) => void;
 }
 
-const MapWithTooltip: React.FC<MapWithTooltipProps> = ({ dataKey, onRegionClick }) => {
+const MapWithTooltip: React.FC<MapWithTooltipProps> = ({ activeMetric, onRegionClick }) => {
   const [tooltip, setTooltip] = useState<{ visible: boolean; x: number; y: number; data: any }>({
     visible: false, x: 0, y: 0, data: null
   });
 
-  // Debug: chiqaramiz barcha location nomlarini
-  useEffect(() => {
-    console.log("Xarita locationlari:", Uzbekistan.locations.map(l => l.name));
-  }, []);
-
   const validLocations = Uzbekistan.locations.filter(loc => mapNameToRegion(loc.name) !== undefined);
-  console.log("Mos keladigan locationlar:", validLocations.length);
-
-  const values = regionsData.map(r => r[dataKey] as number);
-  const minVal = Math.min(...values);
-  const maxVal = Math.max(...values);
+  const metricValues = regionsData.map(r => r[activeMetric.dataKey] as number);
+  const minVal = Math.min(...metricValues);
+  const maxVal = Math.max(...metricValues);
 
   return (
     <Box position="relative" display="flex" justifyContent="center" my={4}>
       <svg viewBox={Uzbekistan.viewBox} width="100%" style={{ maxWidth: "800px", cursor: "pointer" }}>
         {validLocations.map((loc: any) => {
           const region = mapNameToRegion(loc.name)!;
-          const value = region[dataKey] as number;
-          const fillColor = getColorByValue(value, minVal, maxVal);
+          const metricValue = region[activeMetric.dataKey] as number;
+          const fillColor = getDiscreteColor(metricValue, minVal, maxVal);
           return (
             <path
               key={loc.id}
@@ -238,7 +231,7 @@ const MapWithTooltip: React.FC<MapWithTooltipProps> = ({ dataKey, onRegionClick 
                 setTooltip({
                   visible: true,
                   x: e.clientX, y: e.clientY,
-                  data: { name: region.name, value, unit: metrics.find(m => m.dataKey === dataKey)?.unit || "" }
+                  data: { name: region.name, value: metricValue, unit: activeMetric.unit }
                 });
               }}
               onMouseMove={(e) => setTooltip(prev => ({ ...prev, x: e.clientX, y: e.clientY }))}
@@ -261,7 +254,7 @@ const MapWithTooltip: React.FC<MapWithTooltipProps> = ({ dataKey, onRegionClick 
       {tooltip.visible && tooltip.data && (
         <Box position="fixed" top={tooltip.y + 12} left={tooltip.x + 12} bg="white" color="gray.800" px={4} py={2} borderRadius="md" boxShadow="lg" zIndex={1000} border="1px solid" borderColor="gray.200">
           <Text fontWeight="bold">{tooltip.data.name}</Text>
-          <Text fontSize="sm">Qiymat: <strong>{tooltip.data.value?.toLocaleString()} {tooltip.data.unit}</strong></Text>
+          <Text fontSize="sm">{activeMetric.label}: <strong>{(tooltip.data.value ?? 0).toLocaleString()} {tooltip.data.unit}</strong></Text>
           <Text fontSize="xs" color="blue.500">Bosing – batafsil</Text>
         </Box>
       )}
@@ -270,9 +263,9 @@ const MapWithTooltip: React.FC<MapWithTooltipProps> = ({ dataKey, onRegionClick 
 };
 
 // ------------------------------------------------------------
-// 6. EKSPORT FUNKSIYALARI (TO'G'RI MIME TURLARI)
+// 7. EKSPORT FUNKSIYALARI (alohida Excel va Word)
 // ------------------------------------------------------------
-const exportToExcel = (data: RegionData[], metric: MetricConfig) => {
+const exportToExcel = (data: RegionData[], metric: MetricConfig, title: string = "Hisobot") => {
   const excelData = data.map(region => ({
     "Viloyat": region.name,
     [metric.label]: metric.format ? metric.format(region[metric.dataKey] as number) : (region[metric.dataKey] as number).toLocaleString(),
@@ -290,13 +283,13 @@ const exportToExcel = (data: RegionData[], metric: MetricConfig) => {
 
   const ws = XLSX.utils.json_to_sheet(excelData);
   const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, "Hisobot");
+  XLSX.utils.book_append_sheet(wb, ws, title);
   const excelBuffer = XLSX.write(wb, { bookType: "xlsx", type: "array" });
   const dataBlob = new Blob([excelBuffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
-  saveAs(dataBlob, `Hisobot_${metric.label}_${new Date().toISOString().slice(0, 19)}.xlsx`);
+  saveAs(dataBlob, `${title}_${metric.label}_${new Date().toISOString().slice(0, 19)}.xlsx`);
 };
 
-const exportToWord = (data: RegionData[], metric: MetricConfig) => {
+const exportToWord = (data: RegionData[], metric: MetricConfig, title: string = "Hisobot") => {
   const maxRegion = data.reduce((max, r) => (r[metric.dataKey] as number) > (max.val as number) ? { name: r.name, val: r[metric.dataKey] as number } : max, { name: "", val: 0 });
   const minRegion = data.reduce((min, r) => (r[metric.dataKey] as number) < (min.val as number) ? { name: r.name, val: r[metric.dataKey] as number } : min, { name: "", val: Infinity });
   const avgValue = data.reduce((s, r) => s + (r[metric.dataKey] as number), 0) / data.length;
@@ -305,7 +298,7 @@ const exportToWord = (data: RegionData[], metric: MetricConfig) => {
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>O'zbekiston Respublikasi ijtimoiy-iqtisodiy hisoboti</title>
+  <title>${title}</title>
   <style>
     body { font-family: 'Times New Roman', Arial, sans-serif; margin: 40px; }
     h1 { color: #2d3748; }
@@ -320,7 +313,7 @@ const exportToWord = (data: RegionData[], metric: MetricConfig) => {
   </style>
 </head>
 <body>
-  <h1>O'zbekiston Respublikasi ijtimoiy-iqtisodiy hisoboti</h1>
+  <h1>${title}</h1>
   <p>Sana: ${new Date().toLocaleDateString('uz-UZ')} | Hisobot davri: 2025-yil</p>
   <h2>Ko'rsatkich: ${metric.label}</h2>
   <div class="stats">
@@ -348,9 +341,9 @@ const exportToWord = (data: RegionData[], metric: MetricConfig) => {
       ${data.map(r => `
         <tr>
           <td>${r.name}</td>
-          <td>${metric.format ? metric.format(r[metric.dataKey] as number) : (r[metric.dataKey] as number).toLocaleString()}</td>
-          <td>${r.totalPopulation.toLocaleString()}</td>
-          <td>${r.totalFamilies.toLocaleString()}</td>
+          <td>${(r[metric.dataKey] as number ?? 0).toLocaleString()}</td>
+          <td>${(r.totalPopulation ?? 0).toLocaleString()}</td>
+          <td>${(r.totalFamilies ?? 0).toLocaleString()}</td>
           <td>${r.povertyRate}%</td>
           <td>${r.unemploymentRate}%</td>
         </tr>
@@ -361,11 +354,11 @@ const exportToWord = (data: RegionData[], metric: MetricConfig) => {
 </html>`;
 
   const blob = new Blob([htmlContent], { type: "application/msword" });
-  saveAs(blob, `Hisobot_${metric.label}_${new Date().toISOString().slice(0, 19)}.doc`);
+  saveAs(blob, `${title}_${metric.label}_${new Date().toISOString().slice(0, 19)}.doc`);
 };
 
 // ------------------------------------------------------------
-// 7. VILOYAT DETALLARI (DRAWER)
+// 8. VILOYAT DETALLARI – FAQAT QASHQADARYO UCHUN EXCEL/WORD
 // ------------------------------------------------------------
 interface RegionDetailProps {
   region: RegionData;
@@ -379,9 +372,31 @@ const RegionDetail: React.FC<RegionDetailProps> = ({ region, activeMetric, onClo
     value: d[activeMetric.dataKey as keyof DistrictData] as number,
   }));
 
+  const isQashqadaryo = region.name === "Qashqadaryo";
+
+  const handleExcel = () => {
+    exportToExcel([region], activeMetric, `${region.name}_hisoboti`);
+  };
+
+  const handleWord = () => {
+    exportToWord([region], activeMetric, `${region.name}_hisoboti`);
+  };
+
   return (
     <Box>
-      <Heading size="md" mb={4}>{region.name} - {activeMetric.label}</Heading>
+      <Flex justify="space-between" align="center" mb={4}>
+        <Heading size="md">{region.name} - {activeMetric.label}</Heading>
+        {isQashqadaryo && (
+          <HStack spacing={2}>
+            <Button size="sm" leftIcon={<FileSpreadsheet size={16} />} colorScheme="green" onClick={handleExcel}>
+              Excel
+            </Button>
+            <Button size="sm" leftIcon={<FileText size={16} />} colorScheme="blue" onClick={handleWord}>
+              Word
+            </Button>
+          </HStack>
+        )}
+      </Flex>
 
       <SimpleGrid columns={{ base: 1, md: 3 }} spacing={4} mb={6}>
         <Stat bg="gray.50" p={3} borderRadius="lg">
@@ -422,10 +437,10 @@ const RegionDetail: React.FC<RegionDetailProps> = ({ region, activeMetric, onClo
                   {region.districts.map(d => (
                     <Tr key={d.id}>
                       <Td>{d.name}</Td>
-                      <Td isNumeric>{activeMetric.format ? activeMetric.format(d[activeMetric.dataKey as keyof DistrictData] as number) : (d[activeMetric.dataKey as keyof DistrictData] as number).toLocaleString()}</Td>
-                      <Td isNumeric>{d.totalPopulation.toLocaleString()}</Td>
-                      <Td isNumeric>{d.povertyRate}%</Td>
-                      <Td isNumeric>{d.unemploymentRate}%</Td>
+                      <Td isNumeric>{activeMetric.format ? activeMetric.format(d[activeMetric.dataKey as keyof DistrictData] as number) : (d[activeMetric.dataKey as keyof DistrictData] as number ?? 0).toLocaleString()}</Td>
+                      <Td isNumeric>{(d.totalPopulation ?? 0).toLocaleString()}</Td>
+                      <Td isNumeric>{(d.povertyRate ?? 0)}%</Td>
+                      <Td isNumeric>{(d.unemploymentRate ?? 0)}%</Td>
                     </Tr>
                   ))}
                 </Tbody>
@@ -439,7 +454,7 @@ const RegionDetail: React.FC<RegionDetailProps> = ({ region, activeMetric, onClo
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="name" angle={-45} textAnchor="end" height={60} tick={{ fontSize: 10 }} />
                   <YAxis />
-                  <RechartsTooltip formatter={(v: number) => `${v.toLocaleString()} ${activeMetric.unit}`} />
+                  <RechartsTooltip formatter={(v: number) => `${(v ?? 0).toLocaleString()} ${activeMetric.unit}`} />
                   <Bar dataKey="value" fill="#3182CE" name={activeMetric.label} />
                 </BarChart>
               </ResponsiveContainer>
@@ -464,7 +479,7 @@ const RegionDetail: React.FC<RegionDetailProps> = ({ region, activeMetric, onClo
 };
 
 // ------------------------------------------------------------
-// 8. ASOSIY DASHBOARD
+// 9. ASOSIY DASHBOARD (global eksport tugmalari olib tashlandi)
 // ------------------------------------------------------------
 const Reports: React.FC = () => {
   const [selectedRegion, setSelectedRegion] = useState<RegionData | null>(null);
@@ -483,11 +498,9 @@ const Reports: React.FC = () => {
     })).sort((a, b) => b.value - a.value);
   }, [activeMetric]);
 
-  const maxValue = Math.max(...chartData.map(d => d.value));
-  const minValue = Math.min(...chartData.map(d => d.value));
-  const avgValue = chartData.reduce((s, d) => s + d.value, 0) / chartData.length;
-  const maxRegion = chartData[0]?.name || "-";
-  const minRegion = chartData[chartData.length - 1]?.name || "-";
+  const metricValues = regionsData.map(r => r[activeMetric.dataKey] as number);
+  const minVal = Math.min(...metricValues);
+  const maxVal = Math.max(...metricValues);
 
   return (
     <Box minH="100vh">
@@ -521,100 +534,44 @@ const Reports: React.FC = () => {
           </VStack>
         </Box>
 
-        {/* O'ng panel - karta va grafiklar */}
+        {/* O'ng panel - karta va grafiklar (global eksport tugmalari YO'Q) */}
         <Box>
-          <Heading as="h1" size="lg" mb={2} color="gray.800">O'zbekiston Respublikasi ijtimoiy-iqtisodiy hisoboti</Heading>
-          <Text fontSize="md" color="gray.600" mb={4}>
-            Chapdagi ko'rsatkichlardan birini tanlang. Xarita va grafik avtomatik yangilanadi. Hududni bosing – tumanlar darajasida batafsil ma'lumot.
-          </Text>
-
-          <Flex justify="space-between" align="center" mb={3} flexWrap="wrap" gap={3}>
-            <Heading size="md" color="gray.700">{activeMetric.label} (hududlar bo'yicha)</Heading>
-            <HStack spacing={2}>
-              <Tooltip label="Excel formatida yuklab olish">
-                <IconButton
-                  aria-label="Excel"
-                  icon={<FileSpreadsheet size={18} />}
-                  colorScheme="green"
-                  variant="outline"
-                  onClick={() => exportToExcel(regionsData, activeMetric)}
-                  size="sm"
-                />
-              </Tooltip>
-              <Tooltip label="Word formatida yuklab olish">
-                <IconButton
-                  aria-label="Word"
-                  icon={<FileText size={18} />}
-                  colorScheme="blue"
-                  variant="outline"
-                  onClick={() => exportToWord(regionsData, activeMetric)}
-                  size="sm"
-                />
-              </Tooltip>
-            </HStack>
-          </Flex>
+          <Heading size="md" color="gray.700" mb={3}>
+            {activeMetric.label} (hududlar bo'yicha)
+          </Heading>
 
           <Flex justify="center" gap={6} mb={4}>
             <HStack spacing={2}>
-              <Box w="30px" h="16px" bg={getColorByValue(0, 0, 100)} borderRadius="md" />
-              <Text fontSize="xs">Past</Text>
-              <Box w="30px" h="16px" bg={getColorByValue(50, 0, 100)} borderRadius="md" />
-              <Text fontSize="xs">O'rta</Text>
-              <Box w="30px" h="16px" bg={getColorByValue(100, 0, 100)} borderRadius="md" />
+              <Box w="30px" h="16px" bg="#48BB78" borderRadius="md" />
+              <Text fontSize="xs">Kam</Text>
+              <Box w="30px" h="16px" bg="#ECC94B" borderRadius="md" />
+              <Text fontSize="xs">O‘rta</Text>
+              <Box w="30px" h="16px" bg="#F56565" borderRadius="md" />
               <Text fontSize="xs">Yuqori</Text>
             </HStack>
           </Flex>
 
-          <MapWithTooltip dataKey={activeMetric.dataKey} onRegionClick={handleRegionClick} />
+          <MapWithTooltip activeMetric={activeMetric} onRegionClick={handleRegionClick} />
 
-          {/* Uchta keng kartochka */}
-
-
-          {/* Keng grafik */}
         </Box>
       </Grid>
-      <SimpleGrid columns={{ base: 1, md: 3 }} spacing={4} mt={6} width="100%">
-        <Stat bg="white" p={4} borderRadius="xl" boxShadow="md" borderTop="4px solid" borderTopColor="green.500">
-          <Flex align="center" gap={2} mb={2}>
-            <TrendingUp size={20} color="#38A169" />
-            <StatLabel fontSize="md">Eng yuqori ko'rsatkich</StatLabel>
-          </Flex>
-          <StatNumber fontSize="2xl">{maxRegion}</StatNumber>
-          <StatHelpText>{maxValue.toLocaleString()} {activeMetric.unit}</StatHelpText>
-        </Stat>
-        <Stat bg="white" p={4} borderRadius="xl" boxShadow="md" borderTop="4px solid" borderTopColor="red.500">
-          <Flex align="center" gap={2} mb={2}>
-            <TrendingDown size={20} color="#E53E3E" />
-            <StatLabel fontSize="md">Eng past ko'rsatkich</StatLabel>
-          </Flex>
-          <StatNumber fontSize="2xl">{minRegion}</StatNumber>
-          <StatHelpText>{minValue.toLocaleString()} {activeMetric.unit}</StatHelpText>
-        </Stat>
-        <Stat bg="white" p={4} borderRadius="xl" boxShadow="md" borderTop="4px solid" borderTopColor="blue.500">
-          <Flex align="center" gap={2} mb={2}>
-            <Minus size={20} color="#3182CE" />
-            <StatLabel fontSize="md">O'rtacha ko'rsatkich</StatLabel>
-          </Flex>
-          <StatNumber fontSize="2xl">{avgValue.toFixed(1)}</StatNumber>
-          <StatHelpText>{activeMetric.unit}</StatHelpText>
-        </Stat>
-      </SimpleGrid>
-      <Box bg="white" p={4} borderRadius="xl" border="1px solid" borderColor="gray.200" mt={6} width="100%">
-        <Heading size="sm" mb={4}>Hududlar bo'yicha taqqoslama gistogramma</Heading>
-        <ResponsiveContainer width="100%" height={500}>
-          <BarChart data={chartData} layout="vertical" margin={{ left: 100, right: 30 }}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis type="number" tick={{ fill: "#4a5568" }} />
-            <YAxis type="category" dataKey="name" width={130} tick={{ fontSize: 11 }} />
-            <RechartsTooltip formatter={(v: number) => `${v.toLocaleString()} ${activeMetric.unit}`} />
-            <Bar dataKey="value" radius={[0, 8, 8, 0]}>
-              {chartData.map((entry, index) => (
-                <Cell key={index} fill={getColorByValue(entry.value, 0, maxValue)} />
-              ))}
-            </Bar>
-          </BarChart>
-        </ResponsiveContainer>
-      </Box>
+          <Box bg="white" p={4} borderRadius="xl" border="1px solid" borderColor="gray.200" mt={6} width="100%">
+            <Heading size="sm" mb={4}>Hududlar bo'yicha taqqoslama gistogramma</Heading>
+            <ResponsiveContainer width="100%" height={500}>
+              <BarChart data={chartData} layout="vertical" margin={{ left: 100, right: 30 }}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis type="number" tick={{ fill: "#4a5568" }} />
+                <YAxis type="category" dataKey="name" width={130} tick={{ fontSize: 11 }} />
+                <RechartsTooltip formatter={(v: number) => `${v.toLocaleString()} ${activeMetric.unit}`} />
+                <Bar dataKey="value" radius={[0, 8, 8, 0]}>
+                  {chartData.map((entry, idx) => {
+                    const fillColor = getDiscreteColor(entry.value, minVal, maxVal);
+                    return <Cell key={idx} fill={fillColor} />;
+                  })}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </Box>
 
       {/* Drawer - viloyat tahlili */}
       <Drawer isOpen={isOpen} onClose={onClose} size="lg" placement="right">
