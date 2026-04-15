@@ -10,14 +10,13 @@ import {
   StatHelpText,
   Flex,
   Heading,
-  Container,
   Grid,
   GridItem,
   Icon,
   Tooltip,
 } from "@chakra-ui/react";
 import { keyframes } from "@emotion/react";
-import { Landmark, Wallet, Banknote, Globe, TrendingUp } from "lucide-react";
+import { Landmark, Wallet, Banknote, Globe, Flag, TrendingUp } from "lucide-react";
 import Uzbekistan from "@svg-maps/uzbekistan";
 import { NavLink, useNavigate } from "react-router-dom";
 import {
@@ -40,6 +39,37 @@ const fadeInUp = keyframes`
     transform: translateY(0);
   }
 `;
+
+// ------------------------------
+// ДАННЫЕ УРОВНЯ БЕДНОСТИ (povertyRate)
+// ------------------------------
+const povertyRates: Record<string, number> = {
+  Tashkent: 1.7,
+  Samarkand: 2.0,
+  Bukhara: 2.6,
+  Kashkadarya: 3.3,
+  Fergana: 2.7,
+  Andijan: 2.7,
+  Namangan: 2.7,
+  Surkhandarya: 2.8,
+  Jizzakh: 2.8,
+  Sirdarya: 3.0,
+  Navoi: 2.1,
+  Khorezm: 3.0,
+  Karakalpakstan: 3.2,
+};
+
+// ------------------------------
+// 3 ЦВЕТА ДЛЯ КАРТЫ (зелёный / жёлтый / красный)
+// ------------------------------
+const getPovertyColor = (povertyRate: number, minPoverty: number, maxPoverty: number): string => {
+  if (maxPoverty === minPoverty) return "#48BB78";
+  const range = maxPoverty - minPoverty;
+  const third = range / 3;
+  if (povertyRate < minPoverty + third) return "#48BB78"; // зелёный
+  if (povertyRate < minPoverty + 2 * third) return "#ECC94B"; // жёлтый
+  return "#F56565"; // красный
+};
 
 const DashboardPage = () => {
   const navigate = useNavigate();
@@ -143,12 +173,27 @@ const DashboardPage = () => {
     "#2C7A7B",
   ];
 
+  // ------------------------------
+  // 5-я карточка "Red Flag" – количество регионов с бедностью > 3%
+  // ------------------------------
+  const highPovertyRegions = Object.entries(povertyRates).filter(
+    ([_, rate]) => rate >= 3.0
+  ).length;
+
+  // ------------------------------
+  // Логика карты
+  // ------------------------------
   const getRegionKey = (svgName: string): string | null => {
     const normalized = normalizeRegionName(svgName);
     if (regionWeights[normalized]) return normalized;
     if (regionWeights[svgName]) return svgName;
     return null;
   };
+
+  // Минимальный и максимальный уровень бедности для динамической раскраски
+  const povertyValues = Object.values(povertyRates);
+  const minPoverty = Math.min(...povertyValues);
+  const maxPoverty = Math.max(...povertyValues);
 
   const handleRegionClick = (svgName: string) => {
     const key = getRegionKey(svgName);
@@ -159,20 +204,14 @@ const DashboardPage = () => {
 
   return (
     <Box>
-      {/* Kartochkalar bloki: Ajratilgan mablag‘lar */}
-      <Box mb={12}>
-        <Flex align="center" gap={2} mb={5}>
-          <TrendingUp size={24} color={brand600} />
-          <Heading as="h2" size="lg" color="gray.800">
-            Ajratilgan mablag‘lar
-          </Heading>
-        </Flex>
-        <SimpleGrid columns={{ base: 1, md: 2, lg: 4 }} spacing={6}>
+      {/* 5 карточек в ряд */}
+      <Box mb={'10px'}>
+        <SimpleGrid columns={{ base: 1, md: 2, lg: 5 }} spacing={2}>
           {/* 1 - Davlat byudjeti */}
           <NavLink to="/budget2">
             <Box
               bg="white"
-              p={6}
+              p={2}
               borderRadius="2xl"
               boxShadow="lg"
               transition="all 0.3s"
@@ -200,7 +239,7 @@ const DashboardPage = () => {
           <NavLink to='/fund'>
             <Box
               bg="white"
-              p={6}
+              p={2}
               borderRadius="2xl"
               boxShadow="lg"
               transition="all 0.3s"
@@ -212,7 +251,7 @@ const DashboardPage = () => {
               <Flex align="center" gap={3} mb={3}>
                 <Icon as={Wallet} boxSize={6} color={green400} />
                 <Text fontWeight="bold" fontSize="md" color="gray.700">
-                  Davlat va maqsadli jamg‘armalar
+                  Jamg‘armalar
                 </Text>
               </Flex>
               <Text fontSize="3xl" fontWeight="extrabold" color="gray.900">
@@ -224,11 +263,11 @@ const DashboardPage = () => {
             </Box>
           </NavLink>
 
+          {/* 3 - Tijorat bank kreditlari */}
           <NavLink to='/loans'>
-            {/* 3 - Tijorat bank kreditlari */}
             <Box
               bg="white"
-              p={6}
+              p={2}
               borderRadius="2xl"
               boxShadow="lg"
               transition="all 0.3s"
@@ -240,7 +279,7 @@ const DashboardPage = () => {
               <Flex align="center" gap={3} mb={3}>
                 <Icon as={Banknote} boxSize={6} color={orange400} />
                 <Text fontWeight="bold" fontSize="md" color="gray.700">
-                  Tijorat bank kreditlari
+                  Bank kreditlari
                 </Text>
               </Flex>
               <Text fontSize="3xl" fontWeight="extrabold" color="gray.900">
@@ -252,11 +291,11 @@ const DashboardPage = () => {
             </Box>
           </NavLink>
 
+          {/* 4 - Tashqi moliya manbalari */}
           <NavLink to='/external'>
-            {/* 4 - Tashqi moliya manbalari */}
             <Box
               bg="white"
-              p={6}
+              p={2}
               borderRadius="2xl"
               boxShadow="lg"
               transition="all 0.3s"
@@ -268,7 +307,7 @@ const DashboardPage = () => {
               <Flex align="center" gap={3} mb={3}>
                 <Icon as={Globe} boxSize={6} color={purple400} />
                 <Text fontWeight="bold" fontSize="md" color="gray.700">
-                  Tashqi moliya manbalari
+                  Tashqi moliya
                 </Text>
               </Flex>
               <Text fontSize="3xl" fontWeight="extrabold" color="gray.900">
@@ -280,183 +319,209 @@ const DashboardPage = () => {
             </Box>
           </NavLink>
 
+          {/* 5 - Red Flag (qizil bayroq) */}
+          <Box
+            bg="white"
+            p={2}
+            borderRadius="2xl"
+            boxShadow="lg"
+            transition="all 0.3s"
+            _hover={{ transform: "translateY(-5px)", boxShadow: "xl" }}
+            borderLeft="6px solid"
+            borderLeftColor="#F56565"
+            animation={`${fadeInUp} 0.9s ease-out`}
+          >
+            <Flex align="center" gap={3} mb={3}>
+              <Icon as={Flag} boxSize={6} color="#F56565" />
+              <Text fontWeight="bold" fontSize="md" color="gray.700">
+                Red Flag
+              </Text>
+            </Flex>
+            <Text fontSize="3xl" fontWeight="extrabold" color="#C53030">
+              {highPovertyRegions}
+            </Text>
+          </Box>
         </SimpleGrid>
       </Box>
 
-      {/* Xarita bo‘limi */}
-      <Box mb={10}>
-        <Heading as="h2" size="lg" textAlign="center" mb={5} color="gray.800">
-          Hududlar bo‘yicha moliyalashtirish (xarita)
-        </Heading>
-        <Box position="relative" display="flex" justifyContent="center">
-          <svg viewBox={Uzbekistan.viewBox} width="80%" style={{ cursor: "pointer" }}>
-            {Uzbekistan.locations.map((loc: any) => {
-              const regionKey = getRegionKey(loc.name);
-              const hasData = !!regionKey;
-              return (
-                <path
-                  key={loc.id}
-                  d={loc.path}
-                  onMouseEnter={(e) => {
-                    if (!hasData) return;
-                    setTooltip({
-                      visible: true,
-                      x: e.clientX,
-                      y: e.clientY,
-                      data: { ...loc, regionKey },
-                    });
-                  }}
-                  onMouseMove={(e) =>
-                    setTooltip((prev: any) => ({
-                      ...prev,
-                      x: e.clientX,
-                      y: e.clientY,
-                    }))
-                  }
-                  onMouseLeave={() =>
-                    setTooltip({ visible: false, x: 0, y: 0, data: null })
-                  }
-                  onClick={() => handleRegionClick(loc.name)}
-                  style={{
-                    fill: tooltip.data?.id === loc.id ? "#ffffff" : brand600,
-                    stroke: "#2c3e50",
-                    strokeWidth: 1.2,
-                    transition: "fill 0.2s ease, stroke-width 0.2s",
-                    cursor: hasData ? "pointer" : "default",
-                  }}
-                />
-              );
-            })}
-          </svg>
+      {/* Flex контейнер: карта + круговая диаграмма */}
+      <Flex
+        direction={{ base: "column", lg: "row" }}
+        gap={'10px'}
+        mb={'10px'}
+        align="stretch"
+      >
+        {/* Карта (левая часть) */}
+        <Box flex="1" minW="0">
+          <Box bg="white" borderRadius="2xl" p={6} boxShadow="xl" position="relative" display="flex" justifyContent="center">
+            <svg viewBox={Uzbekistan.viewBox} width="100%" style={{ cursor: "pointer", maxWidth: "800px", margin: "0 auto" }}>
+              {Uzbekistan.locations.map((loc: any) => {
+                const regionKey = getRegionKey(loc.name);
+                const hasData = !!regionKey;
+                let fillColor = "#CBD5E0"; // цвет по умолчанию (серый)
+                if (hasData && povertyRates[regionKey] !== undefined) {
+                  fillColor = getPovertyColor(povertyRates[regionKey], minPoverty, maxPoverty);
+                } else if (hasData) {
+                  fillColor = brand600; // fallback, если нет данных по бедности
+                }
+                return (
+                  <path
+                    key={loc.id}
+                    d={loc.path}
+                    onMouseEnter={(e) => {
+                      if (!hasData) return;
+                      setTooltip({
+                        visible: true,
+                        x: e.clientX,
+                        y: e.clientY,
+                        data: { ...loc, regionKey },
+                      });
+                    }}
+                    onMouseMove={(e) =>
+                      setTooltip((prev: any) => ({
+                        ...prev,
+                        x: e.clientX,
+                        y: e.clientY,
+                      }))
+                    }
+                    onMouseLeave={() =>
+                      setTooltip({ visible: false, x: 0, y: 0, data: null })
+                    }
+                    onClick={() => handleRegionClick(loc.name)}
+                    style={{
+                      fill: fillColor,
+                      stroke: "#2c3e50",
+                      strokeWidth: 1.2,
+                      transition: "fill 0.2s ease, stroke-width 0.2s",
+                      cursor: hasData ? "pointer" : "default",
+                    }}
+                  />
+                );
+              })}
+            </svg>
 
-          {/* Tooltip (ma'lumot oynasi) */}
-          {tooltip.visible && tooltip.data && tooltip.data.regionKey && (
-            <Box
-              position="fixed"
-              top={tooltip.y + 12}
-              left={tooltip.x + 12}
-              bg="gray.900"
-              color="white"
-              px={4}
-              py={3}
-              borderRadius="lg"
-              boxShadow="dark-lg"
-              pointerEvents="none"
-              zIndex={1000}
-              maxW="280px"
-              backdropFilter="blur(4px)"
-            >
-              <Text fontWeight="bold" fontSize="md">
-                {tooltip.data.name}
-              </Text>
-              {regionData[tooltip.data.regionKey] && (
-                <>
-                  <Text fontSize="sm" mt={2}>
-                    Davlat byudjeti:{" "}
-                    <strong>
+            {/* Tooltip (ma'lumot oynasi) */}
+            {tooltip.visible && tooltip.data && tooltip.data.regionKey && (
+              <Box
+                position="fixed"
+                top={tooltip.y + 12}
+                left={tooltip.x + 12}
+                bg="gray.900"
+                color="white"
+                px={4}
+                py={3}
+                borderRadius="lg"
+                boxShadow="dark-lg"
+                pointerEvents="none"
+                zIndex={1000}
+                maxW="280px"
+                backdropFilter="blur(4px)"
+              >
+                <Text fontWeight="bold" fontSize="md">
+                  {tooltip.data.name}
+                </Text>
+                {regionData[tooltip.data.regionKey] && (
+                  <>
+                    <Text fontSize="sm" mt={2}>
+                      Davlat byudjeti:{" "}
+                      <strong>
+                        {Math.round(
+                          regionData[tooltip.data.regionKey].state
+                        ).toLocaleString()}{" "}
+                        mln so‘m
+                      </strong>
+                    </Text>
+                    <Text fontSize="sm">
+                      Jamg‘armalar:{" "}
+                      <strong>
+                        {Math.round(
+                          regionData[tooltip.data.regionKey].funds
+                        ).toLocaleString()}{" "}
+                        mln so‘m
+                      </strong>
+                    </Text>
+                    <Text fontSize="sm">
+                      Bank kreditlari:{" "}
+                      <strong>
+                        {Math.round(
+                          regionData[tooltip.data.regionKey].bank
+                        ).toLocaleString()}{" "}
+                        mln so‘m
+                      </strong>
+                    </Text>
+                    <Text fontSize="sm">
+                      Tashqi moliya:{" "}
+                      <strong>
+                        {Math.round(
+                          regionData[tooltip.data.regionKey].external
+                        ).toLocaleString()}{" "}
+                        mln so‘m
+                      </strong>
+                    </Text>
+                    <Text fontSize="sm" fontWeight="bold" mt={2} color="#90CDF4">
+                      Jami:{" "}
                       {Math.round(
-                        regionData[tooltip.data.regionKey].state
+                        regionData[tooltip.data.regionKey].total
                       ).toLocaleString()}{" "}
                       mln so‘m
-                    </strong>
-                  </Text>
-                  <Text fontSize="sm">
-                    Jamg‘armalar:{" "}
-                    <strong>
-                      {Math.round(
-                        regionData[tooltip.data.regionKey].funds
-                      ).toLocaleString()}{" "}
-                      mln so‘m
-                    </strong>
-                  </Text>
-                  <Text fontSize="sm">
-                    Bank kreditlari:{" "}
-                    <strong>
-                      {Math.round(
-                        regionData[tooltip.data.regionKey].bank
-                      ).toLocaleString()}{" "}
-                      mln so‘m
-                    </strong>
-                  </Text>
-                  <Text fontSize="sm">
-                    Tashqi moliya:{" "}
-                    <strong>
-                      {Math.round(
-                        regionData[tooltip.data.regionKey].external
-                      ).toLocaleString()}{" "}
-                      mln so‘m
-                    </strong>
-                  </Text>
-                  <Text fontSize="sm" fontWeight="bold" mt={2} color={brand600}>
-                    Jami:{" "}
-                    {Math.round(
-                      regionData[tooltip.data.regionKey].total
-                    ).toLocaleString()}{" "}
-                    mln so‘m
-                  </Text>
-                </>
-              )}
-            </Box>
-          )}
+                    </Text>
+                    {/* Дополнительно показываем уровень бедности */}
+                    {povertyRates[tooltip.data.regionKey] !== undefined && (
+                      <Text fontSize="sm" mt={1}>
+                        Kambag'alik darajasi:{" "}
+                        <strong>{povertyRates[tooltip.data.regionKey]}%</strong>
+                      </Text>
+                    )}
+                  </>
+                )}
+              </Box>
+            )}
+          </Box>
         </Box>
-      </Box>
 
-      {/* Doiraviy diagramma */}
-      <Box bg="white" borderRadius="2xl" p={6} boxShadow="xl" mt={8}>
-        <Heading as="h2" size="lg" textAlign="center" mb={5} color="gray.800">
-          Hududlar ulushi (jami mablag‘lar asosida)
-        </Heading>
-        <ResponsiveContainer width="100%" height={600}>
-          <PieChart>
-            <Pie
-              data={pieData}
-              dataKey="value"
-              nameKey="name"
-              outerRadius={220}
-              innerRadius={80}
-              label={({ name, percent }) =>
-                `${name} ${(percent * 100).toFixed(0)}%`
-              }
-              labelLine={{ stroke: "#718096", strokeWidth: 1 }}
-              paddingAngle={2}
-            >
-              {pieData.map((_, i) => (
-                <Cell
-                  key={i}
-                  fill={COLORS[i % COLORS.length]}
-                  stroke="#fff"
-                  strokeWidth={2}
-                />
-              ))}
-            </Pie>
-            <Legend
-              verticalAlign="bottom"
-              height={36}
-              iconType="circle"
-              formatter={(value) => <Text fontSize="sm">{value}</Text>}
-            />
-            <RechartsTooltip
-              formatter={(value: any) => [
-                Number(value).toLocaleString() + " mln so‘m",
-                "Jami mablag‘",
-              ]}
-              contentStyle={{
-                backgroundColor: "#1A202C",
-                border: "none",
-                borderRadius: "8px",
-                color: "white",
-              }}
-            />
-          </PieChart>
-        </ResponsiveContainer>
-      </Box>
+        {/* Круговая диаграмма (правая часть) */}
+        <Box flex="1" bg="white" borderRadius="2xl" p={2} boxShadow="xl">
 
-      {/* Qisqa izoh */}
-      <Box mt={8} textAlign="center" fontSize="sm" color="gray.500">
-        <Text>
-          * Qashqadaryo viloyati xaritasini bossangiz, batafsil tumanlar kesimidagi ma’lumotlarga o‘tishingiz mumkin.
-        </Text>
-      </Box>
+          <ResponsiveContainer width="100%" height={500}>
+            <PieChart>
+              <Pie
+                data={pieData}
+                dataKey="value"
+                nameKey="name"
+                outerRadius={180}
+                innerRadius={70}
+                label={({ name, percent }) =>
+                  `${name} ${(percent * 100).toFixed(0)}%`
+                }
+                labelLine={{ stroke: "#718096", strokeWidth: 1 }}
+                paddingAngle={2}
+              >
+                {pieData.map((_, i) => (
+                  <Cell
+                    key={i}
+                    fill={COLORS[i % COLORS.length]}
+                    stroke="#fff"
+                    strokeWidth={2}
+                  />
+                ))}
+              </Pie>
+
+              <RechartsTooltip
+                formatter={(value: any) => [
+                  Number(value).toLocaleString() + " mln so‘m",
+                  "Jami mablag‘",
+                ]}
+                contentStyle={{
+                  backgroundColor: "#1A202C",
+                  border: "none",
+                  borderRadius: "8px",
+                  color: "white",
+                }}
+              />
+            </PieChart>
+          </ResponsiveContainer>
+        </Box>
+      </Flex>
     </Box>
   );
 };
