@@ -274,8 +274,7 @@ const DashboardPage = () => {
               _hover={{ transform: "translateY(-5px)", boxShadow: "xl" }}
               borderLeft="6px solid"
               borderLeftColor={orange400}
-              animation={`${fadeInUp} 0.7s ease-out`}
-            >
+              animation={`${fadeInUp} 0.7s ease-out`}>
               <Flex align="center" gap={3} mb={3}>
                 <Icon as={Banknote} boxSize={6} color={orange400} />
                 <Text fontWeight="bold" fontSize="md" color="gray.700">
@@ -290,7 +289,6 @@ const DashboardPage = () => {
               </Text>
             </Box>
           </NavLink>
-
           {/* 4 - Tashqi moliya manbalari */}
           <NavLink to='/external'>
             <Box
@@ -318,29 +316,34 @@ const DashboardPage = () => {
               </Text>
             </Box>
           </NavLink>
-
           {/* 5 - Red Flag (qizil bayroq) */}
-          <Box
-            bg="white"
-            p={2}
-            borderRadius="2xl"
-            boxShadow="lg"
-            transition="all 0.3s"
-            _hover={{ transform: "translateY(-5px)", boxShadow: "xl" }}
-            borderLeft="6px solid"
-            borderLeftColor="#F56565"
-            animation={`${fadeInUp} 0.9s ease-out`}
-          >
-            <Flex align="center" gap={3} mb={3}>
-              <Icon as={Flag} boxSize={6} color="#F56565" />
-              <Text fontWeight="bold" fontSize="md" color="gray.700">
-                Red Flag
+          <NavLink to='/red-flag'>
+            <Box
+              bg="white"
+              p={2}
+              borderRadius="2xl"
+              boxShadow="lg"
+              transition="all 0.3s"
+              _hover={{ transform: "translateY(-5px)", boxShadow: "xl" }}
+              borderLeft="6px solid"
+              borderLeftColor="#F56565"
+              animation={`${fadeInUp} 0.9s ease-out`}
+            >
+              <Flex align="center" gap={3} mb={3}>
+                <Icon as={Flag} boxSize={6} color="#F56565" />
+                <Text fontWeight="bold" fontSize="md" color="gray.700">
+                  Red Flag
+                </Text>
+
+              </Flex>
+              <Text fontSize="3xl" fontWeight="extrabold" color="#C53030">
+                15
               </Text>
-            </Flex>
-            <Text fontSize="3xl" fontWeight="extrabold" color="#C53030">
-              {highPovertyRegions}
-            </Text>
-          </Box>
+              <Text fontSize="sm" color="gray.500">
+                .
+              </Text>
+            </Box>
+          </NavLink>
         </SimpleGrid>
       </Box>
 

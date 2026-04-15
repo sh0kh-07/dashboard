@@ -68,6 +68,7 @@ import PoorServices from './pages/PoorServices';
 import PoorServicesVil from './pages/PoorServicesVil';
 import PoorServicesVilDetail from './pages/PoorServicesVilDetail';
 import PoorServicesBatosh from './pages/PoorServicesBatosh';
+import RedFlag from './pages/RedFlag';
 
 export default function App() {
   return (
@@ -100,6 +101,7 @@ export default function App() {
               <Route path="/fund-detail/kashkadarya" element={<FoundDetailKashkadarya />} />
               <Route path="/fund-detail/kashkadarya/mahallalar" element={<FoundMahalla />} />
               <Route path="/fund-detail/kashkadarya/mahallalar/batosh" element={<FoundMahallaDetail />} />
+              <Route path="/red-flag" element={<RedFlag />} />
 
               <Route path="/loans" element={<Loans />} />
               <Route path="/loans-detail" element={<LoansDetail />} />
