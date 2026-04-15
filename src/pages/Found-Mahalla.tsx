@@ -1,4 +1,4 @@
-// src/pages/FoundMahalla.tsx
+// src/pages/PovertyReductionMahalla.tsx
 import React, { useState } from "react";
 import {
   Box,
@@ -23,7 +23,7 @@ import {
   Select,
 } from "@chakra-ui/react";
 import { useNavigate } from "react-router-dom";
-import { ArrowRight, Lock, MapPin, Search, X } from "lucide-react";
+import { ArrowRight, Lock, MapPin, Search, X, TrendingDown } from "lucide-react";
 import {
   BarChart,
   Bar,
@@ -46,23 +46,10 @@ const mahallaNames = [
   "Eski Anxor", "Yangi hayot",
 ];
 
-// --- Расчёт доли Qarshi shahri для направления "Davlat va maqsadli jamg‘armalar" ---
-// 1. Общая сумма по республике: 1.2 трлн сум = 1200 млрд сум
-// 2. Веса регионов (как в FoundDetail)
-const regionWeights = {
-  Tashkent: 1.5, Samarkand: 1.2, Bukhara: 1.0, Kashkadarya: 2.5,
-  Fergana: 1.2, Andijan: 1.0, Namangan: 1.0, Surkhandarya: 0.9,
-  Jizzakh: 0.8, Sirdarya: 0.7, Navoi: 1.1, Khorezm: 0.9, Karakalpakstan: 1.0,
-};
-const totalWeight = Object.values(regionWeights).reduce((a, b) => a + b, 0);
-const totalFundsMlrd = 1200; // млрд сум
-const kashkadaryaFunds = totalFundsMlrd * regionWeights.Kashkadarya / totalWeight; // ~202.7 млрд
+// --- Бюджет фонда для Карши: 14 млрд сум ---
+const qarshiFundsMlrd = 14.0; // млрд сум
 
-// Доля Qarshi shahri в бюджете Кашкадарьи (из MainKashkadarya: Qarshi budget 750 из 4530)
-const qarshiBudgetShare = 750 / 4530; // ~0.1655629
-const qarshiFundsMlrd = kashkadaryaFunds * qarshiBudgetShare; // ~33.56 млрд сум
-
-// Определяем получающие махалли (те же, что в MainQarshi)
+// Определяем получающие махалли (те же критерии: idx % 3 == 0 или idx % 5 == 0, плюс Batosh, Ishonch)
 const receivingMahallas = new Set(
   mahallaNames.filter((_, idx) => idx % 3 === 0 || idx % 5 === 0)
 );
@@ -82,7 +69,7 @@ const distributeBudget = (total: number) => {
   const perUnit = total / totalWeight;
   const result: Record<string, number> = {};
   receivingList.forEach(name => {
-    result[name] = +(perUnit * weights[name]).toFixed(2);
+    result[name] = +(perUnit * weights[name]).toFixed(3);
   });
   return result;
 };
@@ -112,7 +99,7 @@ const chartData = allMahallaData.map(item => ({
   budget: item.budget,
 }));
 
-const FoundMahalla = () => {
+const PovertyReductionMahalla = () => {
   const [brand600] = useToken("colors", ["brand.600"]);
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
@@ -124,7 +111,8 @@ const FoundMahalla = () => {
     }
   };
 
-  // Фильтрация по поиску и по статусу
+  // edit hello
+
   const filteredMahallas = allMahallaData.filter(mahalla => {
     const matchesSearch = mahalla.name.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus =
@@ -142,10 +130,12 @@ const FoundMahalla = () => {
         {/* Заголовок и общая сумма */}
         <Flex alignItems="baseline" justifyContent="space-between" mb={4}>
           <Box>
-            <Heading as="h1" size="xl" fontWeight="bold" color="gray.800">
-              Davlat va maqsadli jamg‘armalar
-            </Heading>
-            <Text fontSize="md" color="brand.300" mt={1}>
+            <Flex align="center" gap={2}>
+              <Heading as="h1" size="lg" fontWeight="bold" color="gray.800">
+                Kambag‘allikni qisqartirish davlat maqsadli jamg‘armasi
+              </Heading>
+            </Flex>
+            <Text fontSize="md" color="gray.600" mt={1}>
               Qarshi shahri – mahallalar kesimida taqsimot
             </Text>
           </Box>
@@ -154,16 +144,10 @@ const FoundMahalla = () => {
               Qarshi shahri uchun jami
             </Text>
             <Text fontSize="2xl" fontWeight="extrabold" color={brand600}>
-              {totalBudget.toFixed(2)} mlrd so‘m
+              {totalBudget.toFixed(3)} mlrd so‘m
             </Text>
-            <Text fontSize="xs" color="gray.600">(respublika jamg‘armasidan)</Text>
           </Box>
         </Flex>
-
-        <Text fontSize="md" color="gray.600" mb={8}>
-          Davlat budjeti va maqsadli jamg‘armalar mablag‘larining mahallalar kesimida taqsimlanishi.
-          Quyida har bir mahallaga ajratilgan mablag‘lar keltirilgan.
-        </Text>
 
         {/* Фильтры */}
         <Flex direction={{ base: "column", md: "row" }} gap={4} mb={6}>
@@ -258,7 +242,7 @@ const FoundMahalla = () => {
                         </Flex>
                       </Td>
                       <Td textAlign="right" fontWeight="semibold" color={brand600} borderBottom="1px solid" borderColor="gray.200">
-                        {mahalla.budget.toFixed(2)}
+                        {mahalla.budget.toFixed(3)}
                       </Td>
                       <Td textAlign="center" borderBottom="1px solid" borderColor="gray.200" color="gray.800">
                         {mahalla.receives ? (
@@ -352,7 +336,8 @@ const FoundMahalla = () => {
             </ResponsiveContainer>
           </Box>
           <Text fontSize="xs" mt={4} color="gray.600">
-            * Raqamlar real taqsimot asosida hisoblangan. Faqat Batosh mahallasi uchun batafsil maʼlumot mavjud.
+            * Raqamlar Kambag‘allikni qisqartirish jamg‘armasining real taqsimotiga asoslangan.
+            Batosh mahallasi batafsil maʼlumot uchun faol.
           </Text>
         </Box>
       </Box>
@@ -360,4 +345,4 @@ const FoundMahalla = () => {
   );
 };
 
-export default FoundMahalla;
+export default PovertyReductionMahalla;

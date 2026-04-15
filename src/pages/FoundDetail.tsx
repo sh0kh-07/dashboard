@@ -1,3 +1,4 @@
+// src/pages/PovertyReductionFundDetail.tsx
 import React, { useState } from "react";
 import {
     Box,
@@ -5,6 +6,7 @@ import {
     Heading,
     useToken,
     Flex,
+    SimpleGrid,
 } from "@chakra-ui/react";
 import { useNavigate } from "react-router-dom";
 import Uzbekistan from "@svg-maps/uzbekistan";
@@ -19,10 +21,9 @@ import {
     Cell,
 } from "recharts";
 
-const FoundDetail = () => {
+const PovertyReductionFundDetail = () => {
     const navigate = useNavigate();
     const [brand600] = useToken("colors", ["brand.600"]);
-
     const [tooltip, setTooltip] = useState<any>({
         visible: false,
         x: 0,
@@ -30,283 +31,274 @@ const FoundDetail = () => {
         data: null,
     });
 
-    // --- Маппинг названий SVG -> ключи regionData ---
-    const nameMap: Record<string, string> = {
-        "Toshkent": "Tashkent",
-        "Toshkent viloyati": "Tashkent",
-        "Samarqand": "Samarkand",
-        "Samarqand viloyati": "Samarkand",
-        "Buxoro": "Bukhara",
-        "Buxoro viloyati": "Bukhara",
-        "Qashqadaryo": "Kashkadarya",
-        "Qashqadaryo viloyati": "Kashkadarya",
-        "Farg‘ona": "Fergana",
-        "Farg‘ona viloyati": "Fergana",
-        "Andijon": "Andijan",
-        "Andijon viloyati": "Andijan",
-        "Namangan": "Namangan",
-        "Namangan viloyati": "Namangan",
-        "Surxondaryo": "Surkhandarya",
-        "Surxondaryo viloyati": "Surkhandarya",
-        "Jizzax": "Jizzakh",
-        "Jizzax viloyati": "Jizzakh",
-        "Sirdaryo": "Sirdarya",
-        "Sirdaryo viloyati": "Sirdarya",
-        "Navoiy": "Navoi",
-        "Navoiy viloyati": "Navoi",
-        "Xorazm": "Khorezm",
-        "Xorazm viloyati": "Khorezm",
-        "Qoraqalpog‘iston": "Karakalpakstan",
-        "Qoraqalpog‘iston Respublikasi": "Karakalpakstan",
-        // Английские варианты на всякий случай
-        "Tashkent": "Tashkent",
-        "Samarkand": "Samarkand",
-        "Bukhara": "Bukhara",
-        "Kashkadarya": "Kashkadarya",
-        "Fergana": "Fergana",
-        "Andijan": "Andijan",
-        "Namangan": "Namangan",
-        "Surkhandarya": "Surkhandarya",
-        "Jizzakh": "Jizzakh",
-        "Sirdarya": "Sirdarya",
-        "Navoi": "Navoi",
-        "Khorezm": "Khorezm",
-        "Karakalpakstan": "Karakalpakstan",
+    // --- Уровень бедности (kambag‘allik) по регионам ---
+    const povertyRates: Record<string, number> = {
+        Tashkent: 1.7,
+        Samarkand: 2.0,
+        Bukhara: 2.6,
+        Kashkadarya: 3.3,
+        Fergana: 2.7,
+        Andijan: 2.7,
+        Namangan: 2.7,
+        Surkhandarya: 2.8,
+        Jizzakh: 2.8,
+        Sirdarya: 3.0,
+        Navoi: 2.1,
+        Khorezm: 3.0,
+        Karakalpakstan: 3.2,
     };
 
-    // Нормализация названия: удаляем "viloyati", "shahri", "Respublikasi"
+    // 3 цвета в зависимости от бедности
+    const getPovertyColor = (rate: number, minVal: number, maxVal: number): string => {
+        if (maxVal === minVal) return "#48BB78";
+        const range = maxVal - minVal;
+        const third = range / 3;
+        if (rate < minVal + third) return "#48BB78";
+        if (rate < minVal + 2 * third) return "#ECC94B";
+        return "#F56565";
+    };
+
+    const povertyValues = Object.values(povertyRates);
+    const minPoverty = Math.min(...povertyValues);
+    const maxPoverty = Math.max(...povertyValues);
+
+    // --- Маппинг названий SVG -> регионы ---
+    const nameMap: Record<string, string> = {
+        "Toshkent": "Tashkent", "Toshkent viloyati": "Tashkent",
+        "Samarqand": "Samarkand", "Samarqand viloyati": "Samarkand",
+        "Buxoro": "Bukhara", "Buxoro viloyati": "Bukhara",
+        "Qashqadaryo": "Kashkadarya", "Qashqadaryo viloyati": "Kashkadarya",
+        "Farg‘ona": "Fergana", "Farg‘ona viloyati": "Fergana",
+        "Andijon": "Andijan", "Andijon viloyati": "Andijan",
+        "Namangan": "Namangan", "Namangan viloyati": "Namangan",
+        "Surxondaryo": "Surkhandarya", "Surxondaryo viloyati": "Surkhandarya",
+        "Jizzax": "Jizzakh", "Jizzax viloyati": "Jizzakh",
+        "Sirdaryo": "Sirdarya", "Sirdaryo viloyati": "Sirdarya",
+        "Navoiy": "Navoi", "Navoiy viloyati": "Navoi",
+        "Xorazm": "Khorezm", "Xorazm viloyati": "Khorezm",
+        "Qoraqalpog‘iston": "Karakalpakstan", "Qoraqalpog‘iston Respublikasi": "Karakalpakstan",
+        "Tashkent": "Tashkent", "Samarkand": "Samarkand", "Bukhara": "Bukhara",
+        "Kashkadarya": "Kashkadarya", "Fergana": "Fergana", "Andijan": "Andijan",
+        "Namangan": "Namangan", "Surkhandarya": "Surkhandarya", "Jizzakh": "Jizzakh",
+        "Sirdarya": "Sirdarya", "Navoi": "Navoi", "Khorezm": "Khorezm", "Karakalpakstan": "Karakalpakstan",
+    };
+
     const normalizeName = (name: string): string => {
-        let normalized = name
+        return name
             .replace(/ viloyati$/i, '')
             .replace(/ shahri$/i, '')
             .replace(/ Respublikasi$/i, '')
-            .trim();
-        normalized = normalized.replace(/‘/g, "'");
-        return normalized;
+            .trim()
+            .replace(/‘/g, "'");
     };
 
     const getRegionKey = (svgName: string): string | null => {
-        // Прямое совпадение
         if (nameMap[svgName]) return nameMap[svgName];
         const normalized = normalizeName(svgName);
         if (nameMap[normalized]) return nameMap[normalized];
-        // Если ничего не найдено, выводим предупреждение
-        console.warn(`Region not mapped: "${svgName}" (normalized: "${normalized}")`);
         return null;
     };
 
-    // Веса регионов
+    // --- Распределение бюджета фонда (0.5 трлн = 500 млрд) по регионам ---
+    const totalBudgetMlrd = 500; // млрд so‘m
+    // Веса регионов (пропорционально нуждам – те же, что и для других фондов)
     const weights: Record<string, number> = {
-        Tashkent: 1.5,
-        Samarkand: 1.2,
-        Bukhara: 1.0,
-        Kashkadarya: 2.5,
-        Fergana: 1.2,
-        Andijan: 1.0,
-        Namangan: 1.0,
-        Surkhandarya: 0.9,
-        Jizzakh: 0.8,
-        Sirdarya: 0.7,
-        Navoi: 1.1,
-        Khorezm: 0.9,
-        Karakalpakstan: 1.0,
+        Tashkent: 1.5, Samarkand: 1.2, Bukhara: 1.0, Kashkadarya: 2.5,
+        Fergana: 1.2, Andijan: 1.0, Namangan: 1.0, Surkhandarya: 0.9,
+        Jizzakh: 0.8, Sirdarya: 0.7, Navoi: 1.1, Khorezm: 0.9, Karakalpakstan: 1.0,
     };
     const totalWeight = Object.values(weights).reduce((a, b) => a + b, 0);
-    const totalBudgetMlrd = 1200; // 1.2 trln sum = 1200 mlrd sum
 
-    // Вычисляем сумму для каждого региона
-    const regionData: Record<string, { description: string; value: number }> = {
-        Tashkent: { description: "Poytaxt va iqtisodiy markaz", value: +(totalBudgetMlrd * weights.Tashkent / totalWeight).toFixed(1) },
-        Samarkand: { description: "Tarixiy markaz", value: +(totalBudgetMlrd * weights.Samarkand / totalWeight).toFixed(1) },
-        Bukhara: { description: "Qadimiy madaniyat markazi", value: +(totalBudgetMlrd * weights.Bukhara / totalWeight).toFixed(1) },
-        Kashkadarya: { description: "Sanoat faolligi", value: +(totalBudgetMlrd * weights.Kashkadarya / totalWeight).toFixed(1) },
-        Fergana: { description: "Farg'ona vodiysi", value: +(totalBudgetMlrd * weights.Fergana / totalWeight).toFixed(1) },
-        Andijan: { description: "Sanoat hududi", value: +(totalBudgetMlrd * weights.Andijan / totalWeight).toFixed(1) },
-        Namangan: { description: "Madaniy hudud", value: +(totalBudgetMlrd * weights.Namangan / totalWeight).toFixed(1) },
-        Surkhandarya: { description: "Janubiy hudud", value: +(totalBudgetMlrd * weights.Surkhandarya / totalWeight).toFixed(1) },
-        Jizzakh: { description: "Markaziy hudud", value: +(totalBudgetMlrd * weights.Jizzakh / totalWeight).toFixed(1) },
-        Sirdarya: { description: "Markaziy vodiy", value: +(totalBudgetMlrd * weights.Sirdarya / totalWeight).toFixed(1) },
-        Navoi: { description: "Sanoat markazi", value: +(totalBudgetMlrd * weights.Navoi / totalWeight).toFixed(1) },
-        Khorezm: { description: "Shimoliy hudud", value: +(totalBudgetMlrd * weights.Khorezm / totalWeight).toFixed(1) },
-        Karakalpakstan: { description: "Qoraqalpog'iston Respublikasi", value: +(totalBudgetMlrd * weights.Karakalpakstan / totalWeight).toFixed(1) },
-    };
+    const regionData: Record<string, { description: string; value: number }> = {};
+    Object.keys(weights).forEach(key => {
+        regionData[key] = {
+            description: getDescription(key),
+            value: +(totalBudgetMlrd * weights[key] / totalWeight).toFixed(1),
+        };
+    });
 
-    // Преобразуем данные для графика: сортируем по убыванию значения
+    function getDescription(key: string): string {
+        const desc: Record<string, string> = {
+            Tashkent: "Poytaxt va iqtisodiy markaz",
+            Samarkand: "Tarixiy markaz",
+            Bukhara: "Qadimiy madaniyat markazi",
+            Kashkadarya: "Sanoat faolligi, og‘ir tumanlar",
+            Fergana: "Farg'ona vodiysi",
+            Andijan: "Sanoat hududi",
+            Namangan: "Madaniy hudud",
+            Surkhandarya: "Janubiy hudud",
+            Jizzakh: "Markaziy hudud",
+            Sirdarya: "Markaziy vodiy",
+            Navoi: "Sanoat markazi",
+            Khorezm: "Shimoliy hudud",
+            Karakalpakstan: "Qoraqalpog‘iston Respublikasi",
+        };
+        return desc[key] || "Hudud";
+    }
+
     const chartData = Object.entries(regionData)
-        .map(([name, data]: any) => ({
-            name: name,
-            value: data.value,
-            description: data.description,
-        }))
+        .map(([name, data]) => ({ name, value: data.value, description: data.description }))
         .sort((a, b) => b.value - a.value);
 
-    // Цвета для столбцов
     const barColors = [
-        brand600,
-        "#3182CE",
-        "#DD6B20",
-        "#38A169",
-        "#D53F8C",
-        "#805AD5",
-        "#00A3C4",
-        "#C53030",
-        "#2C7A7B",
-        "#6B46C1",
-        "#E53E3E",
-        "#319795",
-        "#D69E2E",
+        brand600, "#3182CE", "#DD6B20", "#38A169", "#D53F8C",
+        "#805AD5", "#00A3C4", "#C53030", "#2C7A7B", "#6B46C1",
+        "#E53E3E", "#319795", "#D69E2E",
     ];
 
-    // Обработка клика по региону на карте
-    const handleRegionClick = (locId: string) => {
-        if (locId === "qashqadaryo") {
-            navigate("/fund-detail/kashkadarya");
+    const handleRegionClick = (regionKey: string) => {
+        if (regionKey === "Kashkadarya") {
+            navigate("/fund-detail/kashkadarya"); // или свой путь
         }
     };
 
     return (
         <Box>
-            <Flex alignItems="start" justifyContent="space-between" mb={8}>
-                <Heading as="h1" size="xl" fontWeight="bold" color="gray.800">
-                    Davlat va maqsadli jamg‘armalar
-                </Heading>
+            <Flex alignItems="start" justifyContent="space-between" mb={6}>
                 <Box>
-                    <Text fontSize="lg" fontWeight="medium" color="gray.600">
+                    <Heading as="h1" size="lg" fontWeight="bold" color="gray.800">
+                        Kambag‘allikni qisqartirish davlat maqsadli jamg‘armasi
+                    </Heading>
+                    <Text fontSize="sm" color="gray.600" mt={1}>
+                        Aholi daromadlarini oshirish va kambag‘allikni kamaytirish dasturlari
+                    </Text>
+                </Box>
+                <Box textAlign="right">
+                    <Text fontSize="sm" fontWeight="medium" color="gray.600">
                         Umumiy budjet hajmi
                     </Text>
                     <Text fontSize="2xl" fontWeight="extrabold" color={brand600}>
-                        1.2 trln so‘m
+                        0.5 trln so‘m (500 mlrd)
                     </Text>
                 </Box>
             </Flex>
 
-            <Text fontSize="md" color="gray.600" mb={8}>
-                Davlat budjeti va maqsadli jamg‘armalarning viloyatlar kesimida taqsimlanishi.
-                Quyidagi xaritada har bir viloyat bo‘yicha ajratilgan mablag‘lar va tavsiflarni ko‘rishingiz mumkin.
+            <Text fontSize="sm" color="gray.600" mb={6}>
+                Jamg‘arma mablag‘larining viloyatlar kesimida taqsimlanishi. Xarita ranglari kambag‘allik darajasiga qarab belgilanadi.
             </Text>
 
-            {/* Карта */}
-            <Box position="relative" display="flex" justifyContent="center" mb={12}>
-                <svg viewBox={Uzbekistan.viewBox} width="70%">
-                    {Uzbekistan.locations.map((loc: any) => {
-                        const regionKey = getRegionKey(loc.name);
-                        const hasData = !!regionKey;
-                        return (
-                            <path
-                                key={loc.id}
-                                d={loc.path}
-                                onMouseEnter={(e) => {
-                                    if (!hasData) return;
-                                    setTooltip({
-                                        visible: true,
-                                        x: e.clientX,
-                                        y: e.clientY,
-                                        data: { ...loc, regionKey },
-                                    });
-                                }}
-                                onMouseMove={(e) =>
-                                    setTooltip((prev: any) => ({
-                                        ...prev,
-                                        x: e.clientX,
-                                        y: e.clientY,
-                                    }))
+            <SimpleGrid columns={{ base: 1, md: 2 }} spacing={6} mb={8}>
+                {/* Левая колонка: карта */}
+                <Box>
+                    <Box position="relative" display="flex" justifyContent="center">
+                        <svg viewBox={Uzbekistan.viewBox} width="100%" style={{ cursor: "pointer" }}>
+                            {Uzbekistan.locations.map((loc: any) => {
+                                const regionKey = getRegionKey(loc.name);
+                                const hasData = !!regionKey && povertyRates[regionKey] !== undefined;
+                                let fillColor = "#CBD5E0";
+                                if (hasData) {
+                                    fillColor = getPovertyColor(povertyRates[regionKey], minPoverty, maxPoverty);
                                 }
-                                onMouseLeave={() =>
-                                    setTooltip({ visible: false, x: 0, y: 0, data: null })
-                                }
-                                onClick={() => handleRegionClick(loc.id)}
-                                style={{
-                                    fill: tooltip.data?.id === loc.id ? "#ffffff" : brand600,
-                                    stroke: "#000000",
-                                    strokeWidth: 1,
-                                    cursor: hasData ? "pointer" : "default",
-                                    transition: "0.2s",
-                                }}
-                            />
-                        );
-                    })}
-                </svg>
-
-                {tooltip.visible && tooltip.data && tooltip.data.regionKey && (
-                    <Box
-                        position="fixed"
-                        top={tooltip.y + 12}
-                        left={tooltip.x + 12}
-                        bg="gray.50"
-                        color="gray.800"
-                        px={4}
-                        py={2}
-                        borderRadius="md"
-                        pointerEvents="none"
-                        zIndex={1000}
-                        maxW="260px"
-                    >
-                        <Text fontWeight="bold">{tooltip.data.name}</Text>
-                        <Text fontSize="sm" mt={1}>
-                            {regionData[tooltip.data.regionKey]?.description || "Ta'rif mavjud emas"}
-                        </Text>
-                        <Text fontSize="sm" fontWeight="bold" color={brand600} mt={1}>
-                            Ajratilgan mablag‘: {regionData[tooltip.data.regionKey]?.value || 0} mlrd so‘m
-                        </Text>
+                                return (
+                                    <path
+                                        key={loc.id}
+                                        d={loc.path}
+                                        onMouseEnter={(e) => {
+                                            if (!hasData) return;
+                                            setTooltip({
+                                                visible: true,
+                                                x: e.clientX,
+                                                y: e.clientY,
+                                                data: { ...loc, regionKey },
+                                            });
+                                        }}
+                                        onMouseMove={(e) =>
+                                            setTooltip((prev: any) => ({ ...prev, x: e.clientX, y: e.clientY }))
+                                        }
+                                        onMouseLeave={() => setTooltip({ visible: false, x: 0, y: 0, data: null })}
+                                        onClick={() => regionKey && handleRegionClick(regionKey)}
+                                        style={{
+                                            fill: fillColor,
+                                            stroke: "#2c3e50",
+                                            strokeWidth: 1,
+                                            cursor: hasData ? "pointer" : "default",
+                                            transition: "0.2s",
+                                        }}
+                                    />
+                                );
+                            })}
+                        </svg>
                     </Box>
-                )}
-            </Box>
+                    <Flex justify="center" gap={4} mt={3}>
+                        <Flex align="center" gap={1}>
+                            <Box w="20px" h="12px" bg="#48BB78" borderRadius="sm" />
+                            <Text fontSize="xs">Kam kambag‘allik</Text>
+                        </Flex>
+                        <Flex align="center" gap={1}>
+                            <Box w="20px" h="12px" bg="#ECC94B" borderRadius="sm" />
+                            <Text fontSize="xs">O‘rtacha</Text>
+                        </Flex>
+                        <Flex align="center" gap={1}>
+                            <Box w="20px" h="12px" bg="#F56565" borderRadius="sm" />
+                            <Text fontSize="xs">Yuqori kambag‘allik</Text>
+                        </Flex>
+                    </Flex>
 
-            {/* График распределения по регионам */}
-            <Box mt={8}>
-                <Heading as="h2" size="lg" mb={4} color="gray.800">
-                    Viloyatlar kesimida taqsimot (mlrd so‘m)
-                </Heading>
-                <Text fontSize="sm" color="gray.600" mb={6}>
-                    Jamg‘arma mablag‘larining viloyatlar ehtiyojiga qarab taqsimlanishi.
-                    Quyidagi diagrammada eng ko‘p mablag‘ oladigan hududlar keltirilgan.
-                </Text>
-                <ResponsiveContainer width="100%" height={500}>
-                    <BarChart
-                        data={chartData}
-                        layout="vertical"
-                        margin={{ top: 20, right: 30, left: 80, bottom: 20 }}
-                    >
-                        <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                        <XAxis
-                            type="number"
-                            label={{ value: "mlrd so‘m", position: "insideBottom", offset: -5, fill: "#4a5568" }}
-                            tick={{ fill: "#4a5568" }}
-                        />
-                        <YAxis
-                            type="category"
-                            dataKey="name"
-                            tick={{ fontSize: 12, fill: "#4a5568" }}
-                            width={100}
-                        />
-                        <RechartsTooltip
-                            formatter={(value: number) => [`${value} mlrd so‘m`, "Ajratilgan mablag‘"]}
-                            labelFormatter={(label) => {
-                                const item = chartData.find((d) => d.name === label);
-                                return `${label} - ${item?.description || ""}`;
-                            }}
-                            contentStyle={{
-                                backgroundColor: "#ffffff",
-                                borderRadius: "8px",
-                                border: "1px solid #e2e8f0",
-                                color: "#1a202c",
-                            }}
-                            itemStyle={{ color: "#1a202c" }}
-                        />
-                        <Bar dataKey="value" radius={[0, 8, 8, 0]}>
-                            {chartData.map((entry, index) => (
-                                <Cell key={`cell-${index}`} fill={barColors[index % barColors.length]} />
-                            ))}
-                        </Bar>
-                    </BarChart>
-                </ResponsiveContainer>
-                <Text fontSize="xs" color="gray.600" mt={4}>
-                    *Eslatma: Raqamlar namunaviy, real taqsimot loyiha hujjatlarida belgilanadi.
-                    Eng ko‘p mablag‘ Toshkent, Samarqand va Buxoro viloyatlariga yo‘naltirilgan.
-                </Text>
-            </Box>
+                    {tooltip.visible && tooltip.data && tooltip.data.regionKey && (
+                        <Box
+                            position="fixed"
+                            top={tooltip.y + 12}
+                            left={tooltip.x + 12}
+                            bg="gray.800"
+                            color="white"
+                            px={4}
+                            py={2}
+                            borderRadius="md"
+                            pointerEvents="none"
+                            zIndex={1000}
+                            maxW="260px"
+                            fontSize="sm"
+                        >
+                            <Text fontWeight="bold">{tooltip.data.name}</Text>
+                            <Text mt={1}>{regionData[tooltip.data.regionKey]?.description || "Ta'rif mavjud emas"}</Text>
+                            <Text fontWeight="bold" color="#90CDF4" mt={1}>
+                                Ajratilgan mablag‘: {regionData[tooltip.data.regionKey]?.value || 0} mlrd so‘m
+                            </Text>
+                            <Text color="yellow.200" mt={1}>
+                                Kambag‘allik darajasi: {povertyRates[tooltip.data.regionKey]}%
+                            </Text>
+                        </Box>
+                    )}
+                </Box>
+
+                {/* Правая колонка: график */}
+                <Box bg="white" p={4} borderRadius="xl" boxShadow="sm">
+                    <Heading as="h2" size="sm" mb={3} color="gray.700">
+                        Viloyatlar kesimida taqsimot (mlrd so‘m)
+                    </Heading>
+                    <ResponsiveContainer width="100%" height={400}>
+                        <BarChart
+                            layout="vertical"
+                            data={chartData}
+                            margin={{ top: 10, right: 20, left: 70, bottom: 10 }}
+                        >
+                            <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                            <XAxis type="number" tick={{ fontSize: 10 }} />
+                            <YAxis type="category" dataKey="name" tick={{ fontSize: 10 }} width={80} />
+                            <RechartsTooltip
+                                formatter={(value: number) => [`${value} mlrd so‘m`, "Mablag‘"]}
+                                labelFormatter={(label) => {
+                                    const item = chartData.find((d) => d.name === label);
+                                    return `${label} – ${item?.description || ""}`;
+                                }}
+                                contentStyle={{ backgroundColor: "#fff", borderRadius: 8, border: "1px solid #e2e8f0" }}
+                            />
+                            <Bar dataKey="value" radius={[0, 6, 6, 0]}>
+                                {chartData.map((_, index) => (
+                                    <Cell key={`cell-${index}`} fill={barColors[index % barColors.length]} />
+                                ))}
+                            </Bar>
+                        </BarChart>
+                    </ResponsiveContainer>
+                </Box>
+            </SimpleGrid>
+
+            <Text fontSize="xs" color="gray.500" textAlign="center" mt={2}>
+                * Qashqadaryo viloyatini bossangiz, batafsil tumanlar kesimiga o‘tasiz.<br />
+                ** Xarita ranglari kambag‘allik darajasiga ko‘ra: yashil – kam, sariq – o‘rtacha, qizil – yuqori.
+            </Text>
         </Box>
     );
 };
 
-export default FoundDetail;
+export default PovertyReductionFundDetail;
