@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import {
   Box, Text, Heading, Flex, SimpleGrid, Stat, StatLabel, StatNumber, StatHelpText,
-  Badge, useToken, GridItem, VStack
+  Badge, useToken, GridItem, VStack, HStack
 } from "@chakra-ui/react";
 import Uzbekistan from "@svg-maps/uzbekistan";
 import {
@@ -10,7 +10,7 @@ import {
 } from "lucide-react";
 
 // ------------------------------
-// ФОРМАТИРОВАНИЕ (без изменений)
+// ФОРМАТИРОВАНИЕ
 // ------------------------------
 const formatNumber = (num) => {
   if (isNaN(num) || num === undefined || num === null) return "0";
@@ -26,7 +26,7 @@ const formatMoney = (num) => {
 };
 
 // ------------------------------
-// ПОЛНЫЙ МАППИНГ НАЗВАНИЙ
+// МАППИНГ НАЗВАНИЙ
 // ------------------------------
 const nameMappings = [
   ["Tashkent", "Tashkent"], ["Tashkent", "Toshkent"], ["Tashkent", "Toshkent shahri"],
@@ -149,7 +149,7 @@ const regionsData = regionKeys.map(key => {
   const weight = regionWeights[key];
   const allocatedFunds = (totalAssigned * weight) / totalWeight;
   const servicesRendered = Math.round(totalPopulation * (poverty / 100) * 1.2);
-  const isDifficult = poverty >= 3.0; // Og'ir hudud: qashshoqlik 3% va undan yuqori
+  const isDifficult = poverty >= 3.0;
   return {
     stdKey: key,
     displayName: stdToDisplay[key] || key,
@@ -167,7 +167,7 @@ const regionsData = regionKeys.map(key => {
   };
 });
 
-// Агрегированные данные по республике
+// Агрегированные данные
 const totalPopulation = regionsData.reduce((s, r) => s + r.population, 0);
 const totalFamilies = regionsData.reduce((s, r) => s + r.families, 0);
 const totalPoorFamilies = regionsData.reduce((s, r) => s + r.poorFamilies, 0);
@@ -177,10 +177,8 @@ const totalServices = regionsData.reduce((s, r) => s + r.servicesRendered, 0);
 
 const avgPoverty = regionsData.reduce((s, r) => s + r.povertyRate * r.population, 0) / totalPopulation;
 const avgUnemployment = regionsData.reduce((s, r) => s + r.unemploymentRate * r.population, 0) / totalPopulation;
-
 const difficultRegionsCount = regionKeys.filter(key => povertyRates[key] >= 3.0).length;
 
-// 7 red flag items – each corresponds to a statistic card
 const suspiciousContracts = [
   "Kambag'al oilalar",
   "Kambag'allik darajasi",
@@ -190,6 +188,18 @@ const suspiciousContracts = [
   "Ajratilgan mablag'",
   "Ko'rsatilgan xizmatlar"
 ];
+
+// ------------------------------
+// ФУНКЦИЯ ЦВЕТА НА ОСНОВЕ УРОВНЯ БЕДНОСТИ (3 ЦВЕТА)
+// ------------------------------
+const getPovertyColor = (povertyRate, minPoverty, maxPoverty) => {
+  if (maxPoverty === minPoverty) return "#48BB78";
+  const range = maxPoverty - minPoverty;
+  const third = range / 3;
+  if (povertyRate < minPoverty + third) return "#48BB78"; // зелёный
+  if (povertyRate < minPoverty + 2 * third) return "#ECC94B"; // жёлтый
+  return "#F56565"; // красный
+};
 
 const getRegionBySvgName = (svgName) => {
   const stdKey = getStdKeyFromSvgName(svgName);
@@ -203,7 +213,11 @@ const getRegionBySvgName = (svgName) => {
 const DashboardPage = () => {
   const [tooltip, setTooltip] = useState({ visible: false, x: 0, y: 0, data: null });
   const [brand600] = useToken("colors", ["brand.600"]);
-  const mapFill = "#3182CE";
+
+  // Определяем минимальный и максимальный уровень бедности для динамической раскраски
+  const povertyValues = regionsData.map(r => r.povertyRate);
+  const minPoverty = Math.min(...povertyValues);
+  const maxPoverty = Math.max(...povertyValues);
 
   const statCards = [
     { label: "Kambag'al oilalar", value: formatNumber(totalPoorFamilies), help: "Jami muhtoj oilalar", icon: AlertTriangle, color: "red.400" },
@@ -218,7 +232,7 @@ const DashboardPage = () => {
   const handleMouseEnter = (e, region) => {
     let x = e.clientX + 15;
     let y = e.clientY + 15;
-    const tw = 320, th = 420; // slightly taller to accommodate 12 rows
+    const tw = 320, th = 420;
     if (x + tw > window.innerWidth) x = e.clientX - tw - 10;
     if (y + th > window.innerHeight) y = e.clientY - th - 10;
     setTooltip({ visible: true, x, y, data: region });
@@ -241,18 +255,37 @@ const DashboardPage = () => {
           {/* Левая колонка: карта */}
           <GridItem w={'60%'}>
             <Box bg="white" borderRadius="2xl" p={'10px'} boxShadow="md" height="%">
-              <Flex align="center" gap={2} mb={4}>
+              <Flex align="center" justify="space-between" mb={4} flexWrap="wrap" gap={2}>
                 <Heading size="12px">O'zbekiston xaritasi — hududlar ma'lumotlari</Heading>
+                {/* Легенда цветов */}
+                <HStack spacing={3}>
+                  <HStack spacing={1}>
+                    <Box w="20px" h="12px" bg="#48BB78" borderRadius="sm" />
+                    <Text fontSize="xs">Kam qashshoqlik</Text>
+                  </HStack>
+                  <HStack spacing={1}>
+                    <Box w="20px" h="12px" bg="#ECC94B" borderRadius="sm" />
+                    <Text fontSize="xs">O‘rtacha</Text>
+                  </HStack>
+                  <HStack spacing={1}>
+                    <Box w="20px" h="12px" bg="#F56565" borderRadius="sm" />
+                    <Text fontSize="xs">Yuqori qashshoqlik</Text>
+                  </HStack>
+                </HStack>
               </Flex>
               <Box position="relative" display="flex" justifyContent="center">
                 <svg viewBox={Uzbekistan.viewBox} width="100%" style={{ maxHeight: "550px" }}>
                   {Uzbekistan.locations.map((loc) => {
                     const region = getRegionBySvgName(loc.name);
+                    let fillColor = "#CBD5E0"; // цвет для неподписанных областей
+                    if (region) {
+                      fillColor = getPovertyColor(region.povertyRate, minPoverty, maxPoverty);
+                    }
                     return (
                       <path
                         key={loc.id}
                         d={loc.path}
-                        fill={region ? mapFill : "#CBD5E0"}
+                        fill={fillColor}
                         fillOpacity={region ? 0.85 : 0.2}
                         stroke="#FFFFFF"
                         strokeWidth={1.5}
@@ -327,10 +360,9 @@ const DashboardPage = () => {
                       <Flex align="center" gap={1}><FileText size={14} /><Text fontSize="sm">Ko'rsatilgan xizmatlar:</Text></Flex>
                       <Text fontSize="sm" fontWeight="bold">{formatNumber(tooltip.data.servicesRendered)}</Text>
 
-                      {/* Og'ir hudud – теперь показывает количество (уровень бедности в %) */}
                       <Flex align="center" gap={1}><MapPin size={14} /><Text fontSize="sm">Og'ir hudud:</Text></Flex>
                       <Text fontSize="sm" fontWeight="bold" color={tooltip.data.povertyRate >= 3 ? "red.600" : "green.600"}>
-                        2
+                        {tooltip.data.povertyRate >= 3 ? "Ha" : "Yo'q"}
                       </Text>
                     </SimpleGrid>
                   </Box>
@@ -361,7 +393,7 @@ const DashboardPage = () => {
           </GridItem>
         </Flex>
 
-        {/* Блок подозрительных контрактов – 7 пунктов */}
+        {/* Блок подозрительных контрактов */}
         <Box bg="white" p={'5px'} borderRadius="2xl" boxShadow="sm" border="1px solid" borderColor="red.100">
           <Flex align="center" gap={2} mb={3}>
             <ShieldAlert color="red.500" size={20} />

@@ -13,7 +13,7 @@ import {
 import {
   Users, Home, Briefcase, AlertTriangle, CheckCircle, Building,
   BadgePercent, DollarSign, ShieldCheck, Activity, ClipboardList, List,
-  FileSpreadsheet, FileText
+  FileSpreadsheet, FileText, Download
 } from "lucide-react";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
@@ -77,7 +77,7 @@ const generateDistricts = (regionName: string, basePoverty: number, baseUnemploy
     let unemployment = Math.max(2, Math.min(7, baseUnemployment + variation * 0.5));
     let poorFamilies = Math.floor(d.families * (poverty / 100));
     let poorHouseholds = Math.floor(d.households * (poverty / 100));
-    let population = d.pop || 0;
+    let population = d.pop;
     let jobsPlaced = Math.floor(population * (unemployment / 100) * 0.4);
     let allocatedFunds = poorFamilies * 1.2;
     let totalServices = poorFamilies * 3;
@@ -479,7 +479,7 @@ const RegionDetail: React.FC<RegionDetailProps> = ({ region, activeMetric, onClo
 };
 
 // ------------------------------------------------------------
-// 9. ASOSIY DASHBOARD (global eksport tugmalari olib tashlandi)
+// 9. ASOSIY DASHBOARD (global eksport tugmalari qo'shildi)
 // ------------------------------------------------------------
 const Reports: React.FC = () => {
   const [selectedRegion, setSelectedRegion] = useState<RegionData | null>(null);
@@ -501,6 +501,15 @@ const Reports: React.FC = () => {
   const metricValues = regionsData.map(r => r[activeMetric.dataKey] as number);
   const minVal = Math.min(...metricValues);
   const maxVal = Math.max(...metricValues);
+
+  // Глобальные обработчики экспорта (все вилояты)
+  const handleExportAllExcel = () => {
+    exportToExcel(regionsData, activeMetric, "Barcha_viloyatlar_hisoboti");
+  };
+
+  const handleExportAllWord = () => {
+    exportToWord(regionsData, activeMetric, "Barcha_viloyatlar_hisoboti");
+  };
 
   return (
     <Box minH="100vh">
@@ -534,11 +543,36 @@ const Reports: React.FC = () => {
           </VStack>
         </Box>
 
-        {/* O'ng panel - karta va grafiklar (global eksport tugmalari YO'Q) */}
+        {/* O'ng panel - karta va grafiklar */}
         <Box>
-          <Heading size="md" color="gray.700" mb={3}>
-            {activeMetric.label} (hududlar bo'yicha)
-          </Heading>
+          <Flex justify="space-between" align="center" mb={3} flexWrap="wrap" gap={3}>
+            <Heading size="md" color="gray.700">{activeMetric.label} (hududlar bo'yicha)</Heading>
+            {/* Глобальные кнопки экспорта (Excel / Word) для всех регионов */}
+            <HStack spacing={2}>
+              <Tooltip label="Excel formatida barcha viloyatlar hisobotini yuklab olish">
+                <Button
+                  leftIcon={<FileSpreadsheet size={18} />}
+                  colorScheme="green"
+                  variant="outline"
+                  onClick={handleExportAllExcel}
+                  size="sm"
+                >
+                  Excel (barcha)
+                </Button>
+              </Tooltip>
+              <Tooltip label="Word formatida barcha viloyatlar hisobotini yuklab olish">
+                <Button
+                  leftIcon={<FileText size={18} />}
+                  colorScheme="blue"
+                  variant="outline"
+                  onClick={handleExportAllWord}
+                  size="sm"
+                >
+                  Word (barcha)
+                </Button>
+              </Tooltip>
+            </HStack>
+          </Flex>
 
           <Flex justify="center" gap={6} mb={4}>
             <HStack spacing={2}>
@@ -553,8 +587,7 @@ const Reports: React.FC = () => {
 
           <MapWithTooltip activeMetric={activeMetric} onRegionClick={handleRegionClick} />
 
-        </Box>
-      </Grid>
+          {/* Горизонтальная гистограмма */}
           <Box bg="white" p={4} borderRadius="xl" border="1px solid" borderColor="gray.200" mt={6} width="100%">
             <Heading size="sm" mb={4}>Hududlar bo'yicha taqqoslama gistogramma</Heading>
             <ResponsiveContainer width="100%" height={500}>
@@ -572,6 +605,8 @@ const Reports: React.FC = () => {
               </BarChart>
             </ResponsiveContainer>
           </Box>
+        </Box>
+      </Grid>
 
       {/* Drawer - viloyat tahlili */}
       <Drawer isOpen={isOpen} onClose={onClose} size="lg" placement="right">
