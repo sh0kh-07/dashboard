@@ -160,7 +160,7 @@ const PovertyReductionFundDetail = () => {
                         Kambag‘allikni qisqartirish davlat maqsadli jamg‘armasi
                     </Heading>
                     <Text fontSize="sm" color="gray.600" mt={1}>
-                        Aholi daromadlarini oshirish va kambag‘allikni kamaytirish dasturlari
+                        Tomorqa yer egalariga yengil konstruksiyali issiqxonalar o‘rnatish uchun
                     </Text>
                 </Box>
                 <Box textAlign="right">

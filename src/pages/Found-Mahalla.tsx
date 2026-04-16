@@ -131,9 +131,14 @@ const PovertyReductionMahalla = () => {
         <Flex alignItems="baseline" justifyContent="space-between" mb={4}>
           <Box>
             <Flex align="center" gap={2}>
-              <Heading as="h1" size="lg" fontWeight="bold" color="gray.800">
-                Kambag‘allikni qisqartirish davlat maqsadli jamg‘armasi
-              </Heading>
+              <Box>
+                <Heading as="h1" size="lg" fontWeight="bold" color="gray.800">
+                  Kambag‘allikni qisqartirish davlat maqsadli jamg‘armasi
+                </Heading>
+                <Text fontSize="sm" color="gray.600" mt={1}>
+                  Tomorqa yer egalariga yengil konstruksiyali issiqxonalar o‘rnatish uchun
+                </Text>
+              </Box>
             </Flex>
             <Text fontSize="md" color="gray.600" mt={1}>
               Qarshi shahri – mahallalar kesimida taqsimot

@@ -20,9 +20,11 @@ import {
     InputLeftElement,
     InputRightElement,
     Select,
+    Card,
+    CardBody,
 } from "@chakra-ui/react";
 import { useNavigate } from "react-router-dom";
-import { ArrowRight, Lock, MapPin, Search, X } from "lucide-react";
+import { ArrowRight, Lock, MapPin, Search, X, TrendingUp } from "lucide-react";
 import {
     BarChart,
     Bar,
@@ -45,11 +47,8 @@ const mahallaNames = [
     "Eski Anxor", "Yangi hayot",
 ];
 
-// --- Реальные суммы для Qarshi shahri (из LoansDetail, для кредитов) ---
-// Общая сумма кредитов для Кашкадарьи: 23648 млрд сум (из LoansDetail)
-// Вес Qarshi shahri в кредитах = 0.1656 (как и в других направлениях)
-// Тогда сумма кредитов для Qarshi shahri = 23648 * 0.1656 ≈ 3917 млрд сум
-const qarshiLoansTotal = 3917.0; // млрд сум
+// --- Бюджет для махаллей Карши (кредиты O‘zmilliybank) – 42 млрд сум ---
+const qarshiLoansTotal = 42.0; // млрд сум (исправлено)
 
 // Определяем, какие махалли получают финансирование (те же, что в MainQarshi)
 const receivingSet = new Set(
@@ -95,7 +94,7 @@ allMahallaData.sort((a, b) => {
 
 const totalBudget = allMahallaData.reduce((sum, m) => sum + m.budget, 0);
 
-// Данные для горизонтального графика (все махалли, отсортированные)
+// Данные для горизонтального графика
 const chartData = allMahallaData.map(item => ({
     name: item.name.length > 20 ? item.name.substring(0, 18) + "..." : item.name,
     fullName: item.name,
@@ -114,7 +113,6 @@ const LoansMahalla = () => {
         }
     };
 
-    // Фильтрация по поиску и по статусу
     const filteredMahallas = allMahallaData.filter(mahalla => {
         const matchesSearch = mahalla.name.toLowerCase().includes(searchTerm.toLowerCase());
         const matchesStatus =
@@ -128,20 +126,20 @@ const LoansMahalla = () => {
 
     return (
         <Box minH="100vh">
-            <Box  mx="auto">
+            <Box mx="auto">
                 {/* Заголовок и общая сумма */}
-                <Flex alignItems="baseline" justifyContent="space-between" mb={4}>
+                <Flex alignItems="baseline" justifyContent="space-between" mb={4} flexWrap="wrap" gap={2}>
                     <Box>
-                        <Heading as="h1" size="xl" fontWeight="bold" color="gray.800">
+                        <Heading as="h1" size="lg" fontWeight="bold" color="gray.800">
                             Qarshi shahri mahallalari (Kreditlar)
                         </Heading>
-                        <Text fontSize="md" color="brand.300" mt={1}>
-                            Viloyat markazi, kichik va oʻrta biznesni qoʻllab-quvvatlash
+                        <Text fontSize="md" color="gray.600" mt={1}>
+                            O‘zmilliybank – “Kambag‘allikdan farovonlik sari” dasturi
                         </Text>
                     </Box>
                     <Box textAlign="right">
-                        <Text fontSize="lg" fontWeight="medium" color="gray.600">
-                            Jami ajratilgan mablag‘ (kreditlar)
+                        <Text fontSize="sm" fontWeight="medium" color="gray.600">
+                            Jami kreditlar
                         </Text>
                         <Text fontSize="2xl" fontWeight="extrabold" color={brand600}>
                             {totalBudget.toFixed(1)} mlrd so‘m
@@ -149,11 +147,14 @@ const LoansMahalla = () => {
                     </Box>
                 </Flex>
 
+
+
                 <Text fontSize="md" color="gray.600" mb={8}>
                     Tijorat banklari tomonidan berilgan jami kreditlarning mahallalar kesimida taqsimlanishi.
+                    Qarshi shahri uchun 42 mlrd so‘m ajratilgan.
                 </Text>
 
-                {/* Фильтры: поиск и статус */}
+                {/* Фильтры */}
                 <Flex direction={{ base: "column", md: "row" }} gap={4} mb={6}>
                     <InputGroup maxW="400px">
                         <InputLeftElement pointerEvents="none">
@@ -250,9 +251,9 @@ const LoansMahalla = () => {
                                             </Td>
                                             <Td textAlign="center" borderBottom="1px solid" borderColor="gray.200" color="gray.800">
                                                 {mahalla.receives ? (
-                                                    <Badge colorScheme="green" borderRadius="full" px={2}>Mablag‘ ajratilgan</Badge>
+                                                    <Badge colorScheme="green" borderRadius="full" px={2}>Kredit ajratilgan</Badge>
                                                 ) : (
-                                                    <Badge colorScheme="gray" borderRadius="full" px={2}>Mablag‘ ajratilmagan</Badge>
+                                                    <Badge colorScheme="gray" borderRadius="full" px={2}>Kredit ajratilmagan</Badge>
                                                 )}
                                             </Td>
                                             <Td textAlign="center" borderBottom="1px solid" borderColor="gray.200" color="gray.800">
@@ -292,10 +293,10 @@ const LoansMahalla = () => {
                 {/* Горизонтальная гистограмма */}
                 <Box mt={10}>
                     <Heading as="h2" size="lg" mb={4} color="gray.800">
-                        Mablag‘ taqsimoti (mlrd so‘m)
+                        Kreditlar taqsimoti (mlrd so‘m)
                     </Heading>
                     <Text mb={6} color="gray.600">
-                        Eng ko‘p mablag‘ ajratilgan mahallalar (gorizontal diagramma)
+                        Eng ko‘p kredit ajratilgan mahallalar (gorizontal diagramma)
                     </Text>
                     <Box bg="white" p={4} borderRadius="xl" boxShadow="lg">
                         <ResponsiveContainer width="100%" height={Math.max(500, chartData.length * 32)}>
@@ -322,7 +323,7 @@ const LoansMahalla = () => {
                                     width={130}
                                 />
                                 <Tooltip
-                                    formatter={(value: number) => [`${value} mlrd so‘m`, "Kreditlar"]}
+                                    formatter={(value: number) => [`${value} mlrd so‘m`, "Kredit"]}
                                     labelFormatter={(label) => {
                                         const item = chartData.find((d) => d.name === label);
                                         return item ? item.fullName : label;
@@ -340,7 +341,7 @@ const LoansMahalla = () => {
                         </ResponsiveContainer>
                     </Box>
                     <Text fontSize="xs" mt={4} color="gray.600">
-                        * Maʼlumotlar real kredit taqsimotiga asoslangan holda hisoblangan.
+                        * Maʼlumotlar O‘zmilliybankning real kredit taqsimotiga asoslangan holda hisoblangan.
                     </Text>
                 </Box>
             </Box>

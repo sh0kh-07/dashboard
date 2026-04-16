@@ -189,6 +189,9 @@ const FoundMahallaDetail = () => {
             <Heading as="h1" size="xl" fontWeight="bold" color="gray.800">
               Batosh mahallasi – Jamgʻarma kontraktlari
             </Heading>
+            <Text fontSize="sm" color="gray.600" mt={1}>
+              Tomorqa yer egalariga yengil konstruksiyali issiqxonalar o‘rnatish uchun
+            </Text>
             <Text fontSize="md" color="brand.300" mt={1}>
               Qarshi shahri, ijtimoiy va yoshlar loyihalari
             </Text>
@@ -328,8 +331,8 @@ const FoundMahallaDetail = () => {
                       <Badge
                         colorScheme={
                           contract.status === "Bajarildi" ? "green" :
-                          contract.status === "Bajarilmoqda" ? "blue" :
-                          contract.status === "Rejalashtirilgan" ? "orange" : "purple"
+                            contract.status === "Bajarilmoqda" ? "blue" :
+                              contract.status === "Rejalashtirilgan" ? "orange" : "purple"
                         }
                       >
                         {contract.status}

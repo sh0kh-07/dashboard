@@ -180,7 +180,7 @@ const KashkadaryaDistricts = () => {
     <Box minH="100vh">
       <Flex justify="space-between" mb={4} flexWrap="wrap" gap={2}>
         <Heading size="lg" color="gray.800">
-          Qashqadaryo viloyati 
+          Qashqadaryo viloyati
         </Heading>
         <Box textAlign="right">
           <Text fontSize="sm" color="gray.600">

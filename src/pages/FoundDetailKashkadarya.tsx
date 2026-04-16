@@ -163,9 +163,16 @@ const FoundDetailKashkadarya = () => {
     return (
         <Box minH="100vh">
             <Flex justify="space-between" mb={4} flexWrap="wrap" gap={2}>
-                <Heading size="lg" color="gray.800">
-                    Qashqadaryo viloyati – kambag‘allik va mablag‘lar
-                </Heading>
+                <Box>
+                    <Heading size="lg" color="gray.800">
+                        Qashqadaryo viloyati – kambag‘allik va mablag‘lar
+                    </Heading>
+                    <Text fontSize="sm" color="gray.600" mt={1}>
+                        Tomorqa yer egalariga yengil konstruksiyali issiqxonalar o‘rnatish uchun
+                    </Text>
+                </Box>
+
+
                 <Box textAlign="right">
                     <Text fontSize="sm" color="gray.600">Jami budjet</Text>
                     <Text fontSize="2xl" fontWeight="extrabold" color={brand600}>
