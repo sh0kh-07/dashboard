@@ -3,7 +3,7 @@ import {
   Box, Text, Heading, useToken, Tabs, TabList, TabPanels, Tab, TabPanel,
   Alert, AlertIcon, AlertTitle, List, ListItem, ListIcon, SimpleGrid,
   Stat, StatLabel, StatNumber, Progress, Badge, Flex, Table, Thead, Tbody,
-  Tr, Th, Td, TableContainer,
+  Tr, Th, Td, TableContainer, Select,
 } from "@chakra-ui/react";
 import { useNavigate } from "react-router-dom";
 import Uzbekistan from "@svg-maps/uzbekistan";
@@ -134,7 +134,7 @@ const totalActual = directions.reduce((s, d) => s + d.actual, 0);
 const totalPercent = (totalActual / totalAnnualPlan) * 100;
 
 // ------------------------------------------------------------
-// 3. ТАБЛИЦА КОНТРАКТОВ (RED FLAG) – ТОЛЬКО ДЛЯ 6-Й ВКЛАДКИ
+// 3. ТАБЛИЦА КОНТРАКТОВ (RED FLAG) С ПРИВЯЗКОЙ К НАПРАВЛЕНИЯМ
 // ------------------------------------------------------------
 interface Contract {
   name: string;
@@ -142,51 +142,101 @@ interface Contract {
   amount: number;
   status: "bajarildi" | "bajarilmoqda" | "rejalashtirilgan";
   verification: "tasdiqlangan" | "rad etilgan";
+  direction: string;
 }
 const redFlagContracts: Contract[] = [
   {
     name: "Imtiyozli kreditlar orqali kichik biznesni qo‘llab-quvvatlash",
-    type: "Moliyaviy yordam",
+    type: "Tadbirkorlikka jalb qilish",
     amount: 8.5,
     status: "bajarilmoqda",
-    verification: "tasdiqlangan"
+    verification: "tasdiqlangan",
+    direction: "Tadbirkorlikka jalb qilish"
   },
   {
     name: "Yoshlar uchun startap loyihalarni moliyalashtirish",
-    type: "Investitsiya",
+    type: "Tadbirkorlikka jalb qilish",
     amount: 6.2,
     status: "bajarilmoqda",
-    verification: "tasdiqlangan"
+    verification: "tasdiqlangan",
+    direction: "Tadbirkorlikka jalb qilish"
   },
   {
     name: "Aholiga uy-joy uchun imtiyozli ipoteka kreditlari",
-    type: "Kredit dasturi",
+    type: "Kambag‘al oila daromadini oshirish",
     amount: 10.0,
     status: "rejalashtirilgan",
-    verification: "tasdiqlangan"
+    verification: "tasdiqlangan",
+    direction: "Kambag‘al oila daromadini oshirish"
   },
   {
     name: "Kasb-hunar o‘rgatish va ish bilan ta’minlash markazi",
-    type: "Bandlik",
+    type: "Kasb-hunarga oʻqitish orqali bandlik",
     amount: 4.8,
     status: "bajarilmoqda",
-    verification: "tasdiqlangan"
+    verification: "tasdiqlangan",
+    direction: "Kasb-hunarga oʻqitish orqali bandlik"
   },
   {
     name: "Qishloq xo‘jaligi uchun subsidiya va texnika berish",
-    type: "Subsidiya",
+    type: "Tadbirkorlikka jalb qilish",
     amount: 5.7,
     status: "bajarilmoqda",
-    verification: "tasdiqlangan"
-  }
+    verification: "tasdiqlangan",
+    direction: "Tadbirkorlikka jalb qilish"
+  },
+  {
+    name: "Doimiy ish o‘rinlariga joylashtirish dasturi",
+    type: "Doimiy ish oʻrinlariga joylashtirish",
+    amount: 12.3,
+    status: "bajarilmoqda",
+    verification: "tasdiqlangan",
+    direction: "Doimiy ish oʻrinlariga joylashtirish"
+  },
+  {
+    name: "Norasmiy bandlikni legallashtirish loyihasi",
+    type: "Norasmiy faoliyatni legallashtirish",
+    amount: 3.5,
+    status: "rejalashtirilgan",
+    verification: "tasdiqlangan",
+    direction: "Norasmiy faoliyatni legallashtirish"
+  },
+  {
+    name: "AT va zamonaviy kasblarga oʻqitish markazi",
+    type: "AT va zamonaviy kasblarga oʻqitish",
+    amount: 2.8,
+    status: "bajarilmoqda",
+    verification: "tasdiqlangan",
+    direction: "AT va zamonaviy kasblarga oʻqitish"
+  },
 ];
+
 const statusColors = { bajarildi: "green", bajarilmoqda: "blue", rejalashtirilgan: "yellow" };
 const statusLabels = { bajarildi: "Bajarildi", bajarilmoqda: "Bajarilmoqda", rejalashtirilgan: "Rejalashtirilgan" };
 const verificationIcons = { tasdiqlangan: <CheckCircle size={16} color="#38A169" />, "rad etilgan": <XCircle size={16} color="#F56565" /> };
 const verificationLabels = { tasdiqlangan: "Tasdiqlangan", "rad etilgan": "Rad etilgan" };
 
 // ------------------------------------------------------------
-// 4. МАППИНГ НАЗВАНИЙ РЕГИОНОВ ДЛЯ КАРТЫ
+// 4. НАПРАВЛЕНИЯ ДЛЯ ФИЛЬТРА (узбекская латиница)
+// ------------------------------------------------------------
+const filterDirections = [
+  { value: "all", label: "Barcha yo‘nalishlar" },
+  { value: "Doimiy ish oʻrinlariga joylashtirish", label: "Doimiy ish oʻrinlariga joylashtirish" },
+  { value: "Tadbirkorlikka jalb qilish", label: "Tadbirkorlikka jalb qilish" },
+  { value: "Kambag‘al oila daromadini oshirish", label: "Kambag‘al oila daromadini oshirish" },
+  { value: "Norasmiy faoliyatni legallashtirish", label: "Norasmiy faoliyatni legallashtirish" },
+  { value: "Kasb-hunarga oʻqitish orqali bandlik", label: "Kasb-hunarga oʻqitish orqali bandlik" },
+  { value: "Tadbirkorlik infratuzilmasini rivojlantirish", label: "Tadbirkorlik infratuzilmasini rivojlantirish" },
+  { value: "Oʻrmon va koʻchatxonalar tashkil etish", label: "Oʻrmon va koʻchatxonalar tashkil etish" },
+  { value: "Farmasevtika sohasida kooperatsiya", label: "Farmasevtika sohasida kooperatsiya" },
+  { value: "Turizm xizmatlarini rivojlantirish", label: "Turizm xizmatlarini rivojlantirish" },
+  { value: "AT va zamonaviy kasblarga oʻqitish", label: "AT va zamonaviy kasblarga oʻqitish" },
+  { value: "Texnikumlarda kasb-hunarga oʻqitish", label: "Texnikumlarda kasb-hunarga oʻqitish" },
+  { value: "Ilm-fan va texnologiyalarni rivojlantirish", label: "Ilm-fan va texnologiyalarni rivojlantirish" },
+];
+
+// ------------------------------------------------------------
+// 5. МАППИНГ НАЗВАНИЙ РЕГИОНОВ ДЛЯ КАРТЫ
 // ------------------------------------------------------------
 const regionNameMap: Record<string, string> = {
   "Karakalpakstan": "Qoraqalpogʻiston Respublikasi", "Qoraqalpog‘iston": "Qoraqalpogʻiston Respublikasi",
@@ -208,7 +258,7 @@ const getRegionFullName = (svgName: string): string | null => {
 };
 
 // ------------------------------------------------------------
-// 5. ФУНКЦИИ ЦВЕТА (3 цвета)
+// 6. ФУНКЦИИ ЦВЕТА (3 цвета)
 // ------------------------------------------------------------
 const getColorByPercent = (percent: number): string => {
   if (percent >= 60) return "#48BB78";
@@ -222,7 +272,7 @@ const getColorByPoverty = (poverty: number): string => {
 };
 
 // ------------------------------------------------------------
-// 6. КОМПОНЕНТ КАРТЫ С ТУЛТИПОМ
+// 7. КОМПОНЕНТ КАРТЫ С ТУЛТИПОМ
 // ------------------------------------------------------------
 interface MapWithTooltipProps {
   getColor: (regionFull: string) => string;
@@ -270,7 +320,7 @@ const MapWithTooltip: React.FC<MapWithTooltipProps> = ({ getColor, getTooltip })
 };
 
 // ------------------------------------------------------------
-// 7. ОСНОВНОЙ КОМПОНЕНТ (6 вкладок)
+// 8. ОСНОВНОЙ КОМПОНЕНТ (6 вкладок)
 // ------------------------------------------------------------
 const PovertyDashboard = () => {
   // Агрегированные данные для карточек (суммы по всем регионам)
@@ -294,7 +344,7 @@ const PovertyDashboard = () => {
   const totalLineWas = Math.round(totalLineFamilies * 0.8);
 
   const SummaryCards = ({ title, was, should, now, unit }: { title: string; was: number; should: number; now: number; unit: string }) => (
-    <SimpleGrid columns={{ base: 1, md: 3 }} spacing={4} mb={6}>
+    <SimpleGrid columns={{ base: 1, md: 3 }} spacing={2} mb={2}>
       <Stat bg="white" p={3} borderRadius="lg" borderLeft="4px solid" borderLeftColor="gray.400">
         <StatLabel fontSize="sm"> {title} </StatLabel>
         <StatNumber fontSize="xl">{was.toLocaleString()}{unit}</StatNumber>
@@ -310,6 +360,12 @@ const PovertyDashboard = () => {
     </SimpleGrid>
   );
 
+  // Состояние для фильтра
+  const [selectedDirection, setSelectedDirection] = useState("all");
+  const filteredContracts = selectedDirection === "all"
+    ? redFlagContracts
+    : redFlagContracts.filter(c => c.direction === selectedDirection);
+
   return (
     <Box>
       <Tabs variant="soft-rounded" colorScheme="blue">
@@ -322,12 +378,12 @@ const PovertyDashboard = () => {
           <Tab>6. Aniqlangan kamchiliklar</Tab>
         </TabList>
 
-        <TabPanels mt={6}>
+        <TabPanels mt={2}>
           {/* TAB 1 */}
           <TabPanel p={0}>
+            <SummaryCards title="Yil boshida " was={avgPovertyWas} should={povertyPlan} now={+avgPovertyNow.toFixed(1)} unit="%" />
             <Box bg="white" borderRadius="xl" p={5} borderWidth="1px">
               <Heading size="md" mb={2}>Kambag‘allik darajasi</Heading>
-              <SummaryCards title="Yil boshida " was={avgPovertyWas} should={povertyPlan} now={+avgPovertyNow.toFixed(1)} unit="%" />
               <MapWithTooltip
                 getColor={(region) => getColorByPoverty(mainData.find(r => r.name === region)?.povertyRate || 0)}
                 getTooltip={(region) => {
@@ -342,15 +398,14 @@ const PovertyDashboard = () => {
                   </>);
                 }}
               />
-
             </Box>
           </TabPanel>
 
           {/* TAB 2 */}
           <TabPanel p={0}>
+            <SummaryCards title="Jami oilalar" was={totalStateWas} should={totalStatePlan} now={totalStateActual} unit=" ming" />
             <Box bg="white" borderRadius="xl" p={5} borderWidth="1px">
               <Heading size="md">Davlat taʼminoti toifasidagi oilalar</Heading>
-              <SummaryCards title="Jami oilalar" was={totalStateWas} should={totalStatePlan} now={totalStateActual} unit=" ming" />
               <MapWithTooltip
                 getColor={(region) => getColorByPercent(stateSupportData.find(d => d.region === region)?.percent || 0)}
                 getTooltip={(region) => {
@@ -370,9 +425,9 @@ const PovertyDashboard = () => {
 
           {/* TAB 3 */}
           <TabPanel p={0}>
+            <SummaryCards title="Jami kambag‘al oilalar" was={totalPoorWas} should={totalPoorPlan} now={totalPoorActual} unit=" ming" />
             <Box bg="white" borderRadius="xl" p={5} borderWidth="1px">
               <Heading size="md">Kambag‘al oila toifasidagi oilalar</Heading>
-              <SummaryCards title="Jami kambag‘al oilalar" was={totalPoorWas} should={totalPoorPlan} now={totalPoorActual} unit=" ming" />
               <MapWithTooltip
                 getColor={(region) => getColorByPercent(poorFamilyCategoryData.find(d => d.region === region)?.percent || 0)}
                 getTooltip={(region) => {
@@ -392,9 +447,9 @@ const PovertyDashboard = () => {
 
           {/* TAB 4 */}
           <TabPanel p={0}>
+            <SummaryCards title="Chegaradagi oilalar" was={totalLineWas} should={totalLinePlan} now={totalLineActual} unit=" ming" />
             <Box bg="white" borderRadius="xl" p={5} borderWidth="1px">
               <Heading size="md">Kambag‘allik chegarasidagi oilalar</Heading>
-              <SummaryCards title="Chegaradagi oilalar" was={totalLineWas} should={totalLinePlan} now={totalLineActual} unit=" ming" />
               <MapWithTooltip
                 getColor={(region) => getColorByPercent(povertyLineData.find(r => r.name === region)?.percent || 0)}
                 getTooltip={(region) => {
@@ -414,7 +469,7 @@ const PovertyDashboard = () => {
 
           {/* TAB 5 (без карточек) */}
           <TabPanel p={0}>
-            <Box >
+            <Box>
               <Heading size="md">Reyestrdan chiqarish yo‘nalishlari (12 ta)</Heading>
               <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={4} mt={4}>
                 {directions.map((d, idx) => (
@@ -441,10 +496,23 @@ const PovertyDashboard = () => {
             </Box>
           </TabPanel>
 
-          {/* TAB 6 – Red flag (таблица + список) */}
+          {/* TAB 6 – Red flag (таблица + фильтр по направлениям) */}
           <TabPanel p={0}>
             <Box bg="white" borderRadius="xl" p={5} borderWidth="1px">
-              <Heading size="md" mb={4}>Aniqlangan kamchiliklar</Heading>
+              <Flex justify="space-between" align="center" mb={4}>
+                <Heading size="md">Aniqlangan kamchiliklar</Heading>
+                <Select
+                  width="300px"
+                  value={selectedDirection}
+                  onChange={(e) => setSelectedDirection(e.target.value)}
+                  bg="white"
+                  size="sm"
+                >
+                  {filterDirections.map(dir => (
+                    <option key={dir.value} value={dir.value}>{dir.label}</option>
+                  ))}
+                </Select>
+              </Flex>
               <TableContainer borderWidth="1px" borderRadius="lg" overflow="hidden" mb={6}>
                 <Table size="sm" variant="simple">
                   <Thead bg="gray.50">
@@ -457,19 +525,22 @@ const PovertyDashboard = () => {
                     </Tr>
                   </Thead>
                   <Tbody>
-                    {redFlagContracts.map((c, idx) => (
-                      <Tr key={idx}>
-                        <Td fontWeight="medium">{c.name}</Td>
-                        <Td>{c.type}</Td>
-                        <Td isNumeric fontWeight="bold">{c.amount}</Td>
-                        <Td><Badge colorScheme={statusColors[c.status]}>{statusLabels[c.status]}</Badge></Td>
-                        <Td><Flex align="center" gap={2}>{verificationIcons[c.verification]}{verificationLabels[c.verification]}</Flex></Td>
-                      </Tr>
-                    ))}
+                    {filteredContracts.length === 0 ? (
+                      <Tr><Td colSpan={5} textAlign="center">Ushbu yo‘nalish bo‘yicha maʼlumot yo‘q</Td></Tr>
+                    ) : (
+                      filteredContracts.map((c, idx) => (
+                        <Tr key={idx}>
+                          <Td fontWeight="medium">{c.name}</Td>
+                          <Td>{c.type}</Td>
+                          <Td isNumeric fontWeight="bold">{c.amount}</Td>
+                          <Td><Badge colorScheme={statusColors[c.status]}>{statusLabels[c.status]}</Badge></Td>
+                          <Td><Flex align="center" gap={2}>{verificationIcons[c.verification]}{verificationLabels[c.verification]}</Flex></Td>
+                        </Tr>
+                      ))
+                    )}
                   </Tbody>
                 </Table>
               </TableContainer>
-
             </Box>
           </TabPanel>
         </TabPanels>
