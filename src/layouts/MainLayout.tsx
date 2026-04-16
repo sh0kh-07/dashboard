@@ -140,7 +140,7 @@ const MainLayout = ({ children }: MainLayoutProps) => {
 
   const handleBack = () => navigate(-1);
   const showBackButton = location.pathname !== '/';
-  const isHomePage = location.pathname === '/';
+  const isHomePage = location.pathname === '/' || location.pathname === '/poor-level';
 
   const isActivePath = (pathname: string, to: string) => {
     if (to === '/') return pathname === '/';
