@@ -17,7 +17,7 @@ import {
   Container,
   Badge,
 } from "@chakra-ui/react";
-import { ArrowRight, ChevronLeft, Building2, Target, Users, Briefcase, Home, Lock } from "lucide-react";
+import { ArrowRight, ChevronLeft, Building2, Target, Users, Briefcase, Home, Lock, BoxIcon } from "lucide-react";
 
 const Loans = () => {
   const [brand600] = useToken("colors", ["brand.600"]);
@@ -68,6 +68,13 @@ const Loans = () => {
       title: "“Davlat ta’minotidagi oila” dasturi",
       description: "Ijtimoiy himoyadagi oilalarga imtiyozli kreditlar, subsidiyalar",
       icon: Home,
+      color: "#805AD5",
+    },
+    {
+      id: 5,
+      title: "“Boshqa manbalar”",
+      description: "Boshqa manbalardan ajratilgan kreditlar",
+      icon: BoxIcon,
       color: "#805AD5",
     },
   ];
