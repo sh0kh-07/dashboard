@@ -1,14 +1,16 @@
 import React, { useState } from "react";
 import {
   Box, Text, Heading, useToken, Tabs, TabList, TabPanels, Tab, TabPanel,
-  Alert, AlertIcon, AlertTitle, List, ListItem, ListIcon, SimpleGrid, Stat, StatLabel, StatNumber, Progress, Badge, Flex,
+  Alert, AlertIcon, AlertTitle, List, ListItem, ListIcon, SimpleGrid,
+  Stat, StatLabel, StatNumber, Progress, Badge, Flex, Table, Thead, Tbody,
+  Tr, Th, Td, TableContainer,
 } from "@chakra-ui/react";
 import { useNavigate } from "react-router-dom";
 import Uzbekistan from "@svg-maps/uzbekistan";
-import { AlertTriangle, TrendingDown } from "lucide-react";
+import { AlertTriangle, TrendingDown, CheckCircle, XCircle } from "lucide-react";
 
 // ------------------------------------------------------------
-// 1. ДАННЫЕ ПО РЕГИОНАМ (основные – копия из исходника)
+// 1. ДАННЫЕ ПО РЕГИОНАМ (основные)
 // ------------------------------------------------------------
 const regions = [
   "Qoraqalpogʻiston Respublikasi", "Andijon viloyati", "Buxoro viloyati",
@@ -74,7 +76,7 @@ const generateCategoryData = (multiplier: number): CategoryItem[] =>
 const stateSupportData = generateCategoryData(0.12);
 const poorFamilyCategoryData = generateCategoryData(0.65);
 
-// Данные для вкладки 4 (Kambag‘allik chegarasidagi oilalar) – количество семей (тыс.)
+// Данные для вкладки 4 (Kambag‘allik chegarasidagi oilalar)
 const generatePovertyLineData = () => {
   const baseLineRates: Record<string, number> = {
     "Qoraqalpogʻiston Respublikasi": 8.5, "Andijon viloyati": 9.2, "Buxoro viloyati": 6.3,
@@ -132,7 +134,59 @@ const totalActual = directions.reduce((s, d) => s + d.actual, 0);
 const totalPercent = (totalActual / totalAnnualPlan) * 100;
 
 // ------------------------------------------------------------
-// 3. МАППИНГ НАЗВАНИЙ РЕГИОНОВ ДЛЯ КАРТЫ
+// 3. ТАБЛИЦА КОНТРАКТОВ (RED FLAG) – ТОЛЬКО ДЛЯ 6-Й ВКЛАДКИ
+// ------------------------------------------------------------
+interface Contract {
+  name: string;
+  type: string;
+  amount: number;
+  status: "bajarildi" | "bajarilmoqda" | "rejalashtirilgan";
+  verification: "tasdiqlangan" | "rad etilgan";
+}
+const redFlagContracts: Contract[] = [
+  {
+    name: "Imtiyozli kreditlar orqali kichik biznesni qo‘llab-quvvatlash",
+    type: "Moliyaviy yordam",
+    amount: 8.5,
+    status: "bajarilmoqda",
+    verification: "tasdiqlangan"
+  },
+  {
+    name: "Yoshlar uchun startap loyihalarni moliyalashtirish",
+    type: "Investitsiya",
+    amount: 6.2,
+    status: "bajarilmoqda",
+    verification: "tasdiqlangan"
+  },
+  {
+    name: "Aholiga uy-joy uchun imtiyozli ipoteka kreditlari",
+    type: "Kredit dasturi",
+    amount: 10.0,
+    status: "rejalashtirilgan",
+    verification: "tasdiqlangan"
+  },
+  {
+    name: "Kasb-hunar o‘rgatish va ish bilan ta’minlash markazi",
+    type: "Bandlik",
+    amount: 4.8,
+    status: "bajarilmoqda",
+    verification: "tasdiqlangan"
+  },
+  {
+    name: "Qishloq xo‘jaligi uchun subsidiya va texnika berish",
+    type: "Subsidiya",
+    amount: 5.7,
+    status: "bajarilmoqda",
+    verification: "tasdiqlangan"
+  }
+];
+const statusColors = { bajarildi: "green", bajarilmoqda: "blue", rejalashtirilgan: "yellow" };
+const statusLabels = { bajarildi: "Bajarildi", bajarilmoqda: "Bajarilmoqda", rejalashtirilgan: "Rejalashtirilgan" };
+const verificationIcons = { tasdiqlangan: <CheckCircle size={16} color="#38A169" />, "rad etilgan": <XCircle size={16} color="#F56565" /> };
+const verificationLabels = { tasdiqlangan: "Tasdiqlangan", "rad etilgan": "Rad etilgan" };
+
+// ------------------------------------------------------------
+// 4. МАППИНГ НАЗВАНИЙ РЕГИОНОВ ДЛЯ КАРТЫ
 // ------------------------------------------------------------
 const regionNameMap: Record<string, string> = {
   "Karakalpakstan": "Qoraqalpogʻiston Respublikasi", "Qoraqalpog‘iston": "Qoraqalpogʻiston Respublikasi",
@@ -143,7 +197,6 @@ const regionNameMap: Record<string, string> = {
   "Toshkent viloyati": "Toshkent viloyati", "Fergana": "Fargʻona viloyati", "Xorazm": "Xorazm viloyati",
   "Tashkent": "Toshkent shahri",
 };
-
 const getRegionFullName = (svgName: string): string | null => {
   if (regionNameMap[svgName]) return regionNameMap[svgName];
   const normalized = svgName.replace(/ viloyati$/i, '').replace(/ shahri$/i, '').replace(/[‘ʻ]/g, "'").trim();
@@ -155,7 +208,7 @@ const getRegionFullName = (svgName: string): string | null => {
 };
 
 // ------------------------------------------------------------
-// 4. ФУНКЦИИ ЦВЕТА (3 цвета)
+// 5. ФУНКЦИИ ЦВЕТА (3 цвета)
 // ------------------------------------------------------------
 const getColorByPercent = (percent: number): string => {
   if (percent >= 60) return "#48BB78";
@@ -169,7 +222,7 @@ const getColorByPoverty = (poverty: number): string => {
 };
 
 // ------------------------------------------------------------
-// 5. КОМПОНЕНТ КАРТЫ С ТУЛТИПОМ
+// 6. КОМПОНЕНТ КАРТЫ С ТУЛТИПОМ
 // ------------------------------------------------------------
 interface MapWithTooltipProps {
   getColor: (regionFull: string) => string;
@@ -217,43 +270,64 @@ const MapWithTooltip: React.FC<MapWithTooltipProps> = ({ getColor, getTooltip })
 };
 
 // ------------------------------------------------------------
-// 6. ОСНОВНОЙ КОМПОНЕНТ (6 вкладок)
+// 7. ОСНОВНОЙ КОМПОНЕНТ (6 вкладок)
 // ------------------------------------------------------------
 const PovertyDashboard = () => {
-  // Красные флаги для каждой вкладки
-  const mainRedFlags = mainData.filter(r => r.percentAchieved < 30 || r.povertyRate > 15)
-    .map(r => `${r.name}: kambag‘allik ${r.povertyRate}%, reestr chiqarish ${r.percentAchieved}%`);
-  const supportRedFlags = stateSupportData.filter(d => d.percent < 25).map(d => `${d.region}: ${d.percent}%`);
-  const poorRedFlags = poorFamilyCategoryData.filter(d => d.percent < 25).map(d => `${d.region}: ${d.percent}%`);
-  const lineRedFlags = povertyLineData.filter(d => d.percent < 25).map(d => `${d.name}: ${d.percent}% (${d.familiesCount} ming oila)`);
-  const dirRedFlags = directions.filter(d => d.percent < 30).map(d => `${d.name}: ${d.percent}%`);
+  // Агрегированные данные для карточек (суммы по всем регионам)
+  const avgPovertyNow = mainData.reduce((s, r) => s + r.povertyRate, 0) / mainData.length;
+  const avgPovertyWas = 13.2;
+  const povertyPlan = 9.5;
 
-  // Общий Red flag (вкладка 6)
-  const allRedFlags = [
-    ...mainRedFlags.map(f => `[Kambag'allik] ${f}`),
-    ...supportRedFlags.map(f => `[Davlat ta'minoti] ${f}`),
-    ...poorRedFlags.map(f => `[Kambag'al oila] ${f}`),
-    ...lineRedFlags.map(f => `[Chegaradagilar] ${f}`),
-    ...dirRedFlags.map(f => `[Yo'nalishlar] ${f}`),
-  ];
+  const totalStateSupport = stateSupportData.reduce((s, d) => s + d.families, 0);
+  const totalStatePlan = stateSupportData.reduce((s, d) => s + d.annualPlan, 0);
+  const totalStateActual = stateSupportData.reduce((s, d) => s + d.actual, 0);
+  const totalStateWas = Math.round(totalStateSupport * 0.85);
+
+  const totalPoorFamiliesCat = poorFamilyCategoryData.reduce((s, d) => s + d.families, 0);
+  const totalPoorPlan = poorFamilyCategoryData.reduce((s, d) => s + d.annualPlan, 0);
+  const totalPoorActual = poorFamilyCategoryData.reduce((s, d) => s + d.actual, 0);
+  const totalPoorWas = Math.round(totalPoorFamiliesCat * 0.9);
+
+  const totalLineFamilies = povertyLineData.reduce((s, d) => s + d.familiesCount, 0);
+  const totalLinePlan = povertyLineData.reduce((s, d) => s + d.annualPlan, 0);
+  const totalLineActual = povertyLineData.reduce((s, d) => s + d.actual, 0);
+  const totalLineWas = Math.round(totalLineFamilies * 0.8);
+
+  const SummaryCards = ({ title, was, should, now, unit }: { title: string; was: number; should: number; now: number; unit: string }) => (
+    <SimpleGrid columns={{ base: 1, md: 3 }} spacing={4} mb={6}>
+      <Stat bg="white" p={3} borderRadius="lg" borderLeft="4px solid" borderLeftColor="gray.400">
+        <StatLabel fontSize="sm"> {title} </StatLabel>
+        <StatNumber fontSize="xl">{was.toLocaleString()}{unit}</StatNumber>
+      </Stat>
+      <Stat bg="white" p={3} borderRadius="lg" borderLeft="4px solid" borderLeftColor="blue.400">
+        <StatLabel fontSize="sm">🎯 Reja (joriy yil)</StatLabel>
+        <StatNumber fontSize="xl">{should.toLocaleString()}{unit}</StatNumber>
+      </Stat>
+      <Stat bg="white" p={3} borderRadius="lg" borderLeft="4px solid" borderLeftColor="green.400">
+        <StatLabel fontSize="sm">⚡ Hozirgi (4 oy)</StatLabel>
+        <StatNumber fontSize="xl">{now.toLocaleString()}{unit}</StatNumber>
+      </Stat>
+    </SimpleGrid>
+  );
 
   return (
     <Box>
       <Tabs variant="soft-rounded" colorScheme="blue">
         <TabList bg="white" borderRadius="xl" p={2} flexWrap="wrap" gap={2}>
-          <Tab>1. Kambag'allik darajasi (%)</Tab>
+          <Tab>1. Kambag'allik darajasi </Tab>
           <Tab>2. Davlat taʼminotidagi oila</Tab>
           <Tab>3. Kambag'al oila</Tab>
-          <Tab>4. Chegaradagi oilalar (ming)</Tab>
+          <Tab>4. Kambag'alik Chegaradagi oilalar</Tab>
           <Tab>5. Reyestr chiqarish yo'nalishlari</Tab>
-          <Tab>6. Aniqlangan kamchilik </Tab>
+          <Tab>6. Aniqlangan kamchiliklar</Tab>
         </TabList>
 
         <TabPanels mt={6}>
-          {/* TAB 1 – проценты */}
+          {/* TAB 1 */}
           <TabPanel p={0}>
             <Box bg="white" borderRadius="xl" p={5} borderWidth="1px">
-              <Heading size="md" mb={2}>Kambag‘allik darajasi (%) va reyestr chiqarish</Heading>
+              <Heading size="md" mb={2}>Kambag‘allik darajasi</Heading>
+              <SummaryCards title="Yil boshida " was={avgPovertyWas} should={povertyPlan} now={+avgPovertyNow.toFixed(1)} unit="%" />
               <MapWithTooltip
                 getColor={(region) => getColorByPoverty(mainData.find(r => r.name === region)?.povertyRate || 0)}
                 getTooltip={(region) => {
@@ -262,13 +336,13 @@ const PovertyDashboard = () => {
                   return (<>
                     <Text fontWeight="bold">{region}</Text>
                     <Text>Kambag‘allik: {d.povertyRate}%</Text>
-                    <Text>Reja (yillik): {d.annualPlan.toLocaleString()}%</Text>
-                    <Text>Amalda (4 oy): {d.actual.toLocaleString()}%</Text>
+                    <Text>Reja (yillik): {d.annualPlan.toLocaleString()} oila</Text>
+                    <Text>Amalda (4 oy): {d.actual.toLocaleString()}</Text>
                     <Text fontWeight="bold">Bajarilish: {d.percentAchieved}%</Text>
                   </>);
                 }}
               />
-              <Alert status="error" borderRadius="lg" mt={6}><AlertIcon /><AlertTitle>Aniqlangan kamchiliklar</AlertTitle><List>{mainRedFlags.map((f, i) => <ListItem key={i}><ListIcon as={AlertTriangle} />{f}</ListItem>)}</List></Alert>
+
             </Box>
           </TabPanel>
 
@@ -276,6 +350,7 @@ const PovertyDashboard = () => {
           <TabPanel p={0}>
             <Box bg="white" borderRadius="xl" p={5} borderWidth="1px">
               <Heading size="md">Davlat taʼminoti toifasidagi oilalar</Heading>
+              <SummaryCards title="Jami oilalar" was={totalStateWas} should={totalStatePlan} now={totalStateActual} unit=" ming" />
               <MapWithTooltip
                 getColor={(region) => getColorByPercent(stateSupportData.find(d => d.region === region)?.percent || 0)}
                 getTooltip={(region) => {
@@ -290,7 +365,6 @@ const PovertyDashboard = () => {
                   </>);
                 }}
               />
-              <Alert status="error" mt={6}><AlertIcon />Kamchiliklar:<List>{supportRedFlags.map((f, i) => <ListItem key={i}>{f}</ListItem>)}</List></Alert>
             </Box>
           </TabPanel>
 
@@ -298,6 +372,7 @@ const PovertyDashboard = () => {
           <TabPanel p={0}>
             <Box bg="white" borderRadius="xl" p={5} borderWidth="1px">
               <Heading size="md">Kambag‘al oila toifasidagi oilalar</Heading>
+              <SummaryCards title="Jami kambag‘al oilalar" was={totalPoorWas} should={totalPoorPlan} now={totalPoorActual} unit=" ming" />
               <MapWithTooltip
                 getColor={(region) => getColorByPercent(poorFamilyCategoryData.find(d => d.region === region)?.percent || 0)}
                 getTooltip={(region) => {
@@ -312,14 +387,14 @@ const PovertyDashboard = () => {
                   </>);
                 }}
               />
-              <Alert status="error" mt={6}><AlertIcon />Kamchiliklar:<List>{poorRedFlags.map((f, i) => <ListItem key={i}>{f}</ListItem>)}</List></Alert>
             </Box>
           </TabPanel>
 
-          {/* TAB 4 – количество (тыс. семей) */}
+          {/* TAB 4 */}
           <TabPanel p={0}>
             <Box bg="white" borderRadius="xl" p={5} borderWidth="1px">
-              <Heading size="md">Kambag‘allik chegarasidagi oilalar (ming oila)</Heading>
+              <Heading size="md">Kambag‘allik chegarasidagi oilalar</Heading>
+              <SummaryCards title="Chegaradagi oilalar" was={totalLineWas} should={totalLinePlan} now={totalLineActual} unit=" ming" />
               <MapWithTooltip
                 getColor={(region) => getColorByPercent(povertyLineData.find(r => r.name === region)?.percent || 0)}
                 getTooltip={(region) => {
@@ -334,11 +409,10 @@ const PovertyDashboard = () => {
                   </>);
                 }}
               />
-              <Alert status="error" mt={6}><AlertIcon />Kamchiliklar:<List>{lineRedFlags.map((f, i) => <ListItem key={i}>{f}</ListItem>)}</List></Alert>
             </Box>
           </TabPanel>
 
-          {/* TAB 5 – направления (без карты, только список) */}
+          {/* TAB 5 (без карточек) */}
           <TabPanel p={0}>
             <Box >
               <Heading size="md">Reyestrdan chiqarish yo‘nalishlari (12 ta)</Heading>
@@ -367,16 +441,35 @@ const PovertyDashboard = () => {
             </Box>
           </TabPanel>
 
-          {/* TAB 6 – Общий Red flag */}
+          {/* TAB 6 – Red flag (таблица + список) */}
           <TabPanel p={0}>
             <Box bg="white" borderRadius="xl" p={5} borderWidth="1px">
-              <Heading size="md" mb={4}>🚩 Umumiy red flag ko‘rsatkichlari</Heading>
-              <Alert status="error" variant="subtle" flexDirection="column" alignItems="flex-start" borderRadius="lg">
-                <Flex align="center" gap={2} mb={2}><AlertIcon /><AlertTitle>Barcha kamchiliklar ro‘yxati</AlertTitle></Flex>
-                <List spacing={1} maxH="500px" overflowY="auto" width="100%">
-                  {allRedFlags.map((f, i) => <ListItem key={i}><ListIcon as={AlertTriangle} color="red.500" />{f}</ListItem>)}
-                </List>
-              </Alert>
+              <Heading size="md" mb={4}>Aniqlangan kamchiliklar</Heading>
+              <TableContainer borderWidth="1px" borderRadius="lg" overflow="hidden" mb={6}>
+                <Table size="sm" variant="simple">
+                  <Thead bg="gray.50">
+                    <Tr>
+                      <Th>Kontrakt nomi</Th>
+                      <Th>Turi</Th>
+                      <Th isNumeric>Summa (mlrd so‘m)</Th>
+                      <Th>Holati</Th>
+                      <Th>Tekshiruv</Th>
+                    </Tr>
+                  </Thead>
+                  <Tbody>
+                    {redFlagContracts.map((c, idx) => (
+                      <Tr key={idx}>
+                        <Td fontWeight="medium">{c.name}</Td>
+                        <Td>{c.type}</Td>
+                        <Td isNumeric fontWeight="bold">{c.amount}</Td>
+                        <Td><Badge colorScheme={statusColors[c.status]}>{statusLabels[c.status]}</Badge></Td>
+                        <Td><Flex align="center" gap={2}>{verificationIcons[c.verification]}{verificationLabels[c.verification]}</Flex></Td>
+                      </Tr>
+                    ))}
+                  </Tbody>
+                </Table>
+              </TableContainer>
+
             </Box>
           </TabPanel>
         </TabPanels>

@@ -332,7 +332,7 @@ const DashboardPage = () => {
               <Flex align="center" gap={3} mb={3}>
                 <Icon as={Flag} boxSize={6} color="#F56565" />
                 <Text fontWeight="bold" fontSize="md" color="gray.700">
-                  Red Flag
+                  Aniqlangan kamchilik
                 </Text>
 
               </Flex>
