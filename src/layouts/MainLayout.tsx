@@ -50,6 +50,7 @@ const menuConfig: MenuItem[] = [
   { type: 'item', label: 'Bosh sahifa', icon: LayoutDashboard, path: '/' },
   { type: 'item', label: 'Hisobotlar', icon: LayoutDashboard, path: '/reports' },
   { type: 'item', label: 'Ajratilgan mablag`lar', icon: LayoutDashboard, path: '/budget' },
+  { type: 'item', label: 'Kambag`galik darajasi', icon: LayoutDashboard, path: '/poor-level' },
 ];
 
 // ------------------------------
