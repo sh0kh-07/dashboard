@@ -14,7 +14,8 @@ import {
   LogOut,
   User,
   MonitorCloud,
-  Home
+  Home,
+  HandHelping
 } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -47,13 +48,13 @@ interface AccordionMenuItem extends BaseMenuItem {
 type MenuItem = SimpleMenuItem | AccordionMenuItem;
 
 const menuConfig: MenuItem[] = [
-  { type: 'item', label: 'Bosh sahifa', icon: LayoutDashboard, path: '/' },
-  { type: 'item', label: 'Hisobotlar', icon: LayoutDashboard, path: '/reports' },
-  { type: 'item', label: 'Ajratilgan mablag`lar', icon: LayoutDashboard, path: '/budget' },
-  { type: 'item', label: 'Kambag`galik darajasi', icon: LayoutDashboard, path: '/poor-level' },
-  { type: 'item', label: 'Bandlik darajasi', icon: LayoutDashboard, path: '/job-placement' },
-  { type: 'item', label: 'Og\'ir toifadagi hududlar', icon: LayoutDashboard, path: '/regions' },
-  { type: 'item', label: 'Ko\'rsatilgan xizmatlar', icon: LayoutDashboard, path: '/mahalla' },
+  { type: 'item', label: 'Bosh sahifa', icon: Home, path: '/' },
+  { type: 'item', label: 'Hisobotlar', icon: ChartColumnBig, path: '/reports' },
+  { type: 'item', label: 'Ajratilgan mablag`lar', icon: Wallet, path: '/budget' },
+  { type: 'item', label: 'Kambag`galik darajasi', icon: Users, path: '/poor-level' },
+  { type: 'item', label: 'Bandlik darajasi', icon: BriefcaseBusiness, path: '/job-placement' },
+  { type: 'item', label: 'Og\'ir toifadagi hududlar', icon: MapPin, path: '/regions' },
+  { type: 'item', label: 'Ko\'rsatilgan xizmatlar', icon: HandHelping, path: '/mahalla' },
 ];
 
 // ------------------------------
