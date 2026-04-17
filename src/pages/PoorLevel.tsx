@@ -6,8 +6,10 @@ import {
 } from "@chakra-ui/react";
 import { useNavigate } from "react-router-dom";
 import Uzbekistan from "@svg-maps/uzbekistan";
-import { AlertTriangle, TrendingDown, CheckCircle, XCircle } from "lucide-react";
-
+import {
+  AlertTriangle, TrendingDown, CheckCircle, XCircle,
+  Home, Building, AlertCircle, Target, Flag, FileWarning, BarChart3
+} from "lucide-react";
 // ------------------------------------------------------------
 // 1. ДАННЫЕ ПО РЕГИОНАМ (основные)
 // ------------------------------------------------------------
@@ -260,11 +262,13 @@ const MapWithTooltip: React.FC<MapWithTooltipProps> = ({ getColor, getTooltip })
 // ------------------------------------------------------------
 // 7. ОСНОВНОЙ КОМПОНЕНТ С КНОПКАМИ (ВМЕСТО ТАБОВ)
 // ------------------------------------------------------------
+// ... (все импорты и данные выше без изменений)
+
 const PovertyDashboard = () => {
   const [activeSection, setActiveSection] = useState<string>("poverty");
   const [selectedDirection, setSelectedDirection] = useState<string>("all");
 
-  // Агрегированные данные для карточек
+  // Агрегированные данные для карточек (без изменений)
   const avgPovertyNow = mainData.reduce((s, r) => s + r.povertyRate, 0) / mainData.length;
   const avgPovertyWas = 13.2;
   const povertyPlan = 9.5;
@@ -301,226 +305,255 @@ const PovertyDashboard = () => {
     </SimpleGrid>
   );
 
-  const getKamchiliklar = (type: string) => {
-    switch (type) {
-      case 'poverty': return mainData.filter(r => r.percentAchieved < 30).map(r => `${r.name}: bajarilish ${r.percentAchieved}%`);
-      case 'state': return stateSupportData.filter(d => d.percent < 25).map(d => `${d.region}: ${d.percent}%`);
-      case 'poor': return poorFamilyCategoryData.filter(d => d.percent < 25).map(d => `${d.region}: ${d.percent}%`);
-      case 'line': return povertyLineData.filter(d => d.percent < 25).map(d => `${d.name}: ${d.percent}%`);
-      default: return [];
-    }
-  };
 
   const filteredContracts = selectedDirection === "all"
     ? redFlagContracts
     : redFlagContracts.filter(c => c.direction === selectedDirection);
 
+  const sections = [
+    {
+      id: "poverty",
+      label: "Kambag'allik darajasi",
+      icon: <BarChart3 size={24} />,
+      value: `${avgPovertyNow.toFixed(1)}%`,
+      sub: "O‘rtacha ko‘rsatkich",
+    },
+    {
+      id: "state",
+      label: "Davlat taʼminotidagi oila",
+      icon: <Building size={24} />,
+      value: `2%`,
+      sub: "Reja bajarilishi",
+    },
+    {
+      id: "poor",
+      label: "Kambag'al oila",
+      icon: <Home size={24} />,
+      value: `20%`,
+      sub: "Reja bajarilishi",
+    },
+    {
+      id: "line",
+      label: "Chegaradagi oilalar",
+      icon: <AlertCircle size={24} />,
+      value: `10%`,
+      sub: "Reja bajarilishi",
+    },
+    {
+      id: "directions",
+      label: "Reyestr chiqarish yo'nalishlari",
+      icon: <Target size={24} />,
+      value: `${totalPercent.toFixed(1)}%`,
+      sub: "Umumiy bajarilish",
+    },
+    {
+      id: "redflag",
+      label: "Aniqlangan kamchiliklar",
+      icon: <Flag size={24} />,
+      value: `${redFlagContracts.length}`,
+      sub: "Shartnomalar soni",
+    },
+  ];
+
   return (
     <Box>
-      <Flex gap={6}>
-        {/* Левая панель с кнопками */}
-        <VStack align="stretch" minW="220px" bg="white" borderRadius="xl" p={4} spacing={3}>
-          <Button
-            colorScheme={activeSection === "poverty" ? "blue" : "gray"}
-            variant={activeSection === "poverty" ? "solid" : "ghost"}
-            justifyContent="flex-start"
-            onClick={() => setActiveSection("poverty")}
+      {/* Горизонтальные карточки-вкладки */}
+      <Flex
+        gap={4}
+        mb={6}
+        overflowX="auto"
+        pb={2}
+        css={{
+          "&::-webkit-scrollbar": { height: "6px" },
+          "&::-webkit-scrollbar-track": { background: "#f1f1f1", borderRadius: "3px" },
+          "&::-webkit-scrollbar-thumb": { background: "#cbd5e0", borderRadius: "3px" },
+        }}
+      >
+        {sections.map((section) => (
+          <Box
+            key={section.id}
+            onClick={() => setActiveSection(section.id)}
+            cursor="pointer"
+            minW="150"
+            flexShrink={0}
+            bg={activeSection === section.id ? "blue.500" : "white"}
+            color={activeSection === section.id ? "white" : "gray.700"}
+            borderRadius="xl"
+            boxShadow="md"
+            transition="all 0.2s"
+            _hover={{
+              transform: "translateY(-2px)",
+              boxShadow: "lg",
+              bg: activeSection === section.id ? "blue.600" : "gray.50",
+            }}
+            p={4}
           >
-            1. Kambag'allik darajasi
-          </Button>
-          <Button
-            colorScheme={activeSection === "state" ? "blue" : "gray"}
-            variant={activeSection === "state" ? "solid" : "ghost"}
-            justifyContent="flex-start"
-            onClick={() => setActiveSection("state")}
-          >
-            2. Davlat taʼminotidagi oila
-          </Button>
-          <Button
-            colorScheme={activeSection === "poor" ? "blue" : "gray"}
-            variant={activeSection === "poor" ? "solid" : "ghost"}
-            justifyContent="flex-start"
-            onClick={() => setActiveSection("poor")}
-          >
-            3. Kambag'al oila
-          </Button>
-          <Button
-            colorScheme={activeSection === "line" ? "blue" : "gray"}
-            variant={activeSection === "line" ? "solid" : "ghost"}
-            justifyContent="flex-start"
-            onClick={() => setActiveSection("line")}
-          >
-            4. Kambag'alik Chegaradagi oilalar
-          </Button>
-          <Button
-            colorScheme={activeSection === "directions" ? "blue" : "gray"}
-            variant={activeSection === "directions" ? "solid" : "ghost"}
-            justifyContent="flex-start"
-            onClick={() => setActiveSection("directions")}
-          >
-            5. Reyestr chiqarish yo'nalishlari
-          </Button>
-          <Button
-            colorScheme={activeSection === "redflag" ? "blue" : "gray"}
-            variant={activeSection === "redflag" ? "solid" : "ghost"}
-            justifyContent="flex-start"
-            onClick={() => setActiveSection("redflag")}
-          >
-            6. Aniqlangan kamchiliklar
-          </Button>
-        </VStack>
-
-        {/* Правая часть: контент */}
-        <Box flex={1} borderRadius="xl" borderWidth="1px">
-          {activeSection === "poverty" && (
-            <>
-              <SummaryCards title="Yil boshida" was={avgPovertyWas} should={povertyPlan} now={+avgPovertyNow.toFixed(1)} unit="%" />
-              <MapWithTooltip
-                getColor={(region) => getColorByPoverty(mainData.find(r => r.name === region)?.povertyRate || 0)}
-                getTooltip={(region) => {
-                  const d = mainData.find(r => r.name === region);
-                  if (!d) return null;
-                  return (<>
-                    <Text fontWeight="bold">{region}</Text>
-                    <Text>Kambag‘allik: {d.povertyRate}%</Text>
-                    <Text>Reja: {d.annualPlan.toLocaleString()} oila</Text>
-                    <Text>Amalda: {d.actual.toLocaleString()}</Text>
-                    <Text fontWeight="bold">Bajarilish: {d.percentAchieved}%</Text>
-                  </>);
-                }}
-              />
-            </>
-          )}
-
-          {activeSection === "state" && (
-            <>
-              <SummaryCards title="Jami oilalar (davlat ta'minoti)" was={totalStateWas} should={totalStatePlan} now={totalStateActual} unit=" ming" />
-              <MapWithTooltip
-                getColor={(region) => getColorByPercent(stateSupportData.find(d => d.region === region)?.percent || 0)}
-                getTooltip={(region) => {
-                  const d = stateSupportData.find(d => d.region === region);
-                  if (!d) return null;
-                  return (<>
-                    <Text fontWeight="bold">{region}</Text>
-                    <Text>Oilalar: {d.families.toLocaleString()}</Text>
-                    <Text>Reja: {d.annualPlan.toLocaleString()}</Text>
-                    <Text>Amalda: {d.actual.toLocaleString()}</Text>
-                    <Text fontWeight="bold">Bajarilish: {d.percent}%</Text>
-                  </>);
-                }}
-              />
-  
-            </>
-          )}
-
-          {activeSection === "poor" && (
-            <>
-              <SummaryCards title="Jami kambag‘al oilalar" was={totalPoorWas} should={totalPoorPlan} now={totalPoorActual} unit=" ming" />
-              <MapWithTooltip
-                getColor={(region) => getColorByPercent(poorFamilyCategoryData.find(d => d.region === region)?.percent || 0)}
-                getTooltip={(region) => {
-                  const d = poorFamilyCategoryData.find(d => d.region === region);
-                  if (!d) return null;
-                  return (<>
-                    <Text fontWeight="bold">{region}</Text>
-                    <Text>Oilalar: {d.families.toLocaleString()}</Text>
-                    <Text>Reja: {d.annualPlan.toLocaleString()}</Text>
-                    <Text>Amalda: {d.actual.toLocaleString()}</Text>
-                    <Text fontWeight="bold">Bajarilish: {d.percent}%</Text>
-                  </>);
-                }}
-              />
-          
-            </>
-          )}
-
-          {activeSection === "line" && (
-            <>
-              <SummaryCards title="Chegaradagi oilalar" was={totalLineWas} should={totalLinePlan} now={totalLineActual} unit=" ming" />
-              <MapWithTooltip
-                getColor={(region) => getColorByPercent(povertyLineData.find(r => r.name === region)?.percent || 0)}
-                getTooltip={(region) => {
-                  const d = povertyLineData.find(r => r.name === region);
-                  if (!d) return null;
-                  return (<>
-                    <Text fontWeight="bold">{region}</Text>
-                    <Text>Chegaradagi oilalar: {d.familiesCount.toLocaleString()} ming</Text>
-                    <Text>Reja: {d.annualPlan.toLocaleString()}</Text>
-                    <Text>Amalda: {d.actual.toLocaleString()}</Text>
-                    <Text fontWeight="bold">Bajarilish: {d.percent}%</Text>
-                  </>);
-                }}
-              />
-           
-            </>
-          )}
-
-          {activeSection === "directions" && (
-            <Box>
-              <Heading size="md">Reyestrdan chiqarish yo‘nalishlari (12 ta)</Heading>
-              <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={4} mt={4}>
-                {directions.map((d, idx) => (
-                  <Box bg='white' key={idx} p={3} borderWidth="1px" borderRadius="lg" borderLeftColor={d.percent < 30 ? "red.500" : "green.500"} borderLeftWidth="4px">
-                    <Flex align="center" gap={2} mb={2}>
-                      <TrendingDown size={16} color={d.percent < 30 ? "red" : "green"} />
-                      <Text fontWeight="bold">{d.name}</Text>
-                    </Flex>
-                    <Stat size="sm"><StatLabel>Yillik reja</StatLabel><StatNumber>{d.annualPlan.toLocaleString()}</StatNumber></Stat>
-                    <Stat size="sm"><StatLabel>Amalda (4 oy)</StatLabel><StatNumber>{d.actual.toLocaleString()}</StatNumber></Stat>
-                    <Flex align="center" gap={2} mt={2}>
-                      <Progress value={d.percent} size="sm" width="100%" colorScheme={d.percent < 30 ? "red" : "green"} />
-                      <Badge colorScheme={d.percent < 30 ? "red" : "green"}>{d.percent}%</Badge>
-                    </Flex>
-                    {d.percent < 30 && <Flex mt={2} color="red.500" align="center" gap={1}><AlertTriangle size={14} /> Red flag</Flex>}
-                  </Box>
-                ))}
-              </SimpleGrid>
-              <SimpleGrid columns={{ base: 1, md: 3 }} spacing={4} mt={6}>
-                <Stat bg="gray.50" p={3} borderRadius="lg"><StatLabel>Jami yillik reja</StatLabel><StatNumber>{totalAnnualPlan.toLocaleString()}</StatNumber></Stat>
-                <Stat bg="gray.50" p={3} borderRadius="lg"><StatLabel>Jami amalda</StatLabel><StatNumber>{totalActual.toLocaleString()}</StatNumber></Stat>
-                <Stat bg="gray.50" p={3} borderRadius="lg"><StatLabel>Umumiy bajarilish</StatLabel><StatNumber>{totalPercent.toFixed(1)}%</StatNumber><Progress value={totalPercent} size="sm" colorScheme="blue" mt={2} /></Stat>
-              </SimpleGrid>
-            </Box>
-          )}
-
-          {activeSection === "redflag" && (
-            <Box>
-              <Flex justify="space-between" align="center" mb={4}>
-                <Heading size="md">Aniqlangan kamchiliklar</Heading>
-                <Select width="300px" value={selectedDirection} onChange={(e) => setSelectedDirection(e.target.value)} bg="white" size="sm">
-                  {filterDirections.map(dir => <option key={dir.value} value={dir.value}>{dir.label}</option>)}
-                </Select>
-              </Flex>
-              <TableContainer bg='white' borderWidth="1px" borderRadius="lg" overflow="hidden">
-                <Table size="sm" variant="simple">
-                  <Thead bg="gray.50">
-                    <Tr>
-                      <Th>Kontrakt nomi</Th>
-                      <Th isNumeric>Summa (mlrd so‘m)</Th>
-                      <Th>Tekshiruv</Th>
-                    </Tr>
-                  </Thead>
-                  <Tbody>
-                    {filteredContracts.length === 0 ? (
-                      <Tr><Td colSpan={5} textAlign="center">Ushbu yo‘nalish bo‘yicha maʼlumot yo‘q</Td></Tr>
-                    ) : (
-                      filteredContracts.map((c, idx) => (
-                        <Tr key={idx}>
-                          <Td fontWeight="medium">{c.name}</Td>
-                          <Td isNumeric fontWeight="bold">{c.amount}</Td>
-                          <Td><Flex align="center" gap={2}>{verificationIcons[c.verification]}{verificationLabels[c.verification]}</Flex></Td>
-                        </Tr>
-                      ))
-                    )}
-                  </Tbody>
-                </Table>
-              </TableContainer>
-            </Box>
-          )}
-        </Box>
+            <Flex align="center" gap={2} mb={2}>
+              <Box color={activeSection === section.id ? "white" : "blue.500"}>
+                {section.icon}
+              </Box>
+              <Text fontSize="10.5px" fontWeight="medium" noOfLines={2}>
+                {section.label}
+              </Text>
+            </Flex>
+            <Text fontSize="2xl" fontWeight="bold">
+              {section.value}
+            </Text>
+            <Text fontSize="xs" opacity={0.8}>
+              {section.sub}
+            </Text>
+          </Box>
+        ))}
       </Flex>
+
+      {/* Контент выбранного раздела */}
+      <Box borderRadius="xl" borderWidth="1px">
+        {activeSection === "poverty" && (
+          <>
+            <SummaryCards title="Yil boshida" was={avgPovertyWas} should={povertyPlan} now={+avgPovertyNow.toFixed(1)} unit="%" />
+            <MapWithTooltip
+              getColor={(region) => getColorByPoverty(mainData.find(r => r.name === region)?.povertyRate || 0)}
+              getTooltip={(region) => {
+                const d = mainData.find(r => r.name === region);
+                if (!d) return null;
+                return (<>
+                  <Text fontWeight="bold">{region}</Text>
+                  <Text>Kambag‘allik: {d.povertyRate}%</Text>
+                  <Text>Reja: {d.annualPlan.toLocaleString()} oila</Text>
+                  <Text>Amalda: {d.actual.toLocaleString()}</Text>
+                  <Text fontWeight="bold">Bajarilish: {d.percentAchieved}%</Text>
+                </>);
+              }}
+            />
+          </>
+        )}
+
+        {activeSection === "state" && (
+          <>
+            <SummaryCards title="Jami oilalar (davlat ta'minoti)" was={totalStateWas} should={totalStatePlan} now={totalStateActual} unit=" ming" />
+            <MapWithTooltip
+              getColor={(region) => getColorByPercent(stateSupportData.find(d => d.region === region)?.percent || 0)}
+              getTooltip={(region) => {
+                const d = stateSupportData.find(d => d.region === region);
+                if (!d) return null;
+                return (<>
+                  <Text fontWeight="bold">{region}</Text>
+                  <Text>Oilalar: {d.families.toLocaleString()}</Text>
+                  <Text>Reja: {d.annualPlan.toLocaleString()}</Text>
+                  <Text>Amalda: {d.actual.toLocaleString()}</Text>
+                  <Text fontWeight="bold">Bajarilish: {d.percent}%</Text>
+                </>);
+              }}
+            />
+          </>
+        )}
+
+        {activeSection === "poor" && (
+          <>
+            <SummaryCards title="Jami kambag‘al oilalar" was={totalPoorWas} should={totalPoorPlan} now={totalPoorActual} unit=" ming" />
+            <MapWithTooltip
+              getColor={(region) => getColorByPercent(poorFamilyCategoryData.find(d => d.region === region)?.percent || 0)}
+              getTooltip={(region) => {
+                const d = poorFamilyCategoryData.find(d => d.region === region);
+                if (!d) return null;
+                return (<>
+                  <Text fontWeight="bold">{region}</Text>
+                  <Text>Oilalar: {d.families.toLocaleString()}</Text>
+                  <Text>Reja: {d.annualPlan.toLocaleString()}</Text>
+                  <Text>Amalda: {d.actual.toLocaleString()}</Text>
+                  <Text fontWeight="bold">Bajarilish: {d.percent}%</Text>
+                </>);
+              }}
+            />
+          </>
+        )}
+
+        {activeSection === "line" && (
+          <>
+            <SummaryCards title="Chegaradagi oilalar" was={totalLineWas} should={totalLinePlan} now={totalLineActual} unit=" ming" />
+            <MapWithTooltip
+              getColor={(region) => getColorByPercent(povertyLineData.find(r => r.name === region)?.percent || 0)}
+              getTooltip={(region) => {
+                const d = povertyLineData.find(r => r.name === region);
+                if (!d) return null;
+                return (<>
+                  <Text fontWeight="bold">{region}</Text>
+                  <Text>Chegaradagi oilalar: {d.familiesCount.toLocaleString()} ming</Text>
+                  <Text>Reja: {d.annualPlan.toLocaleString()}</Text>
+                  <Text>Amalda: {d.actual.toLocaleString()}</Text>
+                  <Text fontWeight="bold">Bajarilish: {d.percent}%</Text>
+                </>);
+              }}
+            />
+          </>
+        )}
+
+        {activeSection === "directions" && (
+          <Box>
+            <Heading size="md">Reyestrdan chiqarish yo‘nalishlari (12 ta)</Heading>
+            <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={4} mt={4}>
+              {directions.map((d, idx) => (
+                <Box bg='white' key={idx} p={3} borderWidth="1px" borderRadius="lg" borderLeftColor={d.percent < 30 ? "red.500" : "green.500"} borderLeftWidth="4px">
+                  <Flex align="center" gap={2} mb={2}>
+                    <TrendingDown size={16} color={d.percent < 30 ? "red" : "green"} />
+                    <Text fontWeight="bold">{d.name}</Text>
+                  </Flex>
+                  <Stat size="sm"><StatLabel>Yillik reja</StatLabel><StatNumber>{d.annualPlan.toLocaleString()}</StatNumber></Stat>
+                  <Stat size="sm"><StatLabel>Amalda (4 oy)</StatLabel><StatNumber>{d.actual.toLocaleString()}</StatNumber></Stat>
+                  <Flex align="center" gap={2} mt={2}>
+                    <Progress value={d.percent} size="sm" width="100%" colorScheme={d.percent < 30 ? "red" : "green"} />
+                    <Badge colorScheme={d.percent < 30 ? "red" : "green"}>{d.percent}%</Badge>
+                  </Flex>
+                  {d.percent < 30 && <Flex mt={2} color="red.500" align="center" gap={1}><AlertTriangle size={14} /> Red flag</Flex>}
+                </Box>
+              ))}
+            </SimpleGrid>
+            <SimpleGrid columns={{ base: 1, md: 3 }} spacing={4} mt={6}>
+              <Stat bg="gray.50" p={3} borderRadius="lg"><StatLabel>Jami yillik reja</StatLabel><StatNumber>{totalAnnualPlan.toLocaleString()}</StatNumber></Stat>
+              <Stat bg="gray.50" p={3} borderRadius="lg"><StatLabel>Jami amalda</StatLabel><StatNumber>{totalActual.toLocaleString()}</StatNumber></Stat>
+              <Stat bg="gray.50" p={3} borderRadius="lg"><StatLabel>Umumiy bajarilish</StatLabel><StatNumber>{totalPercent.toFixed(1)}%</StatNumber><Progress value={totalPercent} size="sm" colorScheme="blue" mt={2} /></Stat>
+            </SimpleGrid>
+          </Box>
+        )}
+
+        {activeSection === "redflag" && (
+          <Box>
+            <Flex justify="space-between" align="center" mb={4}>
+              <Heading size="md">Aniqlangan kamchiliklar</Heading>
+              <Select width="300px" value={selectedDirection} onChange={(e) => setSelectedDirection(e.target.value)} bg="white" size="sm">
+                {filterDirections.map(dir => <option key={dir.value} value={dir.value}>{dir.label}</option>)}
+              </Select>
+            </Flex>
+            <TableContainer bg='white' borderWidth="1px" borderRadius="lg" overflow="hidden">
+              <Table size="sm" variant="simple">
+                <Thead bg="gray.50">
+                  <Tr>
+                    <Th>Kontrakt nomi</Th>
+                    <Th isNumeric>Summa (mlrd so‘m)</Th>
+                    <Th>Tekshiruv</Th>
+                  </Tr>
+                </Thead>
+                <Tbody>
+                  {filteredContracts.length === 0 ? (
+                    <Tr><Td colSpan={5} textAlign="center">Ushbu yo‘nalish bo‘yicha maʼlumot yo‘q</Td></Tr>
+                  ) : (
+                    filteredContracts.map((c, idx) => (
+                      <Tr key={idx}>
+                        <Td fontWeight="medium">{c.name}</Td>
+                        <Td isNumeric fontWeight="bold">{c.amount}</Td>
+                        <Td><Flex align="center" gap={2}>{verificationIcons[c.verification]}{verificationLabels[c.verification]}</Flex></Td>
+                      </Tr>
+                    ))
+                  )}
+                </Tbody>
+              </Table>
+            </TableContainer>
+          </Box>
+        )}
+      </Box>
     </Box>
   );
 };
 
 export default PovertyDashboard;
+

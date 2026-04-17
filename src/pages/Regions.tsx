@@ -1,19 +1,17 @@
 import React, { useState } from "react";
 import {
-  Box, Text, Heading, useToken, Flex, SimpleGrid, Stat, StatLabel,
-  StatNumber, Badge, Progress, Card, CardBody, CardHeader, Divider,
-  Alert, AlertIcon, AlertTitle, List, ListItem, ListIcon,
-  Icon, Wrap, WrapItem, Tooltip,
-  StatHelpText,
+  Box, Text, Heading, Flex, SimpleGrid, Stat, StatLabel, StatNumber,
+  Badge, Card, CardBody, CardHeader, Divider, Icon,
+  Table, Thead, Tbody, Tr, Th, Td, TableContainer,
+  Modal, ModalOverlay, ModalContent, ModalHeader, ModalBody, ModalFooter,
+  Button, useDisclosure,
 } from "@chakra-ui/react";
-import Uzbekistan from "@svg-maps/uzbekistan";
 import {
-  AlertTriangle, CheckCircle, MapPin, DollarSign, Home, Building, Users,
-  TrendingUp, TrendingDown,
+  Layers, Grid, AlertTriangle, MapPin, DollarSign, Info,
 } from "lucide-react";
 
 // --------------------------------------------------------------
-// MA'LUMOTLAR: VILOYATLAR KESIMIDA
+// MA'LUMOTLAR: VILOYATLAR KESIMIDA (asosiy)
 // --------------------------------------------------------------
 interface RegionData {
   name: string;
@@ -45,228 +43,371 @@ const regionsData: RegionData[] = [
 ];
 
 // --------------------------------------------------------------
-// XARITA MAPPING (TO'LIQ)
+// MA'LUMOTLAR: OG'IR TUMANLAR
 // --------------------------------------------------------------
-const svgToRegion: Record<string, string> = {
-  "Karakalpakstan": "Qoraqalpogʻiston Respublikasi",
-  "Qoraqalpog‘iston": "Qoraqalpogʻiston Respublikasi",
-  "Andijan": "Andijon viloyati",
-  "Bukhara": "Buxoro viloyati",
-  "Jizzakh": "Jizzax viloyati",
-  "Qashqadaryo": "Qashqadaryo viloyati",
-  "Kashkadarya": "Qashqadaryo viloyati",
-  "Navoi": "Navoiy viloyati",
-  "Namangan": "Namangan viloyati",
-  "Samarkand": "Samarqand viloyati",
-  "Sirdaryo": "Sirdaryo viloyati",
-  "Surxondaryo": "Surxondaryo viloyati",
-  "Toshkent viloyati": "Toshkent viloyati",
-  "Fergana": "Fargʻona viloyati",
-  "Xorazm": "Xorazm viloyati",
-  "Tashkent": "Toshkent shahri",
-};
+interface HeavyDistrict {
+  id: number;
+  name: string;
+  region: string;
+  population: number;
+  issues: string;
+  improvementPlan: string;
+  allocatedFund: number;
+}
 
-const normalize = (s: string) => s
-  .replace(/ viloyati$/i, '')
-  .replace(/ shahri$/i, '')
-  .replace(/ Respublikasi$/i, '')
-  .replace(/[‘ʻ]/g, "'")
-  .trim()
-  .toLowerCase();
-
-const getRegionName = (svgName: string): string | null => {
-  if (svgToRegion[svgName]) return svgToRegion[svgName];
-  const norm = normalize(svgName);
-  for (const [key, val] of Object.entries(svgToRegion)) {
-    if (normalize(key) === norm) return val;
-  }
-  const found = regionsData.find(r => normalize(r.name) === norm);
-  return found ? found.name : null;
-};
-
-const getStatusColor = (status: string): string => {
-  if (status === "bad") return "#E53E3E";
-  if (status === "moderate") return "#ED8936";
-  return "#48BB78";
-};
-
-// Xarita komponenti (hover tooltip bilan)
-const MapWithTooltip = () => {
-  const [tooltip, setTooltip] = useState<any>({ visible: false, x: 0, y: 0, content: null });
-
-  const getTooltipContent = (regionName: string) => {
-    const data = regionsData.find(r => r.name === regionName);
-    if (!data) return <Text>Maʼlumot yoʻq</Text>;
-    return (
-      <Box>
-        <Text fontWeight="bold">{regionName}</Text>
-        <Text>💰 Reja/Amalda: {data.fundPlan} / {data.fundActual} mln soʻm</Text>
-        <Text>📊 Bajarilish: {data.fundPercent}%</Text>
-        <Text>🏗 Yaxshilangan tumanlar: {data.improvedDistricts}</Text>
-        <Text>🏘 Ogʻir mahallalar: {data.difficultMahallas}</Text>
-        <Text>📄 Shartnomalar soni: {data.fundCount}</Text>
-        <Text>💵 Ajratilgan summa: {data.fundSum} mln soʻm</Text>
-      </Box>
-    );
-  };
-
-  return (
-    <Box position="relative" display="flex" justifyContent="center" my={6}>
-      <svg viewBox={Uzbekistan.viewBox} width="80%" style={{ cursor: "pointer" }}>
-        {Uzbekistan.locations.map((loc: any) => {
-          const region = getRegionName(loc.name);
-          const data = region ? regionsData.find(r => r.name === region) : null;
-          const fillColor = data ? getStatusColor(data.status) : "#CBD5E0";
-          return (
-            <path
-              key={loc.id}
-              d={loc.path}
-              onMouseEnter={(e) => {
-                const content = region ? getTooltipContent(region) : <Text>Maʼlumot yoʻq</Text>;
-                setTooltip({ visible: true, x: e.clientX, y: e.clientY, content });
-              }}
-              onMouseMove={(e) => setTooltip((p: any) => ({ ...p, x: e.clientX, y: e.clientY }))}
-              onMouseLeave={() => setTooltip({ visible: false, x: 0, y: 0, content: null })}
-              style={{ fill: fillColor, stroke: "#cbd5e0", strokeWidth: 1.2, cursor: "pointer", opacity: 0.85 }}
-              onMouseOver={(e) => { e.currentTarget.style.opacity = "1"; e.currentTarget.style.strokeWidth = "2.5"; e.currentTarget.style.stroke = "#4a5568"; }}
-              onMouseOut={(e) => { e.currentTarget.style.opacity = "0.85"; e.currentTarget.style.strokeWidth = "1.2"; e.currentTarget.style.stroke = "#cbd5e0"; }}
-            />
-          );
-        })}
-      </svg>
-      {tooltip.visible && tooltip.content && (
-        <Box position="fixed" top={tooltip.y + 12} left={tooltip.x + 12} bg="white" px={4} py={2} borderRadius="md" boxShadow="lg" zIndex={1000} pointerEvents="none" border="1px solid" borderColor="gray.200">
-          {tooltip.content}
-        </Box>
-      )}
-    </Box>
-  );
+const generateHeavyDistricts = (): HeavyDistrict[] => {
+  const districts: HeavyDistrict[] = [];
+  const districtNames = [
+    "Markaziy tuman", "Yangiobod tumani", "Chilonzor tumani", "Bog‘ot tumani", "Paxtakor tumani",
+    "Zomin tumani", "Oltinko‘l tumani", "Jomboy tumani", "Uchquduq tumani", "Muborak tumani",
+    "Dehqonobod tumani", "Qamashi tumani", "Yakkabog‘ tumani", "G‘uzor tumani", "Sherobod tumani",
+    "Sariosiyo tumani", "Denov tumani", "Boysun tumani", "Qumqo‘rg‘on tumani", "Uzun tumani",
+  ];
+  let id = 0;
+  regionsData.forEach(region => {
+    for (let i = 0; i < region.improvedDistricts; i++) {
+      const districtFund = Math.round(region.fundSum / Math.max(region.improvedDistricts, 1) * (0.5 + Math.random() * 0.8));
+      districts.push({
+        id: id++,
+        name: districtNames[Math.floor(Math.random() * districtNames.length)] + ` (${region.name.slice(0, 3)})`,
+        region: region.name,
+        population: Math.floor(Math.random() * 50000) + 10000,
+        issues: "Infratuzilma yomon, ishsizlik yuqori, suv muammosi",
+        improvementPlan: "2025 yilgacha yo‘l, gaz, elektr, maktab ta'miri",
+        allocatedFund: districtFund,
+      });
+    }
+  });
+  return districts;
 };
 
 // --------------------------------------------------------------
-// KARTOCHKA KOMPONENTI (viloyatlar uchun)
+// MA'LUMOTLAR: OG'IR MAHALLALAR
 // --------------------------------------------------------------
-const RegionCard = ({ data }: { data: RegionData }) => {
-  const borderColor = data.status === "bad" ? "red.400" : data.status === "good" ? "green.400" : "orange.400";
-  return (
-    <Card borderLeft="4px" borderLeftColor={borderColor} boxShadow="sm" height="100%">
-      <CardHeader pb={0}>
-        <Flex justify="space-between" align="center">
-          <Heading size="sm"><Icon as={MapPin} mr={1} />{data.name}</Heading>
-          <Badge colorScheme={data.status === "bad" ? "red" : data.status === "good" ? "green" : "orange"} fontSize="0.7em">
-            {data.status === "bad" ? "Og‘ir" : data.status === "good" ? "Yaxshi" : "O‘rtacha"}
-          </Badge>
-        </Flex>
-      </CardHeader>
-      <CardBody pt={2}>
-        {/* Mablag'lar */}
-        <Stat size="sm" mb={2}>
-          <StatLabel fontSize="xs">💰 Ajratilgan mablag‘ (reja/amalda)</StatLabel>
-          <StatNumber fontSize="md">{data.fundPlan.toLocaleString()} / {data.fundActual.toLocaleString()} mln so‘m</StatNumber>
-          <Flex align="center" gap={2} mt={1}>
-            <Progress value={data.fundPercent} size="sm" width="100%" colorScheme={data.fundPercent < 75 ? "red" : "green"} />
-            <Badge colorScheme={data.fundPercent < 75 ? "red" : "green"}>{data.fundPercent}%</Badge>
-          </Flex>
-        </Stat>
-        <Divider my={2} />
-        {/* Infratuzilma va mahallalar */}
-        <SimpleGrid columns={2} spacingX={2} spacingY={1} mb={2}>
-          <Stat size="sm"><StatLabel fontSize="xs">🏗 Yaxshilangan tumanlar</StatLabel><StatNumber fontSize="md">{data.improvedDistricts}</StatNumber></Stat>
-          <Stat size="sm"><StatLabel fontSize="xs">🏘 Og‘ir mahallalar</StatLabel><StatNumber fontSize="md">{data.difficultMahallas}</StatNumber></Stat>
-        </SimpleGrid>
-        <Divider my={2} />
-        {/* Shartnomalar va summa */}
-        <SimpleGrid columns={2} spacingX={2} spacingY={1}>
-          <Stat size="sm"><StatLabel fontSize="xs">📄 Shartnomalar soni</StatLabel><StatNumber fontSize="md">{data.fundCount}</StatNumber></Stat>
-          <Stat size="sm"><StatLabel fontSize="xs">💵 Ajratilgan summa</StatLabel><StatNumber fontSize="md">{data.fundSum.toLocaleString()} mln</StatNumber></Stat>
-        </SimpleGrid>
-      </CardBody>
-    </Card>
-  );
+interface HeavyMahalla {
+  id: number;
+  name: string;
+  region: string;
+  households: number;
+  mainProblem: string;
+  status: string;
+  allocatedFund: number;
+}
+
+const generateHeavyMahallas = (): HeavyMahalla[] => {
+  const mahallas: HeavyMahalla[] = [];
+  const mahallaNames = [
+    "Oltin vodiy MFY", "Navbahor MFY", "Istiqlol MFY", "Do‘stlik MFY", "Bunyodkor MFY",
+    "Chorshanba MFY", "Sohil MFY", "Yangi hayot MFY", "Mehnat MFY", "Tong MFY",
+    "Karvon MFY", "Beshyog‘och MFY", "Ko‘kcha MFY", "Yashnobod MFY", "Sergeli MFY",
+  ];
+  let id = 0;
+  regionsData.forEach(region => {
+    for (let i = 0; i < region.difficultMahallas; i++) {
+      const mahallaFund = Math.round(region.fundSum / Math.max(region.difficultMahallas, 1) * (0.3 + Math.random() * 0.9));
+      mahallas.push({
+        id: id++,
+        name: mahallaNames[Math.floor(Math.random() * mahallaNames.length)] + ` (${region.name.slice(0, 4)})`,
+        region: region.name,
+        households: Math.floor(Math.random() * 500) + 50,
+        mainProblem: "Ishsizlik, kam ta'minlanganlik, uy-joy muammosi",
+        status: "Og‘ir",
+        allocatedFund: mahallaFund,
+      });
+    }
+  });
+  return mahallas;
 };
+
+const heavyDistricts = generateHeavyDistricts();
+const heavyMahallas = generateHeavyMahallas();
+
+// --------------------------------------------------------------
+// RED FLAG: PROBLEMLI KONTRAKTLAR / BAJARILMAGAN ISHLAR
+// --------------------------------------------------------------
+interface RedFlagItem {
+  id: number;
+  name: string;           // mahalla yoki tuman nomi
+  region: string;
+  problemType: string;    // muammo turi
+  contractAmount: number; // shartnoma summasi (mln so'm)
+  status: string;         // holat (Bajarilmagan, Muddati o‘tgan, Kamchiliklar bor)
+  details: string;
+}
+
+// Problemli kontraktlarni yaratish (ba'zi mahalla va tumanlar asosida)
+const generateRedFlags = (): RedFlagItem[] => {
+  const redFlags: RedFlagItem[] = [];
+  const problemTypes = [
+    "Shartnoma bajarilmagan", "Mablag‘ o‘zlashtirilmagan", "Sifatli ta'mirlanmagan",
+    "Muddat buzilgan", "Hisobot taqdim etilmagan", "Jarima qo‘llanilgan",
+  ];
+  const statuses = ["Bajarilmagan", "Muddati o‘tgan", "Kamchiliklar bor", "Qayta ko‘rib chiqilmoqda"];
+
+  // Mahallalardan 40% ini problemli qilamiz
+  const problemMahallas = heavyMahallas.filter(() => Math.random() < 0.4);
+  problemMahallas.forEach((m, idx) => {
+    redFlags.push({
+      id: idx,
+      name: m.name,
+      region: m.region,
+      problemType: problemTypes[Math.floor(Math.random() * problemTypes.length)],
+      contractAmount: m.allocatedFund,
+      status: statuses[Math.floor(Math.random() * statuses.length)],
+      details: `${m.name} da ${problemTypes[Math.floor(Math.random() * problemTypes.length)]}. Ajratilgan mablag‘ ${m.allocatedFund} mln so‘m, ammo ishlar to‘liq bajarilmagan.`,
+    });
+  });
+
+  // Tumanlardan 30% ini problemli qilamiz
+  const problemDistricts = heavyDistricts.filter(() => Math.random() < 0.3);
+  problemDistricts.forEach((d, idx) => {
+    redFlags.push({
+      id: problemMahallas.length + idx,
+      name: d.name,
+      region: d.region,
+      problemType: problemTypes[Math.floor(Math.random() * problemTypes.length)],
+      contractAmount: d.allocatedFund,
+      status: statuses[Math.floor(Math.random() * statuses.length)],
+      details: `${d.name} da ${problemTypes[Math.floor(Math.random() * problemTypes.length)]}. Rejalashtirilgan ishlar ${d.allocatedFund} mln so‘m miqdorida bajarilmagan.`,
+    });
+  });
+
+  return redFlags;
+};
+
+const redFlagsData = generateRedFlags();
 
 // --------------------------------------------------------------
 // ASOSIY KOMPONENT
 // --------------------------------------------------------------
 export default function Regions() {
-  // Red flaglar (kamchiliklar)
-  const redFlags = regionsData
-    .filter(r => r.fundPercent < 75 || r.difficultMahallas > 25)
-    .map(r => `${r.name}: mablag‘ bajarilishi ${r.fundPercent}% (reja ${r.fundPlan} mln so‘m), og‘ir mahallalar ${r.difficultMahallas} ta.`);
+  const [activeTab, setActiveTab] = useState<"districts" | "mahallas" | "redflag">("districts");
+  const [selectedItem, setSelectedItem] = useState<any>(null);
+  const { isOpen, onOpen, onClose } = useDisclosure();
 
-  const summary = {
-    totalPlan: regionsData.reduce((s, r) => s + r.fundPlan, 0),
-    totalActual: regionsData.reduce((s, r) => s + r.fundActual, 0),
-    totalPercent: (regionsData.reduce((s, r) => s + r.fundActual, 0) / regionsData.reduce((s, r) => s + r.fundPlan, 0)) * 100,
-    totalDistrictsImproved: regionsData.reduce((s, r) => s + r.improvedDistricts, 0),
-    totalDifficultMahallas: regionsData.reduce((s, r) => s + r.difficultMahallas, 0),
-    totalFundCount: regionsData.reduce((s, r) => s + r.fundCount, 0),
-    totalFundSum: regionsData.reduce((s, r) => s + r.fundSum, 0),
+  // Общие итоги
+  const totalDistricts = heavyDistricts.length;
+  const totalMahallas = heavyMahallas.length;
+  const totalRedFlags = redFlagsData.length;
+
+  const handleRowClick = (item: any) => {
+    setSelectedItem(item);
+    onOpen();
+  };
+
+  const renderTable = () => {
+    if (activeTab === "districts") {
+      return (
+        <TableContainer borderWidth="1px" borderRadius="lg" overflow="hidden">
+          <Table variant="simple" size="sm">
+            <Thead bg="gray.50">
+              <Tr>
+                <Th>Tuman nomi</Th>
+                <Th>Viloyat</Th>
+                <Th isNumeric>Aholi soni</Th>
+                <Th isNumeric>Ajratilgan mablag‘ (mln so‘m)</Th>
+              </Tr>
+            </Thead>
+            <Tbody>
+              {heavyDistricts.map((district) => (
+                <Tr key={district.id} cursor="pointer" _hover={{ bg: "gray.50" }} onClick={() => handleRowClick(district)}>
+                  <Td fontWeight="medium">{district.name}</Td>
+                  <Td>{district.region}</Td>
+                  <Td isNumeric>{district.population.toLocaleString()}</Td>
+                  <Td isNumeric fontWeight="bold" color="green.600">{district.allocatedFund.toLocaleString()} mln</Td>
+                </Tr>
+              ))}
+            </Tbody>
+          </Table>
+        </TableContainer>
+      );
+    }
+
+    if (activeTab === "mahallas") {
+      return (
+        <TableContainer borderWidth="1px" borderRadius="lg" overflow="hidden">
+          <Table variant="simple" size="sm">
+            <Thead bg="gray.50">
+              <Tr>
+                <Th>Mahalla nomi</Th>
+                <Th>Viloyat</Th>
+                <Th isNumeric>Xo‘jaliklar soni</Th>
+                <Th isNumeric>Ajratilgan mablag‘ (mln so‘m)</Th>
+              </Tr>
+            </Thead>
+            <Tbody>
+              {heavyMahallas.map((mahalla) => (
+                <Tr key={mahalla.id} cursor="pointer" _hover={{ bg: "gray.50" }} onClick={() => handleRowClick(mahalla)}>
+                  <Td fontWeight="medium">{mahalla.name}</Td>
+                  <Td>{mahalla.region}</Td>
+                  <Td isNumeric>{mahalla.households.toLocaleString()}</Td>
+                  <Td isNumeric fontWeight="bold" color="green.600">{mahalla.allocatedFund.toLocaleString()} mln</Td>
+                </Tr>
+              ))}
+            </Tbody>
+          </Table>
+        </TableContainer>
+      );
+    }
+
+    if (activeTab === "redflag") {
+      return (
+        <TableContainer borderWidth="1px" borderRadius="lg" overflow="hidden">
+          <Table variant="simple" size="sm">
+            <Thead bg="gray.50">
+              <Tr>
+                <Th>Mahalla / Tuman</Th>
+                <Th>Viloyat</Th>
+                <Th>Muammo turi</Th>
+                <Th isNumeric>Shartnoma summasi (mln so‘m)</Th>
+                <Th>Holat</Th>
+              </Tr>
+            </Thead>
+            <Tbody>
+              {redFlagsData.map((flag) => (
+                <Tr key={flag.id} cursor="pointer" _hover={{ bg: "gray.50" }} onClick={() => handleRowClick(flag)}>
+                  <Td fontWeight="medium">{flag.name}</Td>
+                  <Td>{flag.region}</Td>
+                  <Td>{flag.problemType}</Td>
+                  <Td isNumeric fontWeight="bold" color="red.500">{flag.contractAmount.toLocaleString()} mln</Td>
+                  <Td><Badge colorScheme="red">{flag.status}</Badge></Td>
+                </Tr>
+              ))}
+            </Tbody>
+          </Table>
+        </TableContainer>
+      );
+    }
+    return null;
   };
 
   return (
     <Box>
-      <Heading size="xl" mb={2}> Mahallalar va hududlarni rivojlantirish monitoringi</Heading>
-
-      {/* Xarita */}
-      <MapWithTooltip />
-
-      {/* Asosiy statistika */}
-      <SimpleGrid columns={{ base: 1, md: 2, lg: 4 }} spacing={4} my={4}>
-        <Card><CardBody><Stat><StatLabel>Jami reja</StatLabel><StatNumber>{summary.totalPlan.toLocaleString()} mln so‘m</StatNumber><StatLabel>Amalda: {summary.totalActual.toLocaleString()} mln</StatLabel><Progress value={summary.totalPercent} size="sm" colorScheme="blue" /><Text fontSize="sm">Bajarilish: {summary.totalPercent.toFixed(1)}%</Text></Stat></CardBody></Card>
-        <Card><CardBody><Stat><StatLabel>🏗 Yaxshilangan tumanlar</StatLabel><StatNumber>{summary.totalDistrictsImproved}</StatNumber><StatHelpText>og‘ir toifadagi</StatHelpText></Stat></CardBody></Card>
-        <Card><CardBody><Stat><StatLabel>🏘 Og‘ir mahallalar</StatLabel><StatNumber>{summary.totalDifficultMahallas}</StatNumber><StatHelpText>jami</StatHelpText></Stat></CardBody></Card>
-        <Card><CardBody><Stat><StatLabel>📄 Shartnomalar soni</StatLabel><StatNumber>{summary.totalFundCount}</StatNumber><StatLabel>💵 Summa: {summary.totalFundSum.toLocaleString()} mln so‘m</StatLabel></Stat></CardBody></Card>
-      </SimpleGrid>
-
-      {/* Viloyatlar kartochkalari (jadval o‘rniga) */}
-      <Heading size="md" mt={6} mb={4}>Viloyatlar kesimida batafsil maʼlumot</Heading>
-      <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={4}>
-        {regionsData.map(region => (
-          <RegionCard key={region.name} data={region} />
-        ))}
-      </SimpleGrid>
-
-      {/* Kamchiliklar */}
-      <Alert status="error" borderRadius="lg" mt={6}>
-        <AlertIcon />
-        <AlertTitle>Aniqlangan kamchiliklar (red flag)</AlertTitle>
-        <List spacing={1} mt={2}>
-          {redFlags.map((flag, idx) => (
-            <ListItem key={idx}><ListIcon as={AlertTriangle} color="red.500" />{flag}</ListItem>
-          ))}
-        </List>
-      </Alert>
-
-      {/* Xulosa kartochkalari (og'ir va yaxshi hududlar) */}
-      <SimpleGrid columns={{ base: 1, md: 2 }} spacing={4} mt={6}>
-        <Card borderLeft="4px" borderLeftColor="red.400">
-          <CardHeader><Heading size="sm">⚠ Eng og‘ir holatdagi viloyatlar</Heading></CardHeader>
+      {/* Uchta karta */}
+      <SimpleGrid columns={{ base: 1, md: 3 }} spacing={6} mb={8}>
+        <Card
+          cursor="pointer"
+          onClick={() => setActiveTab("districts")}
+          borderLeft="4px"
+          borderLeftColor={activeTab === "districts" ? "blue.500" : "orange.400"}
+          transition="all 0.2s"
+          _hover={{ transform: "translateY(-2px)", boxShadow: "lg" }}
+          bg={activeTab === "districts" ? "blue.50" : "white"}
+        >
           <CardBody>
-            <List spacing={2}>
-              {regionsData.filter(r => r.status === "bad").map(r => (
-                <ListItem key={r.name} display="flex" alignItems="center" gap={2}>
-                  <Icon as={AlertTriangle} color="red.500" boxSize={4} />
-                  <Text fontSize="sm"><strong>{r.name}</strong> – bajarilish {r.fundPercent}%, og‘ir mahallalar {r.difficultMahallas}</Text>
-                </ListItem>
-              ))}
-            </List>
+            <Flex align="center" gap={4}>
+              <Icon as={Layers} boxSize={10} color="orange.500" />
+              <Box flex="1">
+                <Stat>
+                  <StatLabel fontSize="lg" fontWeight="bold">Og‘ir tumanlar</StatLabel>
+                  <StatNumber fontSize="3xl">{totalDistricts}</StatNumber>
+                  <StatLabel fontSize="sm">Infratuzilmasi yaxshilangan</StatLabel>
+                </Stat>
+              </Box>
+            </Flex>
           </CardBody>
         </Card>
-        <Card borderLeft="4px" borderLeftColor="green.400">
-          <CardHeader><Heading size="sm">✅ Eng yaxshi natijalar</Heading></CardHeader>
+
+        <Card
+          cursor="pointer"
+          onClick={() => setActiveTab("mahallas")}
+          borderLeft="4px"
+          borderLeftColor={activeTab === "mahallas" ? "blue.500" : "red.400"}
+          transition="all 0.2s"
+          _hover={{ transform: "translateY(-2px)", boxShadow: "lg" }}
+          bg={activeTab === "mahallas" ? "blue.50" : "white"}
+        >
           <CardBody>
-            <List spacing={2}>
-              {regionsData.filter(r => r.status === "good").map(r => (
-                <ListItem key={r.name} display="flex" alignItems="center" gap={2}>
-                  <Icon as={CheckCircle} color="green.500" boxSize={4} />
-                  <Text fontSize="sm"><strong>{r.name}</strong> – bajarilish {r.fundPercent}%, {r.improvedDistricts} ta tuman yaxshilangan</Text>
-                </ListItem>
-              ))}
-            </List>
+            <Flex align="center" gap={4}>
+              <Icon as={Grid} boxSize={10} color="red.500" />
+              <Box flex="1">
+                <Stat>
+                  <StatLabel fontSize="lg" fontWeight="bold">Og‘ir mahallalar</StatLabel>
+                  <StatNumber fontSize="3xl">{totalMahallas}</StatNumber>
+                  <StatLabel fontSize="sm">Eng muammoli hududlar</StatLabel>
+                </Stat>
+              </Box>
+            </Flex>
+          </CardBody>
+        </Card>
+
+        <Card
+          cursor="pointer"
+          onClick={() => setActiveTab("redflag")}
+          borderLeft="4px"
+          borderLeftColor={activeTab === "redflag" ? "blue.500" : "red.500"}
+          transition="all 0.2s"
+          _hover={{ transform: "translateY(-2px)", boxShadow: "lg" }}
+          bg={activeTab === "redflag" ? "blue.50" : "white"}
+        >
+          <CardBody>
+            <Flex align="center" gap={4}>
+              <Icon as={AlertTriangle} boxSize={10} color="red.500" />
+              <Box flex="1">
+                <Stat>
+                  <StatLabel fontSize="lg" fontWeight="bold">Aniqlangan kamchilik</StatLabel>
+                  <StatNumber fontSize="3xl">{totalRedFlags}</StatNumber>
+                  <StatLabel fontSize="sm">Bajarilmagan kontraktlar</StatLabel>
+                </Stat>
+              </Box>
+            </Flex>
           </CardBody>
         </Card>
       </SimpleGrid>
+
+      {/* Dinamik jadval */}
+      <Box mt={4}>
+        <Heading size="md" mb={4}>
+          {activeTab === "districts" && "📋 Og‘ir tumanlar ro‘yxati"}
+          {activeTab === "mahallas" && "📋 Og‘ir mahallalar ro‘yxati"}
+          {activeTab === "redflag" && "⚠️ Bajarilmagan kontraktlar / Muammolar"}
+        </Heading>
+        <Box bg='white'>
+          {renderTable()}
+        </Box>
+      </Box>
+
+      {/* Modal oyna */}
+      <Modal isOpen={isOpen} onClose={onClose} size="lg">
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>
+            <Flex align="center" gap={2}>
+              <Icon as={Info} color="blue.500" />
+              Batafsil ma'lumot
+            </Flex>
+          </ModalHeader>
+          <ModalBody>
+            {selectedItem && (
+              <Box>
+                <Text fontWeight="bold" fontSize="lg">{selectedItem.name}</Text>
+                <Divider my={2} />
+                <SimpleGrid columns={2} spacing={3}>
+                  {selectedItem.region && <><Text fontWeight="semibold">Viloyat:</Text><Text>{selectedItem.region}</Text></>}
+                  {selectedItem.population && <><Text fontWeight="semibold">Aholi soni:</Text><Text>{selectedItem.population.toLocaleString()}</Text></>}
+                  {selectedItem.households && <><Text fontWeight="semibold">Xo‘jaliklar soni:</Text><Text>{selectedItem.households.toLocaleString()}</Text></>}
+                  {selectedItem.issues && <><Text fontWeight="semibold">Asosiy muammolar:</Text><Text>{selectedItem.issues}</Text></>}
+                  {selectedItem.improvementPlan && <><Text fontWeight="semibold">Yaxshilash rejasi:</Text><Text>{selectedItem.improvementPlan}</Text></>}
+                  {selectedItem.mainProblem && <><Text fontWeight="semibold">Asosiy muammo:</Text><Text>{selectedItem.mainProblem}</Text></>}
+                  {selectedItem.status && <><Text fontWeight="semibold">Holat:</Text><Badge colorScheme="red">{selectedItem.status}</Badge></>}
+                  {selectedItem.problemType && <><Text fontWeight="semibold">Muammo turi:</Text><Text>{selectedItem.problemType}</Text></>}
+                  {selectedItem.contractAmount && <><Text fontWeight="semibold">Shartnoma summasi:</Text><Text fontWeight="bold" color="red.500">{selectedItem.contractAmount.toLocaleString()} mln so‘m</Text></>}
+                  {selectedItem.allocatedFund !== undefined && !selectedItem.contractAmount && (
+                    <>
+                      <Text fontWeight="semibold">Ajratilgan mablag‘:</Text>
+                      <Text fontWeight="bold" color="green.600">{selectedItem.allocatedFund.toLocaleString()} mln so‘m</Text>
+                    </>
+                  )}
+                  {selectedItem.details && <><Text fontWeight="semibold">Batafsil:</Text><Text>{selectedItem.details}</Text></>}
+                </SimpleGrid>
+              </Box>
+            )}
+          </ModalBody>
+          <ModalFooter>
+            <Button colorScheme="blue" onClick={onClose}>Yopish</Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
     </Box>
   );
 }

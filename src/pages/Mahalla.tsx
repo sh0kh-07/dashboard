@@ -1,17 +1,18 @@
 import React, { useState } from "react";
 import {
-  Box, Text, Heading, useToken, Flex, SimpleGrid, Stat, StatLabel,
-  StatNumber, Badge, Progress, Card, CardBody, CardHeader, Divider,
-  Alert, AlertIcon, AlertTitle, List, ListItem, ListIcon,
-  Icon, Tabs, TabList, TabPanels, Tab, TabPanel,
+  Box, Text, Heading, Flex, SimpleGrid, Stat, StatLabel, StatNumber,
+  Badge, Progress, Card, CardBody, CardHeader, Divider, Icon,
   Table, Thead, Tbody, Tr, Th, Td, TableContainer,
+  Alert, AlertIcon, AlertTitle, List, ListItem, ListIcon,
+  Modal, ModalOverlay, ModalContent, ModalHeader, ModalBody, ModalFooter,
+  Button, useDisclosure,
 } from "@chakra-ui/react";
 import { useNavigate } from "react-router-dom";
 import Uzbekistan from "@svg-maps/uzbekistan";
 import {
-  AlertTriangle, CheckCircle, MapPin, DollarSign, Home, Building, Users,
-  TrendingUp, TrendingDown, Briefcase, Scale, GraduationCap, Landmark,
-  Wallet, Banknote, Globe, Shield,
+  AlertTriangle, CheckCircle, MapPin, Home, Users, Landmark,
+  TrendingUp, Briefcase, Scale, GraduationCap, Wallet, Banknote, Globe,
+  Flag, AlertOctagon,
 } from "lucide-react";
 
 // --------------------------------------------------------------
@@ -19,14 +20,14 @@ import {
 // --------------------------------------------------------------
 interface RegionServiceData {
   name: string;
-  familiesPlan: number;      // oilalar rejasi
-  familiesActual: number;    // amalda
+  familiesPlan: number;
+  familiesActual: number;
   familiesPercent: number;
-  peoplePlan: number;        // aholi rejasi
+  peoplePlan: number;
   peopleActual: number;
   peoplePercent: number;
-  fundCount: number;         // ajratilgan mablag'lar soni (shartnomalar)
-  fundSum: number;           // summasi (mln so'm)
+  fundCount: number;
+  fundSum: number;
   status: "bad" | "moderate" | "good";
 }
 
@@ -48,7 +49,7 @@ const regionsData: RegionServiceData[] = [
 ];
 
 // --------------------------------------------------------------
-// 2. XIZMAT TURLARI (OILALAR VA AHOLI UCHUN)
+// 2. XIZMAT TURLARI
 // --------------------------------------------------------------
 interface ServiceType {
   name: string;
@@ -59,7 +60,7 @@ interface ServiceType {
   peoplePlan: number;
   peopleActual: number;
   peoplePercent: number;
-  incomeIncrease: number;  // oshgan daromad (mln so'm)
+  incomeIncrease: number;
 }
 
 const serviceTypes: ServiceType[] = [
@@ -76,8 +77,8 @@ const serviceTypes: ServiceType[] = [
 interface FundSource {
   name: string;
   icon: any;
-  count: number;      // shartnomalar soni
-  amount: number;     // summasi (mln so'm)
+  count: number;
+  amount: number;
   color: string;
 }
 
@@ -88,7 +89,6 @@ const fundSources: FundSource[] = [
   { name: "Tashqi manba (xalqaro tashkilotlar)", icon: Globe, count: 156, amount: 231000, color: "#805AD5" },
 ];
 
-// Monitoring bosqichlari
 const monitoringStages = [
   "1. Rejalashtirish va byudjetlashtirish",
   "2. Mablag‘larni ajratish (tumanlar kesimida)",
@@ -103,7 +103,76 @@ const monitoringStages = [
 ];
 
 // --------------------------------------------------------------
-// XARITA MAPPING
+// 4. RED FLAG MA'LUMOTLARI (PROBLEMLI KONTRAKTLAR)
+// --------------------------------------------------------------
+interface RedFlagItem {
+  id: number;
+  name: string;           // xizmat nomi yoki mahalla/tuman
+  region: string;
+  problemType: string;
+  contractAmount: number;
+  status: string;
+  details: string;
+}
+
+// Generatsiya qilamiz (real ma'lumotlar o'rniga)
+const generateRedFlags = (): RedFlagItem[] => {
+  const problems = [
+    { type: "Shartnoma bajarilmagan", status: "Bajarilmagan", detail: "Mablag‘ o‘zlashtirilmagan, ish boshlanmagan" },
+    { type: "Muddat buzilgan", status: "Muddati o‘tgan", detail: "Belgilangan muddatda ish tugatilmagan" },
+    { type: "Sifatli ta'mirlanmagan", status: "Kamchiliklar bor", detail: "Ish sifati talabga javob bermaydi" },
+    { type: "Hisobot taqdim etilmagan", status: "Hisobotsiz", detail: "Mablag‘ sarfi bo‘yicha hisobot kelib tushmagan" },
+    { type: "Jarima qo‘llanilgan", status: "Jarima", detail: "Shartnoma shartlarini buzganlik uchun jarima solingan" },
+  ];
+
+  const services = [...serviceTypes];
+  const redFlags: RedFlagItem[] = [];
+  let id = 0;
+
+  // Har bir xizmat turidan 1-2 ta muammo yaratamiz
+  services.forEach(service => {
+    const problemCount = Math.floor(Math.random() * 2) + 1;
+    for (let i = 0; i < problemCount; i++) {
+      const prob = problems[Math.floor(Math.random() * problems.length)];
+      const amount = Math.floor(Math.random() * 50000) + 10000;
+      redFlags.push({
+        id: id++,
+        name: service.name,
+        region: regionsData[Math.floor(Math.random() * regionsData.length)].name,
+        problemType: prob.type,
+        contractAmount: amount,
+        status: prob.status,
+        details: `${service.name} bo‘yicha ${prob.detail}. Shartnoma summasi ${amount.toLocaleString()} mln so‘m.`,
+      });
+    }
+  });
+
+  // Yana bir nechta mahallalarga oid muammolar
+  const mahallaProblems = [
+    { name: "Oltin vodiy MFY", region: "Fargʻona viloyati", problem: "Yo‘l ta'miri tugallanmagan", amount: 12500 },
+    { name: "Navbahor MFY", region: "Namangan viloyati", problem: "Suv tarmog‘i ishlamayapti", amount: 8400 },
+    { name: "Do‘stlik MFY", region: "Surxondaryo viloyati", problem: "Maktab ta'miri sifatsiz", amount: 22300 },
+    { name: "Chorshanba MFY", region: "Qashqadaryo viloyati", problem: "Elektr ta'minotida uzilishlar", amount: 6700 },
+  ];
+  mahallaProblems.forEach((mp, idx) => {
+    redFlags.push({
+      id: id++,
+      name: mp.name,
+      region: mp.region,
+      problemType: mp.problem,
+      contractAmount: mp.amount,
+      status: "Bajarilmagan",
+      details: `${mp.name} da ${mp.problem}. Ajratilgan mablag‘ ${mp.amount.toLocaleString()} mln so‘m, ammo ish to‘liq bajarilmagan.`,
+    });
+  });
+
+  return redFlags;
+};
+
+const redFlagsData = generateRedFlags();
+
+// --------------------------------------------------------------
+// XARITA MAPPING (o'zgarishsiz)
 // --------------------------------------------------------------
 const svgToRegion: Record<string, string> = {
   "Karakalpakstan": "Qoraqalpogʻiston Respublikasi",
@@ -142,46 +211,122 @@ const getRegionName = (svgName: string): string | null => {
   return found ? found.name : null;
 };
 
-const getStatusColor = (status: string): string => {
-  if (status === "bad") return "#E53E3E";
-  if (status === "moderate") return "#ED8936";
-  return "#48BB78";
-};
+// --------------------------------------------------------------
+// XARITA KOMPONENTI (DINAMIK RANG VA TOOLTIP)
+// --------------------------------------------------------------
+interface MapWithTooltipProps {
+  activeSection: "families" | "people" | "funds" | "redflag";
+}
 
-// Xarita komponenti
-const MapWithTooltip = () => {
+const MapWithTooltip: React.FC<MapWithTooltipProps> = ({ activeSection }) => {
   const [tooltip, setTooltip] = useState<any>({ visible: false, x: 0, y: 0, content: null });
+  const navigate = useNavigate();
 
-  const getTooltipContent = (regionName: string) => {
-    const data = regionsData.find(r => r.name === regionName);
-    if (!data) return <Text>Maʼlumot yoʻq</Text>;
-    return (
-      <Box>
-        <Text fontWeight="bold">{regionName}</Text>
-        <Text>👨‍👩‍👧‍👦 Oilalar: {data.familiesActual} / {data.familiesPlan} ({data.familiesPercent}%)</Text>
-        <Text>👥 Aholi: {data.peopleActual} / {data.peoplePlan} ({data.peoplePercent}%)</Text>
-        <Text>💰 Mablag‘lar: {data.fundCount} ta / {data.fundSum} mln so‘m</Text>
-      </Box>
-    );
+  const getColorBySection = (region: RegionServiceData) => {
+    if (activeSection === "families") {
+      const percent = region.familiesPercent;
+      if (percent < 75) return "#E53E3E";
+      if (percent < 85) return "#ED8936";
+      return "#48BB78";
+    }
+    if (activeSection === "people") {
+      const percent = region.peoplePercent;
+      if (percent < 75) return "#E53E3E";
+      if (percent < 85) return "#ED8936";
+      return "#48BB78";
+    }
+    if (activeSection === "funds") {
+      const maxSum = Math.max(...regionsData.map(r => r.fundSum));
+      const intensity = region.fundSum / maxSum;
+      if (intensity < 0.4) return "#E53E3E";
+      if (intensity < 0.7) return "#ED8936";
+      return "#48BB78";
+    }
+    if (activeSection === "redflag") {
+      // Red flag bo'limida xarita kulrang yoki status bo'yicha
+      if (region.status === "bad") return "#E53E3E";
+      if (region.status === "moderate") return "#ED8936";
+      return "#48BB78";
+    }
+    return "#CBD5E0";
+  };
+
+  const getTooltipContent = (region: RegionServiceData) => {
+    if (activeSection === "families") {
+      return (
+        <Box>
+          <Text fontWeight="bold">{region.name}</Text>
+          <Text>👨‍👩‍👧‍👦 Oilalar qamrovi</Text>
+          <Text>Reja: {region.familiesPlan.toLocaleString()}</Text>
+          <Text>Amalda: {region.familiesActual.toLocaleString()}</Text>
+          <Text fontWeight="bold">Bajarilish: {region.familiesPercent}%</Text>
+        </Box>
+      );
+    }
+    if (activeSection === "people") {
+      return (
+        <Box>
+          <Text fontWeight="bold">{region.name}</Text>
+          <Text>👥 Aholi qamrovi</Text>
+          <Text>Reja: {region.peoplePlan.toLocaleString()}</Text>
+          <Text>Amalda: {region.peopleActual.toLocaleString()}</Text>
+          <Text fontWeight="bold">Bajarilish: {region.peoplePercent}%</Text>
+        </Box>
+      );
+    }
+    if (activeSection === "funds") {
+      return (
+        <Box>
+          <Text fontWeight="bold">{region.name}</Text>
+          <Text>💰 Ajratilgan mablag‘lar</Text>
+          <Text>Shartnomalar soni: {region.fundCount}</Text>
+          <Text fontWeight="bold">Summa: {region.fundSum.toLocaleString()} mln so‘m</Text>
+        </Box>
+      );
+    }
+    if (activeSection === "redflag") {
+      const regionRedFlags = redFlagsData.filter(rf => rf.region === region.name);
+      return (
+        <Box>
+          <Text fontWeight="bold">{region.name}</Text>
+          <Text>⚠️ Red Flaglar soni: {regionRedFlags.length}</Text>
+          {regionRedFlags.slice(0, 2).map(rf => (
+            <Text key={rf.id} fontSize="xs">{rf.problemType}</Text>
+          ))}
+          {regionRedFlags.length > 2 && <Text fontSize="xs">va boshqalar...</Text>}
+        </Box>
+      );
+    }
+    return null;
+  };
+
+  const handleClick = (regionName: string) => {
+    console.log("Clicked region:", regionName);
   };
 
   return (
     <Box position="relative" display="flex" justifyContent="center" my={6}>
       <svg viewBox={Uzbekistan.viewBox} width="80%" style={{ cursor: "pointer" }}>
         {Uzbekistan.locations.map((loc: any) => {
-          const region = getRegionName(loc.name);
-          const data = region ? regionsData.find(r => r.name === region) : null;
-          const fillColor = data ? getStatusColor(data.status) : "#CBD5E0";
+          const regionName = getRegionName(loc.name);
+          const regionData = regionName ? regionsData.find(r => r.name === regionName) : null;
+          const fillColor = regionData ? getColorBySection(regionData) : "#CBD5E0";
           return (
             <path
               key={loc.id}
               d={loc.path}
               onMouseEnter={(e) => {
-                const content = region ? getTooltipContent(region) : <Text>Maʼlumot yoʻq</Text>;
-                setTooltip({ visible: true, x: e.clientX, y: e.clientY, content });
+                if (!regionData) return;
+                setTooltip({
+                  visible: true,
+                  x: e.clientX,
+                  y: e.clientY,
+                  content: getTooltipContent(regionData),
+                });
               }}
               onMouseMove={(e) => setTooltip((p: any) => ({ ...p, x: e.clientX, y: e.clientY }))}
               onMouseLeave={() => setTooltip({ visible: false, x: 0, y: 0, content: null })}
+              onClick={() => regionData && handleClick(regionData.name)}
               style={{ fill: fillColor, stroke: "#cbd5e0", strokeWidth: 1.2, cursor: "pointer", opacity: 0.85 }}
               onMouseOver={(e) => { e.currentTarget.style.opacity = "1"; e.currentTarget.style.strokeWidth = "2.5"; e.currentTarget.style.stroke = "#4a5568"; }}
               onMouseOut={(e) => { e.currentTarget.style.opacity = "0.85"; e.currentTarget.style.strokeWidth = "1.2"; e.currentTarget.style.stroke = "#cbd5e0"; }}
@@ -199,24 +344,7 @@ const MapWithTooltip = () => {
 };
 
 // --------------------------------------------------------------
-// VILOYAT KARTOCHKASI (1-TAB UCHUN)
-// --------------------------------------------------------------
-const RegionServiceCard = ({ data }: { data: RegionServiceData }) => (
-  <Card borderLeft="4px" borderLeftColor={getStatusColor(data.status)} boxShadow="sm" height="100%">
-    <CardHeader pb={0}>
-      <Flex justify="space-between"><Heading size="sm"><Icon as={MapPin} mr={1} />{data.name}</Heading><Badge colorScheme={data.status === "bad" ? "red" : data.status === "good" ? "green" : "orange"}>{data.status === "bad" ? "Og‘ir" : data.status === "good" ? "Yaxshi" : "O‘rtacha"}</Badge></Flex>
-    </CardHeader>
-    <CardBody pt={2}>
-      <Stat size="sm" mb={2}><StatLabel fontSize="xs">👨‍👩‍👧‍👦 Oilalar</StatLabel><StatNumber fontSize="md">{data.familiesActual.toLocaleString()} / {data.familiesPlan.toLocaleString()}</StatNumber><Flex align="center" gap={2} mt={1}><Progress value={data.familiesPercent} size="sm" width="100%" colorScheme={data.familiesPercent<75?"red":"green"} /><Badge>{data.familiesPercent}%</Badge></Flex></Stat>
-      <Stat size="sm" mb={2}><StatLabel fontSize="xs">👥 Aholi</StatLabel><StatNumber fontSize="md">{data.peopleActual.toLocaleString()} / {data.peoplePlan.toLocaleString()}</StatNumber><Flex align="center" gap={2} mt={1}><Progress value={data.peoplePercent} size="sm" width="100%" colorScheme={data.peoplePercent<75?"red":"green"} /><Badge>{data.peoplePercent}%</Badge></Flex></Stat>
-      <Divider />
-      <Flex justify="space-between" mt={2}><Text fontSize="xs">💰 Mablag‘lar:</Text><Text fontSize="sm">{data.fundCount} ta / {data.fundSum.toLocaleString()} mln</Text></Flex>
-    </CardBody>
-  </Card>
-);
-
-// --------------------------------------------------------------
-// XIZMAT KARTOCHKASI (2,3-TABLAR UCHUN)
+// XIZMAT KARTOCHKASI (o'zgarishsiz)
 // --------------------------------------------------------------
 const ServiceCard = ({ service, type }: { service: ServiceType; type: "families" | "people" }) => {
   const plan = type === "families" ? service.familiesPlan : service.peoplePlan;
@@ -227,7 +355,7 @@ const ServiceCard = ({ service, type }: { service: ServiceType; type: "families"
     <Card borderTop="4px" borderTopColor={percent < 75 ? "#E53E3E" : percent < 85 ? "#ED8936" : "#48BB78"} boxShadow="sm">
       <CardHeader pb={0}><Flex align="center" gap={2}><Icon as={service.icon} boxSize={5} /><Heading size="sm">{service.name}</Heading></Flex></CardHeader>
       <CardBody pt={2}>
-        <Stat size="sm"><StatLabel fontSize="xs">{label}</StatLabel><StatNumber>{actual.toLocaleString()} / {plan.toLocaleString()}</StatNumber><Flex align="center" gap={2} mt={1}><Progress value={percent} size="sm" width="100%" colorScheme={percent<75?"red":"green"} /><Badge>{percent}%</Badge></Flex></Stat>
+        <Stat size="sm"><StatLabel fontSize="xs">{label}</StatLabel><StatNumber>{actual.toLocaleString()} / {plan.toLocaleString()}</StatNumber><Flex align="center" gap={2} mt={1}><Progress value={percent} size="sm" width="100%" colorScheme={percent < 75 ? "red" : "green"} /><Badge>{percent}%</Badge></Flex></Stat>
         <Divider my={2} />
         <Flex align="center" gap={2}><Icon as={TrendingUp} color="green.500" boxSize={4} /><Text fontSize="sm">Oshgan daromad: <strong>{service.incomeIncrease.toLocaleString()} mln so‘m</strong></Text></Flex>
       </CardBody>
@@ -236,113 +364,258 @@ const ServiceCard = ({ service, type }: { service: ServiceType; type: "families"
 };
 
 // --------------------------------------------------------------
-// ASOSIY DASHBORD
+// ASOSIY KOMPONENT (4 KARTOCHKA)
 // --------------------------------------------------------------
 export default function ServicesDashboard() {
-  // Red flaglar
+  const [activeSection, setActiveSection] = useState<"families" | "people" | "funds" | "redflag">("families");
+  const [selectedItem, setSelectedItem] = useState<any>(null);
+  const { isOpen, onOpen, onClose } = useDisclosure();
+
+  // Общие показатели
+  const totalFamiliesPlan = regionsData.reduce((s, r) => s + r.familiesPlan, 0);
+  const totalFamiliesActual = regionsData.reduce((s, r) => s + r.familiesActual, 0);
+  const familiesPercent = (totalFamiliesActual / totalFamiliesPlan) * 100;
+
+  const totalPeoplePlan = regionsData.reduce((s, r) => s + r.peoplePlan, 0);
+  const totalPeopleActual = regionsData.reduce((s, r) => s + r.peopleActual, 0);
+  const peoplePercent = (totalPeopleActual / totalPeoplePlan) * 100;
+
+  const totalFunds = fundSources.reduce((s, f) => s + f.amount, 0);
+  const totalContracts = fundSources.reduce((s, f) => s + f.count, 0);
+
+  const totalRedFlags = redFlagsData.length;
+
+  // Red flaglar (eski) – o'chirmaymiz, lekin yangi redflag bo'limi uchun alohida
   const regionRedFlags = regionsData.filter(r => r.familiesPercent < 75 || r.peoplePercent < 75).map(r => `${r.name}: oila ${r.familiesPercent}%, aholi ${r.peoplePercent}%`);
   const serviceRedFlags = serviceTypes.filter(s => s.familiesPercent < 75 || s.peoplePercent < 75).map(s => `${s.name}: oila ${s.familiesPercent}%, aholi ${s.peoplePercent}%`);
   const fundRedFlags = ["Tashqi manba mablag‘lari 231 mlrd so‘m bo‘lib, rejadan 15% kam (265 mlrd reja)", "Monitoringning 4-bosqichida hujjatlashtirishda 12 ta kamchilik aniqlandi"];
 
-  // Umumiy statistika
-  const totalFamiliesPlan = regionsData.reduce((s, r) => s + r.familiesPlan, 0);
-  const totalFamiliesActual = regionsData.reduce((s, r) => s + r.familiesActual, 0);
-  const totalPeoplePlan = regionsData.reduce((s, r) => s + r.peoplePlan, 0);
-  const totalPeopleActual = regionsData.reduce((s, r) => s + r.peopleActual, 0);
-  const totalFundSum = regionsData.reduce((s, r) => s + r.fundSum, 0);
+  const handleRowClick = (item: any) => {
+    setSelectedItem(item);
+    onOpen();
+  };
+
+  const sections = [
+    {
+      id: "families",
+      label: "Oilalar qamrovi",
+      icon: <Home size={24} />,
+      value: `${familiesPercent.toFixed(1)}%`,
+      sub: `Reja bajarilishi (${totalFamiliesActual.toLocaleString()} / ${totalFamiliesPlan.toLocaleString()})`,
+    },
+    {
+      id: "people",
+      label: "Aholi qamrovi",
+      icon: <Users size={24} />,
+      value: `${peoplePercent.toFixed(1)}%`,
+      sub: `Reja bajarilishi (${totalPeopleActual.toLocaleString()} / ${totalPeoplePlan.toLocaleString()})`,
+    },
+    {
+      id: "funds",
+      label: "Ajratilgan mablag‘lar",
+      icon: <Landmark size={24} />,
+      value: `${totalFunds.toLocaleString()} mln`,
+      sub: `${totalContracts} ta shartnoma`,
+    },
+    {
+      id: "redflag",
+      label: "Aniqlangan kamchiliklar",
+      icon: <Flag size={24} />,
+      value: `${totalRedFlags}`,
+      sub: "Aniqlangan muammolar",
+    },
+  ];
+
+  // Jadvalni render qilish (redflag uchun)
+  const renderRedFlagTable = () => (
+    <TableContainer borderWidth="1px" borderRadius="lg" overflow="hidden" mt={4}>
+      <Table variant="simple" size="sm">
+        <Thead bg="gray.50">
+          <Tr>
+            <Th>Xizmat / Mahalla</Th>
+            <Th>Viloyat</Th>
+            <Th>Muammo turi</Th>
+            <Th isNumeric>Shartnoma summasi (mln so‘m)</Th>
+            <Th>Holat</Th>
+          </Tr>
+        </Thead>
+        <Tbody>
+          {redFlagsData.map((flag) => (
+            <Tr key={flag.id} cursor="pointer" _hover={{ bg: "gray.50" }} onClick={() => handleRowClick(flag)}>
+              <Td fontWeight="medium">{flag.name}</Td>
+              <Td>{flag.region}</Td>
+              <Td>{flag.problemType}</Td>
+              <Td isNumeric fontWeight="bold" color="red.500">{flag.contractAmount.toLocaleString()} mln</Td>
+              <Td><Badge colorScheme="red">{flag.status}</Badge></Td>
+            </Tr>
+          ))}
+        </Tbody>
+      </Table>
+    </TableContainer>
+  );
 
   return (
-    <Box >
-      <Heading size="xl" mb={2}>📊 Ko‘rsatilgan xizmatlar monitoringi</Heading>
-      <Text mb={4}>Daromadni oshirishga qaratilgan xizmatlar – oilalar, aholi va ajratilgan mablag‘lar tahlili</Text>
+    <Box>
+      {/* Горизонтальные карточки-вкладки (4 штуки) */}
+      <Flex
+        gap={4}
+        mb={6}
+        overflowX="auto"
+        pb={2}
+        css={{
+          "&::-webkit-scrollbar": { height: "6px" },
+          "&::-webkit-scrollbar-track": { background: "#f1f1f1", borderRadius: "3px" },
+          "&::-webkit-scrollbar-thumb": { background: "#cbd5e0", borderRadius: "3px" },
+        }}
+      >
+        {sections.map((section) => (
+          <Box
+            key={section.id}
+            onClick={() => setActiveSection(section.id as any)}
+            cursor="pointer"
+            minW="220px"
+            flexShrink={0}
+            bg={activeSection === section.id ? "blue.500" : "white"}
+            color={activeSection === section.id ? "white" : "gray.700"}
+            borderRadius="xl"
+            boxShadow="md"
+            transition="all 0.2s"
+            _hover={{
+              transform: "translateY(-2px)",
+              boxShadow: "lg",
+              bg: activeSection === section.id ? "blue.600" : "gray.50",
+            }}
+            p={4}
+          >
+            <Flex align="center" gap={2} mb={2}>
+              <Box color={activeSection === section.id ? "white" : "blue.500"}>
+                {section.icon}
+              </Box>
+              <Text fontSize="sm" fontWeight="medium" noOfLines={2}>
+                {section.label}
+              </Text>
+            </Flex>
+            <Text fontSize="2xl" fontWeight="bold">
+              {section.value}
+            </Text>
+            <Text fontSize="xs" opacity={0.8}>
+              {section.sub}
+            </Text>
+          </Box>
+        ))}
+      </Flex>
 
-      <Tabs variant="soft-rounded" colorScheme="blue">
-        <TabList bg="white" borderRadius="xl" p={2} flexWrap="wrap" gap={2}>
-          <Tab>1. Xarita (viloyatlar)</Tab>
-          <Tab>2. Oilalar</Tab>
-          <Tab>3. Aholi</Tab>
-          <Tab>4. Ajratilgan mablag‘lar</Tab>
-        </TabList>
+      {/* Контент выбранного раздела */}
+      <Box borderRadius="xl" borderWidth="1px">
+        {/* Карта показывается для всех разделов, кроме redflag? – пусть показывается везде, для redflag показывает статус регионов */}
+        <MapWithTooltip activeSection={activeSection} />
 
-        <TabPanels mt={6}>
-          {/* ---------- TAB 1: XARITA ---------- */}
-          <TabPanel p={0}>
-            <Box bg="white" borderRadius="xl" p={5} borderWidth="1px">
-              <Heading size="md">Viloyatlar kesimida daromad oshirish xizmatlari</Heading>
-              <MapWithTooltip />
-              <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={4} mt={4}>
-                {regionsData.map(r => <RegionServiceCard key={r.name} data={r} />)}
-              </SimpleGrid>
-              <Alert status="error" mt={6}><AlertIcon /><AlertTitle>Aniqlangan kamchiliklar (red flag)</AlertTitle><List>{regionRedFlags.map((f,i)=><ListItem key={i}><ListIcon as={AlertTriangle}/>{f}</ListItem>)}</List></Alert>
-            </Box>
-          </TabPanel>
+        {/* Oilalar qamrovi */}
+        {activeSection === "families" && (
+          <>
+            <Heading size="md" mt={4} mb={4}>Xizmat turlari bo‘yicha oilalar qamrovi</Heading>
+            <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={4}>
+              {serviceTypes.map(s => <ServiceCard key={s.name} service={s} type="families" />)}
+            </SimpleGrid>
+            <SimpleGrid columns={{ base: 1, md: 2 }} spacing={4} mt={6}>
+              <Card><CardBody><Stat><StatLabel>Jami oilalar reja</StatLabel><StatNumber>{totalFamiliesPlan.toLocaleString()}</StatNumber><StatLabel>Amalda: {totalFamiliesActual.toLocaleString()}</StatLabel><Progress value={familiesPercent} size="sm" colorScheme="blue" /><Text>Bajarilish: {familiesPercent.toFixed(1)}%</Text></Stat></CardBody></Card>
+              <Card><CardBody><Stat><StatLabel>Jami oshgan daromad (oilalar)</StatLabel><StatNumber>{serviceTypes.reduce((s, sv) => s + sv.incomeIncrease, 0).toLocaleString()} mln so‘m</StatNumber></Stat></CardBody></Card>
+            </SimpleGrid>
+          
+          </>
+        )}
 
-          {/* ---------- TAB 2: OILALAR ---------- */}
-          <TabPanel p={0}>
-            <Box bg="white" borderRadius="xl" p={5} borderWidth="1px">
-              <Heading size="md">Xizmat turlari bo‘yicha oilalar qamrovi</Heading>
-              <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={4} mt={4}>
-                {serviceTypes.map(s => <ServiceCard key={s.name} service={s} type="families" />)}
-              </SimpleGrid>
-              <SimpleGrid columns={{ base: 1, md: 2 }} spacing={4} mt={6}>
-                <Card><CardBody><Stat><StatLabel>Jami oilalar reja</StatLabel><StatNumber>{totalFamiliesPlan.toLocaleString()}</StatNumber><StatLabel>Amalda: {totalFamiliesActual.toLocaleString()}</StatLabel><Progress value={(totalFamiliesActual/totalFamiliesPlan)*100} size="sm" colorScheme="blue" /><Text>Bajarilish: {((totalFamiliesActual/totalFamiliesPlan)*100).toFixed(1)}%</Text></Stat></CardBody></Card>
-                <Card><CardBody><Stat><StatLabel>Jami oshgan daromad (oilalar)</StatLabel><StatNumber>{serviceTypes.reduce((s,sv)=>s+sv.incomeIncrease,0).toLocaleString()} mln so‘m</StatNumber></Stat></CardBody></Card>
-              </SimpleGrid>
-              <Alert status="error" mt={6}><AlertIcon />Kamchiliklar:<List>{serviceRedFlags.map((f,i)=><ListItem key={i}>{f}</ListItem>)}</List></Alert>
-            </Box>
-          </TabPanel>
+        {/* Aholi qamrovi */}
+        {activeSection === "people" && (
+          <>
+            <Heading size="md" mt={4} mb={4}>Xizmat turlari bo‘yicha aholi qamrovi</Heading>
+            <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={4}>
+              {serviceTypes.map(s => <ServiceCard key={s.name} service={s} type="people" />)}
+            </SimpleGrid>
+            <SimpleGrid columns={{ base: 1, md: 2 }} spacing={4} mt={6}>
+              <Card><CardBody><Stat><StatLabel>Jami aholi reja</StatLabel><StatNumber>{totalPeoplePlan.toLocaleString()}</StatNumber><StatLabel>Amalda: {totalPeopleActual.toLocaleString()}</StatLabel><Progress value={peoplePercent} size="sm" colorScheme="blue" /><Text>Bajarilish: {peoplePercent.toFixed(1)}%</Text></Stat></CardBody></Card>
+              <Card><CardBody><Stat><StatLabel>Jami oshgan daromad (aholi)</StatLabel><StatNumber>{serviceTypes.reduce((s, sv) => s + sv.incomeIncrease, 0).toLocaleString()} mln so‘m</StatNumber></Stat></CardBody></Card>
+            </SimpleGrid>
+          
+          </>
+        )}
 
-          {/* ---------- TAB 3: AHOLI ---------- */}
-          <TabPanel p={0}>
-            <Box bg="white" borderRadius="xl" p={5} borderWidth="1px">
-              <Heading size="md">Xizmat turlari bo‘yicha aholi qamrovi</Heading>
-              <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={4} mt={4}>
-                {serviceTypes.map(s => <ServiceCard key={s.name} service={s} type="people" />)}
-              </SimpleGrid>
-              <SimpleGrid columns={{ base: 1, md: 2 }} spacing={4} mt={6}>
-                <Card><CardBody><Stat><StatLabel>Jami aholi reja</StatLabel><StatNumber>{totalPeoplePlan.toLocaleString()}</StatNumber><StatLabel>Amalda: {totalPeopleActual.toLocaleString()}</StatLabel><Progress value={(totalPeopleActual/totalPeoplePlan)*100} size="sm" colorScheme="blue" /><Text>Bajarilish: {((totalPeopleActual/totalPeoplePlan)*100).toFixed(1)}%</Text></Stat></CardBody></Card>
-                <Card><CardBody><Stat><StatLabel>Jami oshgan daromad (aholi)</StatLabel><StatNumber>{serviceTypes.reduce((s,sv)=>s+sv.incomeIncrease,0).toLocaleString()} mln so‘m</StatNumber></Stat></CardBody></Card>
-              </SimpleGrid>
-              <Alert status="error" mt={6}><AlertIcon />Kamchiliklar:<List>{serviceRedFlags.map((f,i)=><ListItem key={i}>{f}</ListItem>)}</List></Alert>
-            </Box>
-          </TabPanel>
+        {/* Ajratilgan mablag‘lar */}
+        {activeSection === "funds" && (
+          <>
+            <Heading size="md" mt={4} mb={4}>Ajratilgan mablag‘lar manbalari</Heading>
+            <SimpleGrid columns={{ base: 1, md: 2, lg: 4 }} spacing={4}>
+              {fundSources.map(f => (
+                <Card key={f.name} borderTop="4px" borderTopColor={f.color}>
+                  <CardBody>
+                    <Flex align="center" gap={2} mb={2}><Icon as={f.icon} color={f.color} /><Heading size="xs">{f.name}</Heading></Flex>
+                    <Stat size="sm"><StatLabel>Shartnomalar soni</StatLabel><StatNumber>{f.count}</StatNumber></Stat>
+                    <Stat size="sm"><StatLabel>Summa</StatLabel><StatNumber>{f.amount.toLocaleString()} mln so‘m</StatNumber></Stat>
+                  </CardBody>
+                </Card>
+              ))}
+            </SimpleGrid>
+            <Card mt={6}><CardBody><Stat><StatLabel>Jami ajratilgan mablag‘</StatLabel><StatNumber>{totalFunds.toLocaleString()} mln so‘m</StatNumber><StatLabel>Jami shartnomalar soni: {totalContracts}</StatLabel></Stat></CardBody></Card>
 
-          {/* ---------- TAB 4: AJRATILGAN MABLAG'LAR ---------- */}
-          <TabPanel p={0}>
-            <Box bg="white" borderRadius="xl" p={5} borderWidth="1px">
-              <Heading size="md">Ajratilgan mablag‘lar manbalari</Heading>
-              <SimpleGrid columns={{ base: 1, md: 2, lg: 4 }} spacing={4} mt={4}>
-                {fundSources.map(f => (
-                  <Card key={f.name} borderTop="4px" borderTopColor={f.color}>
-                    <CardBody>
-                      <Flex align="center" gap={2} mb={2}><Icon as={f.icon} color={f.color} /><Heading size="xs">{f.name}</Heading></Flex>
-                      <Stat size="sm"><StatLabel>Shartnomalar soni</StatLabel><StatNumber>{f.count}</StatNumber></Stat>
-                      <Stat size="sm"><StatLabel>Summa</StatLabel><StatNumber>{f.amount.toLocaleString()} mln so‘m</StatNumber></Stat>
-                    </CardBody>
-                  </Card>
-                ))}
-              </SimpleGrid>
-              <Card mt={6}><CardBody><Stat><StatLabel>Jami ajratilgan mablag‘</StatLabel><StatNumber>{fundSources.reduce((s,f)=>s+f.amount,0).toLocaleString()} mln so‘m</StatNumber><StatLabel>Jami shartnomalar soni: {fundSources.reduce((s,f)=>s+f.count,0)}</StatLabel></Stat></CardBody></Card>
-
-              <Heading size="md" mt={6}>📋 Mablag‘larni maqsadli yetib borishi – 10 bosqichli monitoring</Heading>
+            <Heading size="md" mt={6}>📋 Mablag‘larni maqsadli yetib borishi – 10 bosqichli monitoring</Heading>
+            <Box bg='white'>
               <TableContainer mt={4} border="1px solid" borderColor="gray.200" borderRadius="lg">
                 <Table size="sm"><Thead bg="gray.50"><Tr><Th>Bosqich</Th><Th>Nazorat choralari</Th><Th>Holat</Th></Tr></Thead>
-                <Tbody>
-                  {monitoringStages.map((stage, idx) => (
-                    <Tr key={idx}>
-                      <Td fontWeight="medium">{stage.split('. ')[0]}</Td>
-                      <Td>{stage.split('. ')[1]}</Td>
-                      <Td><Badge colorScheme={idx < 8 ? "green" : idx === 8 ? "orange" : "yellow"}>Amalga oshirilmoqda</Badge></Td>
-                    </Tr>
-                  ))}
-                </Tbody></Table>
+                  <Tbody>
+                    {monitoringStages.map((stage, idx) => (
+                      <Tr key={idx}>
+                        <Td fontWeight="medium">{stage.split('. ')[0]}</Td>
+                        <Td>{stage.split('. ')[1]}</Td>
+                        <Td><Badge colorScheme={idx < 8 ? "green" : idx === 8 ? "orange" : "yellow"}>Amalga oshirilmoqda</Badge></Td>
+                      </Tr>
+                    ))}
+                  </Tbody></Table>
               </TableContainer>
-
-              <Alert status="error" mt={6}><AlertIcon />Kamchiliklar (red flag):<List>{fundRedFlags.map((f,i)=><ListItem key={i}><ListIcon as={AlertTriangle}/>{f}</ListItem>)}</List></Alert>
             </Box>
-          </TabPanel>
-        </TabPanels>
-      </Tabs>
+          </>
+        )}
+
+        {/* RED FLAG – yangi bo‘lim */}
+        {activeSection === "redflag" && (
+          <>
+            <Heading size="md" mt={4} mb={4}>⚠️ Aniqlangan muammolar (bajarilmagan kontraktlar, sifat kamchiliklari)</Heading>
+            <Box bg={'white'}>
+              {renderRedFlagTable()}
+            </Box>
+          </>
+        )}
+      </Box>
+
+      {/* Модальное окно с деталями */}
+      <Modal isOpen={isOpen} onClose={onClose} size="lg">
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>
+            <Flex align="center" gap={2}>
+              <Icon as={AlertOctagon} color="red.500" />
+              Muammo haqida batafsil
+            </Flex>
+          </ModalHeader>
+          <ModalBody>
+            {selectedItem && (
+              <Box>
+                <Text fontWeight="bold" fontSize="lg">{selectedItem.name}</Text>
+                <Divider my={2} />
+                <SimpleGrid columns={2} spacing={3}>
+                  <Text fontWeight="semibold">Viloyat:</Text><Text>{selectedItem.region}</Text>
+                  <Text fontWeight="semibold">Muammo turi:</Text><Text>{selectedItem.problemType}</Text>
+                  <Text fontWeight="semibold">Shartnoma summasi:</Text><Text fontWeight="bold" color="red.500">{selectedItem.contractAmount.toLocaleString()} mln so‘m</Text>
+                  <Text fontWeight="semibold">Holat:</Text><Badge colorScheme="red">{selectedItem.status}</Badge>
+                  <Text fontWeight="semibold">Batafsil:</Text><Text>{selectedItem.details}</Text>
+                </SimpleGrid>
+              </Box>
+            )}
+          </ModalBody>
+          <ModalFooter>
+            <Button colorScheme="blue" onClick={onClose}>Yopish</Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
     </Box>
   );
 }

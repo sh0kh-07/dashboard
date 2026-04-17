@@ -51,6 +51,9 @@ const menuConfig: MenuItem[] = [
   { type: 'item', label: 'Hisobotlar', icon: LayoutDashboard, path: '/reports' },
   { type: 'item', label: 'Ajratilgan mablag`lar', icon: LayoutDashboard, path: '/budget' },
   { type: 'item', label: 'Kambag`galik darajasi', icon: LayoutDashboard, path: '/poor-level' },
+  { type: 'item', label: 'Bandlik darajasi', icon: LayoutDashboard, path: '/job-placement' },
+  { type: 'item', label: 'Og\'ir toifadagi hududlar', icon: LayoutDashboard, path: '/regions' },
+  { type: 'item', label: 'Ko\'rsatilgan xizmatlar', icon: LayoutDashboard, path: '/mahalla' },
 ];
 
 // ------------------------------

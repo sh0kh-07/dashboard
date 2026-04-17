@@ -1,20 +1,20 @@
 import React, { useState } from "react";
 import {
   Box, Text, Heading, useToken, Flex, SimpleGrid, Stat, StatLabel,
-  StatNumber, Tabs, TabList, TabPanels, Tab, TabPanel,
-  Badge, Progress, Card, CardBody, CardHeader, Divider,
+  StatNumber, Badge, Progress, Card, CardBody, CardHeader, Divider,
   Alert, AlertIcon, AlertTitle, List, ListItem, ListIcon,
   Icon, Table, Thead, Tbody, Tr, Th, Td, TableContainer,
+  Accordion, AccordionItem, AccordionButton, AccordionPanel, AccordionIcon,
+  Select,
 } from "@chakra-ui/react";
 import { useNavigate } from "react-router-dom";
 import Uzbekistan from "@svg-maps/uzbekistan";
 import {
-  BarChart, Bar, XAxis, YAxis, Tooltip as RechartsTooltip,
-  ResponsiveContainer, CartesianGrid, Legend,
-} from "recharts";
-import {
   AlertTriangle, CheckCircle, TrendingUp, TrendingDown,
   Briefcase, Building, Landmark, Home, Users, MapPin,
+  BarChart3, FileCheck, Target, UserCheck, Flag, AlertOctagon,
+  CheckCircle2,
+  XCircle,
 } from "lucide-react";
 
 // --------------------------------------------------------------
@@ -22,9 +22,9 @@ import {
 // --------------------------------------------------------------
 interface RegionUnemployment {
   name: string;
-  startYear: number;      // yil boshi
-  actualCurrent: number;  // hozirgi (4 oy)
-  targetEndYear: number;  // yil oxiri maqsadi
+  startYear: number;
+  actualCurrent: number;
+  targetEndYear: number;
   status: "bad" | "moderate" | "good";
 }
 
@@ -66,7 +66,7 @@ const unemploymentData: RegionUnemployment[] = rawStart.map(r => {
 });
 
 // --------------------------------------------------------------
-// 2. LEGALLASHTIRILADIGAN ISH O'RINLARI (2-TAB) - reja, amalda, foiz
+// 2. LEGALLASHTIRILADIGAN ISH O'RINLARI
 // --------------------------------------------------------------
 interface RegionLegal {
   name: string;
@@ -92,7 +92,7 @@ const legalData: RegionLegal[] = [
 ];
 
 // --------------------------------------------------------------
-// 3. DOIMIY ISHGA JOYLASHTIRISH (3-TAB) - reja, amalda, foiz
+// 3. DOIMIY ISHGA JOYLASHTIRISH
 // --------------------------------------------------------------
 interface RegionPlacement {
   name: string;
@@ -118,7 +118,7 @@ const placementData: RegionPlacement[] = [
 ];
 
 // --------------------------------------------------------------
-// 4. KAMBAG'AL OILALARDAGI ISHSIZLAR (4-TAB) - kartochkalar
+// 4. KAMBAG'AL OILALARDAGI ISHSIZLAR
 // --------------------------------------------------------------
 interface PoorUnemployed {
   region: string;
@@ -148,7 +148,7 @@ const poorUnemployedData: PoorUnemployed[] = [
 ];
 
 // --------------------------------------------------------------
-// XARITA MAPPING (TO'LIQ MOSLASHTIRILGAN)
+// XARITA MAPPING
 // --------------------------------------------------------------
 const svgToRegion: Record<string, string> = {
   "Karakalpakstan": "Qoraqalpogʻiston Respublikasi",
@@ -177,29 +177,26 @@ const getRegionName = (svgName: string): string | null => {
   for (const [key, val] of Object.entries(svgToRegion)) {
     if (normalize(key) === norm) return val;
   }
-  // Ma'lumotlar ichidan qidirish
   const found = unemploymentData.find(r => normalize(r.name) === norm) ||
-                legalData.find(r => normalize(r.name) === norm) ||
-                placementData.find(r => normalize(r.name) === norm) ||
-                poorUnemployedData.find(r => normalize(r.region) === norm);
+    legalData.find(r => normalize(r.name) === norm) ||
+    placementData.find(r => normalize(r.name) === norm) ||
+    poorUnemployedData.find(r => normalize(r.region) === norm);
   return found ? (found.name || found.region) : null;
 };
 
-// 3 darajali rang funksiyasi (foiz asosida)
 const getPercentColor = (percent: number): string => {
-  if (percent < 70) return "#E53E3E";  // qizil
-  if (percent < 80) return "#ED8936";  // sariq (to'q sariq)
-  return "#48BB78";                     // yashil
+  if (percent < 70) return "#E53E3E";
+  if (percent < 80) return "#ED8936";
+  return "#48BB78";
 };
 
-// Ishsizlik statusi uchun rang
 const getStatusColor = (status: string): string => {
   if (status === "bad") return "#E53E3E";
   if (status === "moderate") return "#ED8936";
   return "#48BB78";
 };
 
-// Xarita komponenti (hover va click bilan)
+// Xarita komponenti
 const MapWithTooltip = ({ getColor, getTooltipContent, dataMap, regionClickPath = "/poor-level/vil" }: any) => {
   const [tooltip, setTooltip] = useState<any>({ visible: false, x: 0, y: 0, content: null });
   const navigate = useNavigate();
@@ -241,180 +238,367 @@ const MapWithTooltip = ({ getColor, getTooltipContent, dataMap, regionClickPath 
   );
 };
 
-// 4-tab uchun kartochka
-const PoorCard = ({ data }: { data: PoorUnemployed }) => {
-  const avg = (data.permPercent + data.infPercent) / 2;
-  return (
-    <Card borderLeft="4px" borderLeftColor={getPercentColor(avg)} boxShadow="sm">
-      <CardHeader pb={0}><Heading size="xs"><Icon as={MapPin} mr={1} />{data.region}</Heading></CardHeader>
-      <CardBody pt={2}>
-        <Stat size="sm" mb={2}><StatLabel fontSize="xs">Kambag‘al oilalardagi ishsizlar</StatLabel><StatNumber>{data.unemployed} ming</StatNumber></Stat>
-        <Divider />
-        <Text fontSize="xs" fontWeight="bold" mt={1}>Doimiy ishga joylashtirish</Text>
-        <Flex justify="space-between"><Text fontSize="xs">Reja:</Text><Text fontSize="sm">{data.permPlan} ming</Text></Flex>
-        <Flex justify="space-between"><Text fontSize="xs">Amalda:</Text><Text fontSize="sm">{data.permActual} ming</Text></Flex>
-        <Flex align="center" gap={2} mt={1}><Progress value={data.permPercent} size="sm" width="100%" colorScheme={data.permPercent<70?"red":"green"} /><Badge>{data.permPercent}%</Badge></Flex>
-        <Text fontSize="xs" fontWeight="bold" mt={2}>Norasmiy legallashtirish</Text>
-        <Flex justify="space-between"><Text fontSize="xs">Reja:</Text><Text fontSize="sm">{data.infPlan} ming</Text></Flex>
-        <Flex justify="space-between"><Text fontSize="xs">Amalda:</Text><Text fontSize="sm">{data.infActual} ming</Text></Flex>
-        <Flex align="center" gap={2} mt={1}><Progress value={data.infPercent} size="sm" width="100%" colorScheme={data.infPercent<70?"red":"green"} /><Badge>{data.infPercent}%</Badge></Flex>
-      </CardBody>
-    </Card>
-  );
-};
+interface Contract {
+  name: string;
+  type: string;
+  amount: number;
+  status: "bajarildi" | "bajarilmoqda" | "rejalashtirilgan";
+  verification: "tasdiqlangan" | "rad etilgan";
+  direction: string;
+}
+
+const redFlagContracts: Contract[] = [
+  { name: "Imtiyozli kreditlar orqali kichik biznesni qo‘llab-quvvatlash", type: "Tadbirkorlikka jalb qilish", amount: 8.5, status: "bajarilmoqda", verification: "tasdiqlangan", direction: "Tadbirkorlikka jalb qilish" },
+  { name: "Yoshlar uchun startap loyihalarni moliyalashtirish", type: "Tadbirkorlikka jalb qilish", amount: 6.2, status: "bajarilmoqda", verification: "tasdiqlangan", direction: "Tadbirkorlikka jalb qilish" },
+  { name: "Aholiga uy-joy uchun imtiyozli ipoteka kreditlari", type: "Kambag‘al oila daromadini oshirish", amount: 10.0, status: "rejalashtirilgan", verification: "tasdiqlangan", direction: "Kambag‘al oila daromadini oshirish" },
+  { name: "Kasb-hunar o‘rgatish va ish bilan ta’minlash markazi", type: "Kasb-hunarga oʻqitish orqali bandlik", amount: 4.8, status: "bajarilmoqda", verification: "tasdiqlangan", direction: "Kasb-hunarga oʻqitish orqali bandlik" },
+  { name: "Qishloq xo‘jaligi uchun subsidiya va texnika berish", type: "Tadbirkorlikka jalb qilish", amount: 5.7, status: "bajarilmoqda", verification: "tasdiqlangan", direction: "Tadbirkorlikka jalb qilish" },
+  { name: "Doimiy ish o‘rinlariga joylashtirish dasturi", type: "Doimiy ish oʻrinlariga joylashtirish", amount: 12.3, status: "bajarilmoqda", verification: "tasdiqlangan", direction: "Doimiy ish oʻrinlariga joylashtirish" },
+  { name: "Norasmiy bandlikni legallashtirish loyihasi", type: "Norasmiy faoliyatni legallashtirish", amount: 3.5, status: "rejalashtirilgan", verification: "tasdiqlangan", direction: "Norasmiy faoliyatni legallashtirish" },
+  { name: "AT va zamonaviy kasblarga oʻqitish markazi", type: "AT va zamonaviy kasblarga oʻqitish", amount: 2.8, status: "bajarilmoqda", verification: "tasdiqlangan", direction: "AT va zamonaviy kasblarga oʻqitish" },
+];
+const verificationIcons = { tasdiqlangan: <CheckCircle2 size={16} color="#38A169" />, "rad etilgan": <XCircle size={16} color="#F56565" /> };
+const verificationLabels = { tasdiqlangan: "Tasdiqlangan", "rad etilgan": "Rad etilgan" };
+
+const filterDirections = [
+  { value: "all", label: "Barcha yo‘nalishlar" },
+  { value: "Doimiy ish oʻrinlariga joylashtirish", label: "Doimiy ish oʻrinlariga joylashtirish" },
+  { value: "Tadbirkorlikka jalb qilish", label: "Tadbirkorlikka jalb qilish" },
+  { value: "Kambag‘al oila daromadini oshirish", label: "Kambag‘al oila daromadini oshirish" },
+  { value: "Norasmiy faoliyatni legallashtirish", label: "Norasmiy faoliyatni legallashtirish" },
+  { value: "Kasb-hunarga oʻqitish orqali bandlik", label: "Kasb-hunarga oʻqitish orqali bandlik" },
+  { value: "Tadbirkorlik infratuzilmasini rivojlantirish", label: "Tadbirkorlik infratuzilmasini rivojlantirish" },
+  { value: "Oʻrmon va koʻchatxonalar tashkil etish", label: "Oʻrmon va koʻchatxonalar tashkil etish" },
+  { value: "Farmasevtika sohasida kooperatsiya", label: "Farmasevtika sohasida kooperatsiya" },
+  { value: "Turizm xizmatlarini rivojlantirish", label: "Turizm xizmatlarini rivojlantirish" },
+  { value: "AT va zamonaviy kasblarga oʻqitish", label: "AT va zamonaviy kasblarga oʻqitish" },
+  { value: "Texnikumlarda kasb-hunarga oʻqitish", label: "Texnikumlarda kasb-hunarga oʻqitish" },
+  { value: "Ilm-fan va texnologiyalarni rivojlantirish", label: "Ilm-fan va texnologiyalarni rivojlantirish" },
+];
 
 // --------------------------------------------------------------
-// ASOSIY DASHBORD (4 TA TAB)
+// ASOSIY DASHBORD (5 KARTOCHKA – RED FLAG)
 // --------------------------------------------------------------
 const FinalDashboard = () => {
+  const [activeSection, setActiveSection] = useState<string>("unemployment");
   const [brand600] = useToken("colors", ["brand.600"]);
+  const [selectedDirection, setSelectedDirection] = useState<string>("all");
 
-  // Tooltip kontentlari (barcha ma'lumotlar bilan)
-  const unempTooltip = (region: string) => {
-    const d = unemploymentData.find(r => r.name === region);
-    return d ? (
-      <Box>
-        <Text fontWeight="bold">{region}</Text>
-        <Text>📅 Yil boshi: {d.startYear}%</Text>
-        <Text>📊 Hozirgi (4 oy): {d.actualCurrent}%</Text>
-        <Text>🎯 Yil oxiri maqsadi: {d.targetEndYear}%</Text>
-        <Text>🏷 Holat: {d.status === "bad" ? "Xavf ostida" : d.status === "good" ? "Yaxshi" : "O‘rtacha"}</Text>
-      </Box>
-    ) : null;
-  };
-  const legalTooltip = (region: string) => {
-    const d = legalData.find(r => r.name === region);
-    return d ? (
-      <Box>
-        <Text fontWeight="bold">{region}</Text>
-        <Text>📋 Yillik reja: {d.plan.toLocaleString()}</Text>
-        <Text>✅ Amalda (4 oy): {d.actual.toLocaleString()}</Text>
-        <Text>📈 Bajarilish: {d.percent}%</Text>
-      </Box>
-    ) : null;
-  };
-  const placementTooltip = (region: string) => {
-    const d = placementData.find(r => r.name === region);
-    return d ? (
-      <Box>
-        <Text fontWeight="bold">{region}</Text>
-        <Text>📋 Yillik reja: {d.plan.toLocaleString()}</Text>
-        <Text>✅ Amalda (4 oy): {d.actual.toLocaleString()}</Text>
-        <Text>📈 Bajarilish: {d.percent}%</Text>
-      </Box>
-    ) : null;
-  };
-  const poorTooltip = (region: string) => {
-    const d = poorUnemployedData.find(r => r.region === region);
-    return d ? (
-      <Box>
-        <Text fontWeight="bold">{region}</Text>
-        <Text>👥 Kamb. oilalardagi ishsizlar: {d.unemployed} ming</Text>
-        <Text>💼 Doimiy ish reja/amalda: {d.permPlan} / {d.permActual} ming ({d.permPercent}%)</Text>
-        <Text>⚖ Legallashtirish reja/amalda: {d.infPlan} / {d.infActual} ming ({d.infPercent}%)</Text>
-      </Box>
-    ) : null;
+
+
+  // Вычисляем ключевые показатели для карточек 1-4
+  const avgUnemployment = (unemploymentData.reduce((s, r) => s + r.actualCurrent, 0) / unemploymentData.length).toFixed(1);
+  const badRegionsCount = unemploymentData.filter(r => r.status === "bad").length;
+
+  const totalLegalPlan = legalData.reduce((s, d) => s + d.plan, 0);
+  const totalLegalActual = legalData.reduce((s, d) => s + d.actual, 0);
+  const legalPercent = (totalLegalActual / totalLegalPlan) * 100;
+  const legalRedCount = legalData.filter(d => d.percent < 70).length;
+
+  const totalPlacePlan = placementData.reduce((s, d) => s + d.plan, 0);
+  const totalPlaceActual = placementData.reduce((s, d) => s + d.actual, 0);
+  const placePercent = (totalPlaceActual / totalPlacePlan) * 100;
+  const placeRedCount = placementData.filter(d => d.percent < 70).length;
+
+  const poorAvgPercent = poorUnemployedData.reduce((s, d) => s + (d.permPercent + d.infPercent) / 2, 0) / poorUnemployedData.length;
+  const poorRedCount = poorUnemployedData.filter(d => d.permPercent < 60 || d.infPercent < 60).length;
+
+  // Сбор всех Red Flag для пятой карточки
+  const unempRedFlags = unemploymentData.filter(r => r.status === "bad").map(r => `⚠️ ${r.name}: ishsizlik ${r.actualCurrent}% (maqsad ${r.targetEndYear}%)`);
+  const legalRedFlags = legalData.filter(r => r.percent < 70).map(r => `⚠️ ${r.name}: legallashtirish bajarilishi ${r.percent}%`);
+  const placementRedFlags = placementData.filter(r => r.percent < 70).map(r => `⚠️ ${r.name}: doimiy ishga joylashtirish ${r.percent}%`);
+  const poorRedFlags = poorUnemployedData.filter(d => d.permPercent < 60 || d.infPercent < 60).map(d => {
+    const issues = [];
+    if (d.permPercent < 60) issues.push(`doimiy ishga joylashtirish ${d.permPercent}%`);
+    if (d.infPercent < 60) issues.push(`norasmiy legallashtirish ${d.infPercent}%`);
+    return `⚠️ ${d.region}: ${issues.join(', ')}`;
+  });
+
+  const allRedFlags = [...unempRedFlags, ...legalRedFlags, ...placementRedFlags, ...poorRedFlags];
+  const totalRedFlags = allRedFlags.length;
+
+
+
+  const filteredContracts = selectedDirection === "all"
+    ? redFlagContracts
+    : redFlagContracts.filter(c => c.direction === selectedDirection);
+
+
+  // Данные для 5 карточек
+  const sections = [
+    {
+      id: "unemployment",
+      label: "Ishsizlik darajasi",
+      icon: <TrendingDown size={24} />,
+      value: `${avgUnemployment}%`,
+      sub: `O‘rtacha (${badRegionsCount} ta xavfli)`,
+    },
+    {
+      id: "legal",
+      label: "Legallashtiriladigan ish o‘rinlari",
+      icon: <FileCheck size={24} />,
+      value: `${legalPercent.toFixed(1)}%`,
+      sub: `Bajarilish (${legalRedCount} ta kamchilik)`,
+    },
+    {
+      id: "placement",
+      label: "Doimiy ishga joylashtirish",
+      icon: <UserCheck size={24} />,
+      value: `${placePercent.toFixed(1)}%`,
+      sub: `Bajarilish (${placeRedCount} ta kamchilik)`,
+    },
+    {
+      id: "poor",
+      label: "Kambag‘al oilalardagi ishsizlar",
+      icon: <Home size={24} />,
+      value: `${poorAvgPercent.toFixed(1)}%`,
+      sub: `O‘rtacha bajarilish (${poorRedCount} ta muammoli)`,
+    },
+    {
+      id: "redflag",
+      label: "Aniqlangan kamchiliklar",
+      icon: <AlertOctagon size={24} />,
+      value: `${totalRedFlags}`,
+      sub: "Jami muammolar soni",
+    },
+  ];
+
+  // Tooltip контенты для карты (зависит от активного раздела)
+  const getTooltipBySection = (region: string, section: string) => {
+    if (section === "unemployment") {
+      const d = unemploymentData.find(r => r.name === region);
+      return d ? (
+        <Box>
+          <Text fontWeight="bold">{region}</Text>
+          <Text>📅 Yil boshi: {d.startYear}%</Text>
+          <Text>📊 Hozirgi (4 oy): {d.actualCurrent}%</Text>
+          <Text>🎯 Yil oxiri maqsadi: {d.targetEndYear}%</Text>
+          <Text>🏷 Holat: {d.status === "bad" ? "Xavf ostida" : d.status === "good" ? "Yaxshi" : "O‘rtacha"}</Text>
+        </Box>
+      ) : null;
+    }
+    if (section === "legal") {
+      const d = legalData.find(r => r.name === region);
+      return d ? (
+        <Box>
+          <Text fontWeight="bold">{region}</Text>
+          <Text>📋 Yillik reja: {d.plan.toLocaleString()}</Text>
+          <Text>✅ Amalda (4 oy): {d.actual.toLocaleString()}</Text>
+          <Text>📈 Bajarilish: {d.percent}%</Text>
+        </Box>
+      ) : null;
+    }
+    if (section === "placement") {
+      const d = placementData.find(r => r.name === region);
+      return d ? (
+        <Box>
+          <Text fontWeight="bold">{region}</Text>
+          <Text>📋 Yillik reja: {d.plan.toLocaleString()}</Text>
+          <Text>✅ Amalda (4 oy): {d.actual.toLocaleString()}</Text>
+          <Text>📈 Bajarilish: {d.percent}%</Text>
+        </Box>
+      ) : null;
+    }
+    if (section === "poor") {
+      const d = poorUnemployedData.find(r => r.region === region);
+      return d ? (
+        <Box>
+          <Text fontWeight="bold">{region}</Text>
+          <Text>👥 Kamb. oilalardagi ishsizlar: {d.unemployed} ming</Text>
+          <Text>💼 Doimiy ish reja/amalda: {d.permPlan} / {d.permActual} ming ({d.permPercent}%)</Text>
+          <Text>⚖ Legallashtirish reja/amalda: {d.infPlan} / {d.infActual} ming ({d.infPercent}%)</Text>
+        </Box>
+      ) : null;
+    }
+    return null;
   };
 
-  // Red flags
-  const unempRedFlags = unemploymentData.filter(r => r.status === "bad").map(r => `${r.name}: ishsizlik ${r.actualCurrent}% (maqsad ${r.targetEndYear}%)`);
-  const legalRedFlags = legalData.filter(r => r.percent < 70).map(r => `${r.name}: ${r.percent}%`);
-  const placementRedFlags = placementData.filter(r => r.percent < 70).map(r => `${r.name}: ${r.percent}%`);
-  const poorRedFlags = poorUnemployedData.filter(d => d.permPercent < 60 || d.infPercent < 60).map(d => `${d.region}: doimiy ${d.permPercent}%, legall ${d.infPercent}%`);
+  const getColorBySection = (region: string, section: string) => {
+    if (section === "unemployment") {
+      const d = unemploymentData.find(r => r.name === region);
+      return getStatusColor(d?.status || "moderate");
+    }
+    if (section === "legal") {
+      const d = legalData.find(r => r.name === region);
+      return getPercentColor(d?.percent || 0);
+    }
+    if (section === "placement") {
+      const d = placementData.find(r => r.name === region);
+      return getPercentColor(d?.percent || 0);
+    }
+    if (section === "poor") {
+      const d = poorUnemployedData.find(r => r.region === region);
+      const avg = d ? (d.permPercent + d.infPercent) / 2 : 0;
+      return getPercentColor(avg);
+    }
+    return "#CBD5E0";
+  };
 
   return (
     <Box>
-      <Heading size="xl" mb={2}>📊 Bandlik va kambag‘allik monitoringi</Heading>
+      {/* Горизонтальные карточки-вкладки (5 штук) */}
+      <Flex
+        gap={4}
+        mb={6}
+        overflowX="auto"
+        pb={2}
+        css={{
+          "&::-webkit-scrollbar": { height: "6px" },
+          "&::-webkit-scrollbar-track": { background: "#f1f1f1", borderRadius: "3px" },
+          "&::-webkit-scrollbar-thumb": { background: "#cbd5e0", borderRadius: "3px" },
+        }}
+      >
+        {sections.map((section) => (
+          <Box
+            key={section.id}
+            onClick={() => setActiveSection(section.id)}
+            cursor="pointer"
+            minW="220px"
+            flexShrink={0}
+            bg={activeSection === section.id ? "blue.500" : "white"}
+            color={activeSection === section.id ? "white" : "gray.700"}
+            borderRadius="xl"
+            boxShadow="md"
+            transition="all 0.2s"
+            _hover={{
+              transform: "translateY(-2px)",
+              boxShadow: "lg",
+              bg: activeSection === section.id ? "blue.600" : "gray.50",
+            }}
+            p={4}
+          >
+            <Flex align="center" gap={2} mb={2}>
+              <Box color={activeSection === section.id ? "white" : "blue.500"}>
+                {section.icon}
+              </Box>
+              <Text fontSize="9px" fontWeight="medium" noOfLines={2}>
+                {section.label}
+              </Text>
+            </Flex>
+            <Text fontSize="2xl" fontWeight="bold">
+              {section.value}
+            </Text>
+            <Text fontSize="xs" opacity={0.8}>
+              {section.sub}
+            </Text>
+          </Box>
+        ))}
+      </Flex>
 
-      <Tabs variant="soft-rounded" colorScheme="blue">
-        <TabList bg="white" borderRadius="xl" p={2} flexWrap="wrap" gap={2}>
-          <Tab>1. Ishsizlik darajasi</Tab>
-          <Tab>2. Legallashtiriladigan ish o‘rinlari</Tab>
-          <Tab>3. Doimiy ishga joylashtirish</Tab>
-          <Tab>4. Kambag‘al oilalardagi ishsizlar</Tab>
-        </TabList>
+      {/* Контент выбранного раздела */}
+      <Box bg="white" borderRadius="xl" p={5} borderWidth="1px">
+        {/* Раздел 1: Ishsizlik darajasi */}
+        {activeSection === "unemployment" && (
+          <>
+            <Heading size="md" mb={4}>Ishsizlik darajasi (%) – yil boshi, hozirgi, maqsad</Heading>
+            <MapWithTooltip
+              getColor={(region: string) => getColorBySection(region, "unemployment")}
+              getTooltipContent={(region: string) => getTooltipBySection(region, "unemployment")}
+              dataMap={unemploymentData}
+            />
+            <SimpleGrid columns={{ base: 1, md: 3 }} spacing={4} my={4}>
+              <Stat bg="gray.50" p={3}><StatLabel>Yaxshi holat</StatLabel><StatNumber color="green.500">{unemploymentData.filter(r => r.status === "good").length}</StatNumber></Stat>
+              <Stat bg="gray.50" p={3}><StatLabel>O‘rtacha</StatLabel><StatNumber color="orange.500">{unemploymentData.filter(r => r.status === "moderate").length}</StatNumber></Stat>
+              <Stat bg="gray.50" p={3}><StatLabel>Xavf ostida</StatLabel><StatNumber color="red.500">{unemploymentData.filter(r => r.status === "bad").length}</StatNumber></Stat>
+            </SimpleGrid>
+            <TableContainer><Table size="sm"><Thead><Tr><Th>Viloyat</Th><Th isNumeric>Yil boshi</Th><Th isNumeric>Hozirgi (4 oy)</Th><Th isNumeric>Yil oxiri maqsadi</Th><Th>Holat</Th></Tr></Thead>
+              <Tbody>{unemploymentData.map(r => <Tr key={r.name}><Td>{r.name}</Td><Td isNumeric>{r.startYear}%</Td><Td isNumeric color={r.status === "bad" ? "red.500" : r.status === "good" ? "green.500" : "orange.500"}>{r.actualCurrent}%</Td><Td isNumeric>{r.targetEndYear}%</Td><Td><Badge colorScheme={r.status === "bad" ? "red" : r.status === "good" ? "green" : "orange"}>{r.status === "bad" ? "Xavf" : r.status === "good" ? "Yaxshi" : "O‘rtacha"}</Badge></Td></Tr>)}</Tbody></Table></TableContainer>
 
-        <TabPanels mt={6}>
-          {/* TAB 1 */}
-          <TabPanel p={0}>
-            <Box bg="white" borderRadius="xl" p={5} borderWidth="1px">
-              <Heading size="md">Ishsizlik darajasi (%) – yil boshi, hozirgi, maqsad</Heading>
-              <MapWithTooltip
-                getColor={(region: string) => getStatusColor(unemploymentData.find(r => r.name === region)?.status || "moderate")}
-                getTooltipContent={unempTooltip}
-                dataMap={unemploymentData}
-              />
-              <SimpleGrid columns={{ base: 1, md: 3 }} spacing={4} my={4}>
-                <Stat bg="gray.50" p={3}><StatLabel>Yaxshi holat</StatLabel><StatNumber color="green.500">{unemploymentData.filter(r=>r.status==="good").length}</StatNumber></Stat>
-                <Stat bg="gray.50" p={3}><StatLabel>O‘rtacha</StatLabel><StatNumber color="orange.500">{unemploymentData.filter(r=>r.status==="moderate").length}</StatNumber></Stat>
-                <Stat bg="gray.50" p={3}><StatLabel>Xavf ostida</StatLabel><StatNumber color="red.500">{unemploymentData.filter(r=>r.status==="bad").length}</StatNumber></Stat>
-              </SimpleGrid>
-              <TableContainer><Table size="sm"><Thead><Tr><Th>Viloyat</Th><Th isNumeric>Yil boshi</Th><Th isNumeric>Hozirgi (4 oy)</Th><Th isNumeric>Yil oxiri maqsadi</Th><Th>Holat</Th></Tr></Thead>
-              <Tbody>{unemploymentData.map(r => <Tr key={r.name}><Td>{r.name}</Td><Td isNumeric>{r.startYear}%</Td><Td isNumeric color={r.status==="bad"?"red.500":r.status==="good"?"green.500":"orange.500"}>{r.actualCurrent}%</Td><Td isNumeric>{r.targetEndYear}%</Td><Td><Badge colorScheme={r.status==="bad"?"red":r.status==="good"?"green":"orange"}>{r.status==="bad"?"Xavf":r.status==="good"?"Yaxshi":"O‘rtacha"}</Badge></Td></Tr>)}</Tbody></Table></TableContainer>
-              <Alert status="error" mt={6}><AlertIcon />Kamchiliklar:<List>{unempRedFlags.map((f,i)=><ListItem key={i}>{f}</ListItem>)}</List></Alert>
+          </>
+        )}
+
+        {/* Раздел 2: Legallashtiriladigan ish o‘rinlari */}
+        {activeSection === "legal" && (
+          <>
+            <Heading size="md" mb={4}>Legallashtiriladigan ish o‘rinlari (reja/amalda/%)</Heading>
+            <MapWithTooltip
+              getColor={(region: string) => getColorBySection(region, "legal")}
+              getTooltipContent={(region: string) => getTooltipBySection(region, "legal")}
+              dataMap={legalData}
+            />
+            <SimpleGrid columns={{ base: 1, md: 3 }} spacing={4} my={4}>
+              <Stat bg="gray.50" p={3}><StatLabel>Jami reja</StatLabel><StatNumber>{totalLegalPlan.toLocaleString()}</StatNumber></Stat>
+              <Stat bg="gray.50" p={3}><StatLabel>Jami amalda</StatLabel><StatNumber>{totalLegalActual.toLocaleString()}</StatNumber></Stat>
+              <Stat bg="gray.50" p={3}><StatLabel>O‘rtacha foiz</StatLabel><StatNumber>{legalPercent.toFixed(1)}%</StatNumber></Stat>
+            </SimpleGrid>
+            <TableContainer><Table size="sm"><Thead><Tr><Th>Hudud</Th><Th isNumeric>Reja (yillik)</Th><Th isNumeric>Amalda (4 oy)</Th><Th isNumeric>Bajarilish %</Th></Tr></Thead>
+              <Tbody>{legalData.map(r => <Tr key={r.name}><Td>{r.name}</Td><Td isNumeric>{r.plan.toLocaleString()}</Td><Td isNumeric>{r.actual.toLocaleString()}</Td><Td isNumeric><Badge colorScheme={r.percent < 70 ? "red" : r.percent < 80 ? "orange" : "green"}>{r.percent}%</Badge></Td></Tr>)}</Tbody></Table></TableContainer>
+
+          </>
+        )}
+
+        {/* Раздел 3: Doimiy ishga joylashtirish */}
+        {activeSection === "placement" && (
+          <>
+            <Heading size="md" mb={4}>Doimiy ishga joylashtirish (reja/amalda/%)</Heading>
+            <MapWithTooltip
+              getColor={(region: string) => getColorBySection(region, "placement")}
+              getTooltipContent={(region: string) => getTooltipBySection(region, "placement")}
+              dataMap={placementData}
+            />
+            <SimpleGrid columns={{ base: 1, md: 3 }} spacing={4} my={4}>
+              <Stat bg="gray.50" p={3}><StatLabel>Jami reja</StatLabel><StatNumber>{totalPlacePlan.toLocaleString()}</StatNumber></Stat>
+              <Stat bg="gray.50" p={3}><StatLabel>Jami amalda</StatLabel><StatNumber>{totalPlaceActual.toLocaleString()}</StatNumber></Stat>
+              <Stat bg="gray.50" p={3}><StatLabel>O‘rtacha foiz</StatLabel><StatNumber>{placePercent.toFixed(1)}%</StatNumber></Stat>
+            </SimpleGrid>
+            <TableContainer><Table size="sm"><Thead><Tr><Th>Hudud</Th><Th isNumeric>Reja (yillik)</Th><Th isNumeric>Amalda (4 oy)</Th><Th isNumeric>Bajarilish %</Th></Tr></Thead>
+              <Tbody>{placementData.map(r => <Tr key={r.name}><Td>{r.name}</Td><Td isNumeric>{r.plan.toLocaleString()}</Td><Td isNumeric>{r.actual.toLocaleString()}</Td><Td isNumeric><Badge colorScheme={r.percent < 70 ? "red" : r.percent < 80 ? "orange" : "green"}>{r.percent}%</Badge></Td></Tr>)}</Tbody></Table></TableContainer>
+
+          </>
+        )}
+
+        {/* Раздел 4: Kambag‘al oilalardagi ishsizlar */}
+        {activeSection === "poor" && (
+          <>
+            <Heading size="md" mb={4}>Kambag‘al oilalardagi ishsizlar va bandlik choralari</Heading>
+            <MapWithTooltip
+              getColor={(region: string) => getColorBySection(region, "poor")}
+              getTooltipContent={(region: string) => getTooltipBySection(region, "poor")}
+              dataMap={poorUnemployedData}
+            />
+
+
+          </>
+        )}
+
+        {/* Раздел 5: Red Flag (сводка всех проблем) */}
+        {activeSection === "redflag" && (
+          <>
+            <Box>
+              <Flex justify="space-between" align="center" mb={4}>
+                <Heading size="md">Aniqlangan kamchiliklar</Heading>
+                <Select width="300px" value={selectedDirection} onChange={(e) => setSelectedDirection(e.target.value)} bg="white" size="sm">
+                  {filterDirections.map(dir => <option key={dir.value} value={dir.value}>{dir.label}</option>)}
+                </Select>
+              </Flex>
+              <TableContainer bg='white' borderWidth="1px" borderRadius="lg" overflow="hidden">
+                <Table size="sm" variant="simple">
+                  <Thead bg="gray.50">
+                    <Tr>
+                      <Th>Kontrakt nomi</Th>
+                      <Th isNumeric>Summa (mlrd so‘m)</Th>
+                      <Th>Tekshiruv</Th>
+                    </Tr>
+                  </Thead>
+                  <Tbody>
+                    {filteredContracts.length === 0 ? (
+                      <Tr><Td colSpan={5} textAlign="center">Ushbu yo‘nalish bo‘yicha maʼlumot yo‘q</Td></Tr>
+                    ) : (
+                      filteredContracts.map((c, idx) => (
+                        <Tr key={idx}>
+                          <Td fontWeight="medium">{c.name}</Td>
+                          <Td isNumeric fontWeight="bold">{c.amount}</Td>
+                          <Td><Flex align="center" gap={2}>{verificationIcons[c.verification]}{verificationLabels[c.verification]}</Flex></Td>
+                        </Tr>
+                      ))
+                    )}
+                  </Tbody>
+                </Table>
+              </TableContainer>
             </Box>
-          </TabPanel>
-
-          {/* TAB 2 */}
-          <TabPanel p={0}>
-            <Box bg="white" borderRadius="xl" p={5} borderWidth="1px">
-              <Heading size="md">Legallashtiriladigan ish o‘rinlari (reja/amalda/%)</Heading>
-              <MapWithTooltip
-                getColor={(region: string) => getPercentColor(legalData.find(r => r.name === region)?.percent || 0)}
-                getTooltipContent={legalTooltip}
-                dataMap={legalData}
-              />
-              <SimpleGrid columns={{ base: 1, md: 3 }} spacing={4} my={4}>
-                <Stat bg="gray.50" p={3}><StatLabel>Jami reja</StatLabel><StatNumber>{legalData.reduce((s,d)=>s+d.plan,0).toLocaleString()}</StatNumber></Stat>
-                <Stat bg="gray.50" p={3}><StatLabel>Jami amalda</StatLabel><StatNumber>{legalData.reduce((s,d)=>s+d.actual,0).toLocaleString()}</StatNumber></Stat>
-                <Stat bg="gray.50" p={3}><StatLabel>O‘rtacha foiz</StatLabel><StatNumber>{(legalData.reduce((s,d)=>s+d.percent,0)/legalData.length).toFixed(1)}%</StatNumber></Stat>
-              </SimpleGrid>
-              <TableContainer><Table size="sm"><Thead><Tr><Th>Hudud</Th><Th isNumeric>Reja (yillik)</Th><Th isNumeric>Amalda (4 oy)</Th><Th isNumeric>Bajarilish %</Th></Tr></Thead>
-              <Tbody>{legalData.map(r => <Tr key={r.name}><Td>{r.name}</Td><Td isNumeric>{r.plan.toLocaleString()}</Td><Td isNumeric>{r.actual.toLocaleString()}</Td><Td isNumeric><Badge colorScheme={r.percent<70?"red":r.percent<80?"orange":"green"}>{r.percent}%</Badge></Td></Tr>)}</Tbody></Table></TableContainer>
-              <Alert status="error" mt={6}><AlertIcon />Kamchiliklar:<List>{legalRedFlags.map((f,i)=><ListItem key={i}>{f}</ListItem>)}</List></Alert>
-            </Box>
-          </TabPanel>
-
-          {/* TAB 3 */}
-          <TabPanel p={0}>
-            <Box bg="white" borderRadius="xl" p={5} borderWidth="1px">
-              <Heading size="md">Doimiy ishga joylashtirish (reja/amalda/%)</Heading>
-              <MapWithTooltip
-                getColor={(region: string) => getPercentColor(placementData.find(r => r.name === region)?.percent || 0)}
-                getTooltipContent={placementTooltip}
-                dataMap={placementData}
-              />
-              <SimpleGrid columns={{ base: 1, md: 3 }} spacing={4} my={4}>
-                <Stat bg="gray.50" p={3}><StatLabel>Jami reja</StatLabel><StatNumber>{placementData.reduce((s,d)=>s+d.plan,0).toLocaleString()}</StatNumber></Stat>
-                <Stat bg="gray.50" p={3}><StatLabel>Jami amalda</StatLabel><StatNumber>{placementData.reduce((s,d)=>s+d.actual,0).toLocaleString()}</StatNumber></Stat>
-                <Stat bg="gray.50" p={3}><StatLabel>O‘rtacha foiz</StatLabel><StatNumber>{(placementData.reduce((s,d)=>s+d.percent,0)/placementData.length).toFixed(1)}%</StatNumber></Stat>
-              </SimpleGrid>
-              <TableContainer><Table size="sm"><Thead><Tr><Th>Hudud</Th><Th isNumeric>Reja (yillik)</Th><Th isNumeric>Amalda (4 oy)</Th><Th isNumeric>Bajarilish %</Th></Tr></Thead>
-              <Tbody>{placementData.map(r => <Tr key={r.name}><Td>{r.name}</Td><Td isNumeric>{r.plan.toLocaleString()}</Td><Td isNumeric>{r.actual.toLocaleString()}</Td><Td isNumeric><Badge colorScheme={r.percent<70?"red":r.percent<80?"orange":"green"}>{r.percent}%</Badge></Td></Tr>)}</Tbody></Table></TableContainer>
-              <Alert status="error" mt={6}><AlertIcon />Kamchiliklar:<List>{placementRedFlags.map((f,i)=><ListItem key={i}>{f}</ListItem>)}</List></Alert>
-            </Box>
-          </TabPanel>
-
-          {/* TAB 4 - KARTOCHKALAR */}
-          <TabPanel p={0}>
-            <Box bg="white" borderRadius="xl" p={5} borderWidth="1px">
-              <Heading size="md">Kambag‘al oilalardagi ishsizlar va bandlik choralari</Heading>
-              <MapWithTooltip
-                getColor={(region: string) => {
-                  const d = poorUnemployedData.find(r => r.region === region);
-                  return d ? getPercentColor((d.permPercent + d.infPercent) / 2) : "#CBD5E0";
-                }}
-                getTooltipContent={poorTooltip}
-                dataMap={poorUnemployedData}
-              />
-              <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={4} mt={4}>
-                {poorUnemployedData.map(d => <PoorCard key={d.region} data={d} />)}
-              </SimpleGrid>
-              <Alert status="error" mt={6}><AlertIcon />Kamchiliklar:<List>{poorRedFlags.map((f,i)=><ListItem key={i}>{f}</ListItem>)}</List></Alert>
-            </Box>
-          </TabPanel>
-        </TabPanels>
-      </Tabs>
+          </>
+        )}
+      </Box>
     </Box>
   );
 };
